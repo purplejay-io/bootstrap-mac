@@ -146,7 +146,6 @@ function install-o365-apps {
     brew install wget
   fi
 
-  cd /tmp
   if [[ ! -d "/Applications/Company Portal.app" ]];then
     sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Company%20Portal/installCompanyPortal.sh)"
   fi
@@ -432,8 +431,10 @@ if [[ $1 == "install" ]]; then
   cd ~/.pj/bootstrap-mac
   poetry install
   reset-dock
-  echo "Log into OneDrive and Teams, then sync the Purple Jay Teams Documents"
-  # https://unix.stackexchange.com/questions/293940/how-can-i-make-press-any-key-to-continue
+  echo "Log into OneDrive"
+  read -r -s -k '?Press any key to continue.'
+  open "https://purplejayio.sharepoint.com/sites/PurpleJay2/Shared%20Documents/Forms/AllItems.aspx"
+  echo "Sync Purple Jay Documents"
   read -r -s -k '?Press any key to continue.'
   check-become-password
   poetry run ansible-playbook local.yml
