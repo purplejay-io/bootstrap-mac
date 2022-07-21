@@ -368,8 +368,8 @@ function display-help {
   echo "Usage: ./run.sh [Option]
 
   Options:
-  [blank]     Install Apps and Goes through bootstrap-mac setup
-  install     Only Install Apps
+  install     Install Apps and Clones bootstrap-mac
+  update      Runs bootstrap-mac and upgrades poetry
   noupdate    Runs bootstrap-mac minus homebrew playbooks
   password    Resets become password
   op          Runs op-cli secrets push/pull
@@ -428,6 +428,8 @@ fi
 if [[ $1 == "install" ]]; then
   install-apps
   clone-bootstrap-mac
+  cd ~.pj/bootstrap-mac
+  poetry install
   reset-dock
   exit 1
 fi
