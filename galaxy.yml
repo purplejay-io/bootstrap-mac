@@ -1,0 +1,6 @@
+---
+collections:
+# With the collection name, version, and source options
+- name: pj.mac
+  source: collections/pj-mac-1.0.0.tar.gz
+  type: file

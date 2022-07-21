@@ -1,0 +1,14 @@
+**/.DS_Store
+ansible-logs.txt
+env.yml
+sshkey_op.json
+.pass
+privatekey
+publickey
+.idea/
+override_env.yml
+vars/*
+!vars/.gitkeep
+.venv
+collections/*
+!collections/.gitkeep

@@ -1,0 +1,30 @@
+---
+# Download collection to local ansible folder
+#- hosts: localhost
+#  any_errors_fatal: false
+#  tasks:
+#    - name: Copy pj mac collection to local ansible folder
+#      copy:
+#        src: "{{ ansible_user_dir }}/Library/CloudStorage/OneDrive-SharedLibraries-PurpleJay/Purple Jay - Documents/IT Setup/pj-mac-1.0.0.tar.gz"
+#        dest: "{{ ansible_user_dir }}/.ansible"
+#      failed_when: false
+#
+#    - name: Load pj mac collection
+#      shell: ansible-galaxy collection install {{ ansible_user_dir }}/.ansible/pj-mac-1.0.0.tar.gz --force
+
+- hosts: localhost
+  vars_files:
+    - vars/pass.yml
+    - vars/user.yml
+  roles:
+    - role: pj.mac.bootstrap
+      when: ansible_distribution == "MacOSX"
+
+- hosts: localhost
+  vars_files:
+    - vars/pass.yml
+    - vars/user.yml
+    - vars/secrets.yml
+  roles:
+    - role: pj.mac.wg
+      when: wg_priv is defined and ansible_distribution == "MacOSX"
