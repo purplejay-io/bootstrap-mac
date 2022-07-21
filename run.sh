@@ -429,13 +429,16 @@ if [[ $1 == "install" ]]; then
   install-apps
   clone-bootstrap-mac
   cd ~/.pj/bootstrap-mac
-  poetry install
   reset-dock
-  echo "Log into OneDrive"
-  read -r -s -k '?Press any key to continue.'
-  open "https://purplejayio.sharepoint.com/sites/PurpleJay2/Shared%20Documents/Forms/AllItems.aspx"
-  echo "Sync Purple Jay Documents"
-  read -r -s -k '?Press any key to continue.'
+  if [[ $IT_SETUP_FOLDER_CHECK == 1 ]]; then
+    echo "Log into OneDrive"
+    read -r -s -k '?Press any key to continue.'
+    open "https://purplejayio.sharepoint.com/sites/PurpleJay2/Shared%20Documents/Forms/AllItems.aspx"
+    echo "Sync Purple Jay Documents"
+    read -r -s -k '?Press any key to continue.'
+    sleep 5
+  fi
+  IT_SETUP_FOLDER_CHECK=$(test -d "$IT_SETUP_FOLDER";echo $?)
   check-become-password
   poetry run ansible-playbook local.yml
   exit 1
