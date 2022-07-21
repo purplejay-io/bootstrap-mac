@@ -366,6 +366,11 @@ function reset-bootstrap-mac {
   exit 1
 }
 
+function reset-onedrive {
+    # Reset OneDrive
+  /Applications/OneDrive.app/Contents/Resources/ResetOneDriveApp.command
+}
+
 function display-help {
   echo "Usage: ./run.sh [Option]
 
@@ -464,6 +469,11 @@ if [[ $1 == "op" ]]; then
   op-login
   poetry run ansible-playbook local.yml --skip-tags update
   op-create
+  exit 1
+fi
+
+if [[ $1 == "reset-onedrive" ]]; then
+  reset-onedrive
   exit 1
 fi
 
