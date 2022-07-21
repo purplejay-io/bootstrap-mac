@@ -418,13 +418,6 @@ if [[ $# -gt 1 ]]; then
   display-help
 fi
 
-if [[ $1 == "" ]]; then
-  install-apps
-  check-become-password
-  poetry run ansible-playbook local.yml
-  exit 1
-fi
-
 if [[ $1 == "install" ]]; then
   install-apps
   clone-bootstrap-mac
