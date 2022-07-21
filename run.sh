@@ -394,6 +394,7 @@ function op-login {
     exit 1
   fi
   rm vars/secrets.yml
+  export PULL_OP_SECRETS=true
 }
 
 function op-create {
