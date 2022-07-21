@@ -424,6 +424,11 @@ if [[ $1 == "install" ]]; then
   cd ~/.pj/bootstrap-mac
   poetry install
   reset-dock
+  echo "Log into OneDrive and Teams, then sync the Purple Jay Teams Documents"
+  # https://unix.stackexchange.com/questions/293940/how-can-i-make-press-any-key-to-continue
+  read -r -s -k '?Press any key to continue.'
+  check-become-password
+  poetry run ansible-playbook local.yml
   exit 1
 fi
 
