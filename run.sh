@@ -363,6 +363,7 @@ function reset-bootstrap-mac {
 
   # Remove bootstrap-mac
   rm -Rf $HOME/.pj/bootstrap-mac/
+  rm -Rf $HOME/.pj/bootstrap_mac/
 
   # Reset OneDrive
   /Applications/OneDrive.app/Contents/Resources/ResetOneDriveApp.command
@@ -431,7 +432,6 @@ fi
 
 if [[ $1 == "" ]]; then
   install-apps
-  reset-dock
   check-become-password
   poetry run ansible-playbook local.yml
   exit 1
@@ -439,6 +439,8 @@ fi
 
 if [[ $1 == "install" ]]; then
   install-apps
+  clone-bootstrap-mac
+  reset-dock
   exit 1
 fi
 
