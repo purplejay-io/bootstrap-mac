@@ -30,12 +30,15 @@ OP_INSTALLED=$(test -d /Applications/1Password.app;echo $?)
 OP_CLI_INSTALLED=$(test -f /usr/local/bin/op;echo $?)
 
 # Is bootstrap_mac repo synced on mac?
-BOOTSTRAP_MAC_PATH="$HOME/.pj/bootstrap_mac/"
-BOOTSTRAP_MAC_REPO=$(test -d $HOME/.pj/bootstrap_mac/.git/;echo $?)
+BOOTSTRAP_MAC_PATH="$HOME/.pj/bootstrap-mac/"
+BOOTSTRAP_MAC_REPO=$(test -d $HOME/.pj/bootstrap-mac/.git/;echo $?)
 
 # Is the OneDrive IT Setup Folder being synced?
 IT_SETUP_FOLDER="$HOME/Library/CloudStorage/OneDrive-SharedLibraries-PurpleJay/Purple Jay - Documents/IT Setup"
 IT_SETUP_FOLDER_CHECK=$(test -d "$IT_SETUP_FOLDER";echo $?)
+
+# Personal OneDrive Folder
+PERSONAL_FOLDER="$HOME/Library/CloudStorage/OneDrive-PurpleJay"
 
 ########################################################################
 #  Define Functions
@@ -112,13 +115,13 @@ function clone-bootstrap-mac {
 
     if [[ $BOOTSTRAP_MAC_REPO == 1 ]]; then
       mkdir -p "$HOME"/.pj
-      git clone https://github.com/purplejay-io/bootstrap_mac.git $BOOTSTRAP_MAC_PATH
-      BOOTSTRAP_MAC_REPO=$(test -d $HOME/.pj/bootstrap_mac/.git/;echo $?)
+      git clone https://github.com/purplejay-io/bootstrap-mac.git $BOOTSTRAP_MAC_PATH
+      BOOTSTRAP_MAC_REPO=$(test -d $HOME/.pj/bootstrap-mac/.git/;echo $?)
     else
       cd $BOOTSTRAP_MAC_PATH || exit
       git reset --hard HEAD
       git fetch
-      # Pull latest bootstrap_mac version
+      # Pull latest bootstrap-mac version
       if [[ $(git rev-list HEAD...origin/main --count) != 0 ]]; then
         git pull
       fi
@@ -216,38 +219,43 @@ function reset-become-password {
 function check-ansible-readiness {
   if [[ $HOMEBREW_INSTALLED == 1 ]]; then
     echo "function: check-ansible-readiness"
-    echo "Homebrew must be installed before you can run bootstrap_mac"
+    echo "Homebrew must be installed before you can run bootstrap-mac"
     exit 1
   fi
   if [[ $PYTHON_INSTALLED == 1 ]]; then
     echo "function: check-ansible-readiness"
-    echo "Python 3 must be installed before you can run bootstrap_mac"
+    echo "Python 3 must be installed before you can run bootstrap-mac"
     exit 1
   fi
   if [[ $POETRY_INSTALLED == 1 ]]; then
     echo "function: check-ansible-readiness"
-    echo "Poetry must be installed before you can run bootstrap_mac"
+    echo "Poetry must be installed before you can run bootstrap-mac"
     exit 1
   fi
   if [[ $OP_INSTALLED == 1 ]]; then
     echo "function: check-ansible-readiness"
-    echo "1password must be installed before you can run bootstrap_mac"
+    echo "1password must be installed before you can run bootstrap-mac"
     exit 1
   fi
   if [[ $OP_CLI_INSTALLED == 1 ]]; then
     echo "function: check-ansible-readiness"
-    echo "1password CLI must be installed before you can run bootstrap_mac"
+    echo "1password CLI must be installed before you can run bootstrap-mac"
     exit 1
   fi
   if [[ $BOOTSTRAP_MAC_REPO == 1 ]]; then
     echo "function: check-ansible-readiness"
-    echo "bootstrap-mac repo must be cloned locally before you can run bootstrap_mac"
+    echo "bootstrap-mac repo must be cloned locally before you can run bootstrap-mac"
     exit 1
   fi
   if [[ $IT_SETUP_FOLDER_CHECK == 1 ]]; then
     echo "function: check-ansible-readiness"
-    echo "IT Setup OneDrive folder must be synced before you can run bootstrap_mac"
+    echo "IT Setup OneDrive folder must be synced before you can run bootstrap-mac"
     exit 1
+  fi
+
+  # Remove old bootstrap_mac folder if found
+  if [[ -d $HOME/.pj/bootstrap_mac/ ]]; then
+    rm -Rf $HOME/.pj/bootstrap_mac/
   fi
 
   # Create empty secrets and user vars files if not found
@@ -319,7 +327,7 @@ function check-become-password {
 }
 
 function reset-bootstrap-mac {
-  echo "About to remove bootstrap_mac, are you sure you want to continue?"
+  echo "About to remove bootstrap-mac, are you sure you want to continue?"
   # https://unix.stackexchange.com/questions/293940/how-can-i-make-press-any-key-to-continue
   read -r -s -k '?Press any key to continue.'
   sudo echo "You now have SUDO in this session"
@@ -354,7 +362,7 @@ function reset-bootstrap-mac {
   security delete-generic-password -a pj-bootstrap-ansible
 
   # Remove bootstrap-mac
-  rm -Rf $HOME/.pj/bootstrap_mac/
+  rm -Rf $HOME/.pj/bootstrap-mac/
 
   # Reset OneDrive
   /Applications/OneDrive.app/Contents/Resources/ResetOneDriveApp.command
@@ -371,12 +379,12 @@ function display-help {
   echo "Usage: ./run.sh [Option]
 
   Options:
-  [blank]     Install Apps and Goes through bootstrap_mac setup
+  [blank]     Install Apps and Goes through bootstrap-mac setup
   install     Only Install Apps
-  noupdate    Runs bootstrap_mac minus homebrew playbooks
+  noupdate    Runs bootstrap-mac minus homebrew playbooks
   password    Resets become password
   op          Runs op-cli secrets push/pull
-  reset       Uninstall Apps and remove bootstrap_mac
+  reset       Uninstall Apps and remove bootstrap-mac
   "
   exit 1
 }
@@ -399,10 +407,16 @@ function op-create {
 }
 
 function check-dir {
-  if [[ $ROOT_DIR != "$HOME/.pj/bootstrap_mac/" ]]; then
+  if [[ $ROOT_DIR != "$HOME/.pj/bootstrap-mac/" ]]; then
     echo "function: check-dir"
-    echo "You must run bootstrap_mac from ~/.pj/bootstrap_mac. Try again"
+    echo "You must run bootstrap-mac from ~/.pj/bootstrap-mac. Try again"
     exit 1
+  fi
+}
+
+function sync-user-yml {
+  if [[ -f $PERSONAL_FOLDER/user.yml ]]; then
+    cp $PERSONAL_FOLDER/user.yml $BOOTSTRAP_MAC_PATH/vars/
   fi
 }
 
@@ -433,12 +447,14 @@ if [[ $1 == "update" ]]; then
   brew update
   brew upgrade
   poetry self update
+  sync-user-yml
   poetry run ansible-playbook local.yml
   exit 1
 fi
 
 if [[ $1 == "noupdate" ]]; then
   check-become-password
+  sync-user-yml
   poetry run ansible-playbook local.yml --skip-tags update
   exit 1
 fi
