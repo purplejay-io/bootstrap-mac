@@ -146,10 +146,7 @@ function install-o365-apps {
 
   cd /tmp
   if [[ ! -d "/Applications/Company Portal.app" ]];then
-    wget https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Company%20Portal/installCompanyPortal.sh
-    chmod +x installCompanyPortal.sh
-    sudo ./installCompanyPortal.sh &
-    # sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Company%20Portal/installCompanyPortal.sh)"
+    sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Company%20Portal/installCompanyPortal.sh)"
   fi
   if [[ ! -d "/Applications/Company Portal.app" ]];then
     echo "function: install-o365-apps"
@@ -157,14 +154,8 @@ function install-o365-apps {
     exit 1
   fi
   if [[ ! -d "/Applications/Microsoft Teams.app" ]];then
-    wget https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Misc/Rosetta2/installRosetta2.sh
-    chmod +x installRosetta2.sh
-    sudo ./installRosetta2.sh &
-    #sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Misc/Rosetta2/installRosetta2.sh)"
-    wget https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Teams/installTeams.sh
-    chmod +x installTeams.sh
-    sudo /bin/bash -c "./installTeams.sh"
-    #sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Teams/installTeams.sh)"
+    sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Misc/Rosetta2/installRosetta2.sh)"
+    sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Teams/installTeams.sh)"
   fi
   if [[ ! -d "/Applications/Microsoft Teams.app" ]];then
     echo "function: install-o365-apps"
@@ -172,10 +163,7 @@ function install-o365-apps {
     exit 1
   fi
   if [[ ! -d "/Applications/Microsoft Edge.app" ]];then
-    wget https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Edge/installEdge.sh
-    chmod +x installEdge.sh
-    sudo ./installEdge.sh &
-    # sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Edge/installEdge.sh)"
+    sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Edge/installEdge.sh)"
   fi
   if [[ ! -d "/Applications/Microsoft Edge.app" ]];then
     echo "function: install-o365-apps"
