@@ -124,6 +124,8 @@ function clone-bootstrap-mac {
       # Pull latest bootstrap-mac version
       if [[ $(git rev-list HEAD...origin/main --count) != 0 ]]; then
         git pull
+        echo "The bootstrap-mac script has been updated. Re run the script now."
+        exit 1
       fi
       # Escape the script if git pull didn't get the latest
       if [[ $(git rev-list HEAD...origin/main --count) != 0 ]]; then
