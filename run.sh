@@ -428,7 +428,7 @@ fi
 if [[ $1 == "install" ]]; then
   install-apps
   clone-bootstrap-mac
-  cd ~.pj/bootstrap-mac
+  cd ~/.pj/bootstrap-mac
   poetry install
   reset-dock
   exit 1
