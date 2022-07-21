@@ -403,7 +403,7 @@ function op-create {
 }
 
 function check-dir {
-  if [[ $ROOT_DIR != "$HOME/.pj/bootstrap-mac/" ]]; then
+  if [[ $ROOT_DIR != "$HOME/.pj/bootstrap-mac" ]]; then
     echo "function: check-dir"
     echo "You must run bootstrap-mac from ~/.pj/bootstrap-mac. Try again"
     exit 1
