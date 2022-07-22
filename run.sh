@@ -106,9 +106,9 @@ function install-op-cli {
   fi
 }
 
-function clone-bootstrap-mac {
+function install-bootstrapmac {
     if [[ $HOMEBREW_INSTALLED == 1 ]]; then
-      echo "function: clone-bootstrap-mac"
+      echo "function: install-bootstrapmac"
       echo "Homebrew is not installed"
       exit 1
     fi
@@ -129,7 +129,7 @@ function clone-bootstrap-mac {
       fi
       # Escape the script if git pull didn't get the latest
       if [[ $(git rev-list HEAD...origin/main --count) != 0 ]]; then
-        echo "function: clone-bootstrap-mac"
+        echo "function: install-bootstrapmac"
         echo "An error occurred with pulling the version of bootstrap_man. Try again. "
         exit 1
       fi
@@ -141,7 +141,7 @@ function clone-bootstrap-mac {
     fi
 }
 
-function install-o365-apps {
+function install-o365apps {
   if [[ ! -f $HOMEBREW_PATH/bin/wget ]];then
     brew install wget
   fi
@@ -150,7 +150,7 @@ function install-o365-apps {
     sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Company%20Portal/installCompanyPortal.sh)"
   fi
   if [[ ! -d "/Applications/Company Portal.app" ]];then
-    echo "function: install-o365-apps"
+    echo "function: install-o365apps"
     echo "Company Portal did not install, try again."
     exit 1
   fi
@@ -159,7 +159,7 @@ function install-o365-apps {
     sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Teams/installTeams.sh)"
   fi
   if [[ ! -d "/Applications/Microsoft Teams.app" ]];then
-    echo "function: install-o365-apps"
+    echo "function: install-o365apps"
     echo "Teams did not install, try again."
     exit 1
   fi
@@ -167,7 +167,7 @@ function install-o365-apps {
     sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Edge/installEdge.sh)"
   fi
   if [[ ! -d "/Applications/Microsoft Edge.app" ]];then
-    echo "function: install-o365-apps"
+    echo "function: install-o365apps"
     echo "Edge did not install, try again."
     exit 1
   fi
@@ -176,9 +176,25 @@ function install-apps {
   install-homebrew
   install-python
   install-poetry
-  install-o365-apps
+  install-o365apps
   install-op
   install-op-cli
+}
+
+function check-dir {
+  if [[ $ROOT_DIR != "$HOME/.pj/bootstrap-mac" ]]; then
+    echo "function: check-dir"
+    echo "You must run bootstrap-mac from ~/.pj/bootstrap-mac. Try again. \n"
+    exit 1
+  fi
+}
+
+function check-useryml {
+  if [[ -f $PERSONAL_FOLDER/user.yml ]]; then
+    echo "user.yml was found in OneDrive, will sync with bootstrap-mac."
+    echo "\n"
+    cp $PERSONAL_FOLDER/user.yml $BOOTSTRAP_MAC_PATH/vars/
+  fi
 }
 
 function check-keychain-password {
@@ -194,15 +210,6 @@ function check-keychain-password {
     exit 1
   fi
   ANSIBLE_KEYCHAIN_PASS=0
-}
-
-function reset-dock {
-  defaults write com.apple.dock persistent-apps -array
-  killall Dock
-}
-
-function reset-become-password {
-  rm -f $BOOTSTRAP_MAC_PATH/vars/pass.yml
 }
 
 function check-ansible-readiness {
@@ -286,7 +293,7 @@ function check-become-password {
   fi
 
   # 2. Ensure ansible-vault can be ran
-  clone-bootstrap-mac
+  install-bootstrapmac
   check-ansible-readiness
   # Note: Should not get to this point if there was a failure, but adding just in case
   if [[ $ANSIBLE_READINESS == 1 ]]; then
@@ -300,6 +307,7 @@ function check-become-password {
   if [[ ! -f vars/pass.yml ]]; then
     echo -n Local Password:
     read -s password
+    echo "\n"
     echo "---" > vars/pass.yml
     echo "ansible_become_password: $password" >> vars/pass.yml
 
@@ -315,11 +323,113 @@ function check-become-password {
   BECOME_PASSWORD_CHECK=0
 }
 
-function reset-bootstrap-mac {
+function create-archive {
+  CURRENT_DATE=$(date +%m-%d-%Y)
+  ARCHIVE_FOLDER="$CURRENT_DATE-Archive"
+  mkdir -p $HOME/$ARCHIVE_FOLDER
+}
+
+function create-userbackup {
+  create-archive
+  SN=$(ioreg -c IOPlatformExpertDevice -d 2 | awk -F\" '/IOPlatformSerialNumber/{print $(NF-1)}' | sed 's/^[ \t]*//;s/[ \t]*$//')
+
+  echo "Creating user backup... \n"
+  tar --exclude='venv' --exclude='*.box' --exclude='__pycache__' --exclude='node_modules' \
+  --exclude='[Bb]in' --exclude='[Oo]bj' --exclude='[Dd]ebug' --exclude='[Rr]elease' --exclude='x64'\
+  --exclude='id_rsa' --exclude='id_rsa.pub' --exclude='data' --exclude='output' \
+  --exclude='.venv' \
+  -czf "$HOME/$ARCHIVE_FOLDER/$SN-backup.tar.gz" \
+  -C $HOME \
+  git/ .pj/bootstrap-mac/vars/user.yml .ssh/
+}
+
+function reset-dock {
+  defaults write com.apple.dock persistent-apps -array
+  killall Dock
+}
+
+function reset-become-password {
+  rm -f $BOOTSTRAP_MAC_PATH/vars/pass.yml
+}
+
+function reset-onedrive {
+  # Reset OneDrive
+  /Applications/OneDrive.app/Contents/Resources/ResetOneDriveApp.command
+
+  create-archive
+  # Zip Archives
+  if [[ -d "$HOME/OneDrive-PurpleJay (Archive)/" ]]; then
+    echo "Zipping Personal OneDrive folder ... \n"
+    zip -r "$HOME/OneDrive-PurpleJay (Archive).zip" "$HOME/OneDrive-PurpleJay (Archive)/"
+    mv "$HOME/OneDrive-PurpleJay (Archive).zip" "$HOME/$ARCHIVE_FOLDER/"
+    rm -Rf "$HOME/OneDrive-PurpleJay (Archive)/"
+  fi
+  if [[ -d "$HOME/OneDrive-SharedLibraries-PurpleJay (Archive)/" ]]; then
+    echo "Zipping Shared Libraries OneDrive folder ... \n"
+    zip -r "$HOME/OneDrive-SharedLibraries-PurpleJay (Archive).zip" "$HOME/OneDrive-SharedLibraries-PurpleJay (Archive)/"
+    mv "$HOME/OneDrive-PurpleJay (Archive).zip" "$HOME/$ARCHIVE_FOLDER/"
+    rm -Rf "$HOME/OneDrive-SharedLibraries-PurpleJay (Archive)/"
+  fi
+
+  # Remove symbolic links
+  if [[ -L "$HOME/OneDrive - Purple Jay" ]]; then
+    rm -f "$HOME/OneDrive - Purple Jay"
+  fi
+  if [[ -L "$HOME/Purple Jay" ]]; then
+    rm -f "$HOME/Purple Jay"
+  fi
+}
+
+function reset-nextcloud {
+  pkill "Nextcloud"
+  brew uninstall nextcloud
+
+  if [[ -d "$HOME/Library/Application Support/Nextcloud/" ]]; then
+    rm -Rf "$HOME/Library/Application Support/Nextcloud/"
+  fi
+  if [[ -d "$HOME/Library/Preferences/Nextcloud" ]]; then
+    rm -Rf -d "$HOME/Library/Preferences/Nextcloud"
+  fi
+  rm -Rf "$HOME/Library/Group Containers/group.com.nextcloud.Talk"
+  rm -Rf "$HOME/Library/Caches/com.nextcloud.desktopclient/"
+  rm -Rf "$HOME/Library/Caches/Nextcloud/"
+
+  create-archive
+
+  if [[ -d "$HOME/Nextcloud/" ]]; then
+    echo "Zipping Nexcloud folder ... \n"
+    zip -r "$HOME/$ARCHIVE_FOLDER/nextcloud.zip" "$HOME/Nextcloud/"
+    rm -Rf "$HOME/Nextcloud/"
+  fi
+}
+
+function reset-teams {
+  pkill "Microsoft Teams"
+  sudo rm -Rf "/Applications/Microsoft Teams.app/"
+  rm -Rf "$HOME/Library/Application Support/Microsoft/Teams/"
+  rm -f "$HOME/Library/Preferences/com.microsoft.teams.plist"
+  rm -Rf "$HOME/Library/Caches/com.microsoft.teams/"
+  sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Teams/installTeams.sh)"
+}
+
+function reset-edge {
+  pkill "Microsoft Edge"
+  sudo rm -Rf "/Applications/Microsoft Edge.app/"
+  rm -Rf "$HOME/Library/Application Support/Microsoft/EdgeUpdater/"
+  rm -Rf "$HOME/Library/Application Support/Microsoft Edge/"
+  rm -f "$HOME/Library/Preferences/com.microsoft.edgemac.plist"
+  rm -Rf "$HOME/Library/Caches/Microsoft Edge/"
+  sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Edge/installEdge.sh)"
+}
+
+function reset-bootstrapmac {
   echo "About to remove bootstrap-mac, are you sure you want to continue?"
   # https://unix.stackexchange.com/questions/293940/how-can-i-make-press-any-key-to-continue
   read -r -s -k '?Press any key to continue.'
   sudo echo "You now have SUDO in this session"
+
+  create-userbackup
+  reset-nextcloud
 
   # Uninstall Python
   brew uninstall python3
@@ -355,32 +465,12 @@ function reset-bootstrap-mac {
   rm -Rf $HOME/.pj/bootstrap_mac/
 
   # Reset OneDrive
-  /Applications/OneDrive.app/Contents/Resources/ResetOneDriveApp.command
+  reset-onedrive
 
   # Uninstall O365 Apps
-  sudo rm -Rf /Applications/Microsoft\ Teams.app/
-  sudo rm -Rf /Applications/Microsoft\ Edge.app/
-  sudo rm -Rf /Applications/Company\ Portal.app/
+  reset-teams
+  reset-edge
 
-  exit 1
-}
-
-function reset-onedrive {
-    # Reset OneDrive
-  /Applications/OneDrive.app/Contents/Resources/ResetOneDriveApp.command
-}
-
-function display-help {
-  echo "Usage: ./run.sh [Option]
-
-  Options:
-  install     Install Apps and Clones bootstrap-mac
-  update      Runs bootstrap-mac and upgrades poetry
-  noupdate    Runs bootstrap-mac minus homebrew playbooks
-  password    Resets become password
-  op          Runs op-cli secrets push/pull
-  reset       Uninstall Apps and remove bootstrap-mac
-  "
   exit 1
 }
 
@@ -389,7 +479,7 @@ function op-login {
   check_op=$(op account get)
   if [[ $check_op == "" ]];then
     echo "function: op-login"
-    echo "You did not login into 1password, make sure you have enabled Biometric Unlock."
+    echo "You did not login into 1password, make sure you have enabled Biometric Unlock. \n"
     exit 1
   fi
   rm vars/secrets.yml
@@ -402,20 +492,25 @@ function op-create {
   fi
 }
 
-function check-dir {
-  if [[ $ROOT_DIR != "$HOME/.pj/bootstrap-mac" ]]; then
-    echo "function: check-dir"
-    echo "You must run bootstrap-mac from ~/.pj/bootstrap-mac. Try again"
-    exit 1
-  fi
-}
 
-function sync-user-yml {
-  if [[ -f $PERSONAL_FOLDER/user.yml ]]; then
-    cp $PERSONAL_FOLDER/user.yml $BOOTSTRAP_MAC_PATH/vars/
-  fi
-}
+function display-help {
+  echo "Usage: ./run.sh [Option]
 
+  Options:
+  install           Install Apps and Clones bootstrap-mac
+  update            Runs bootstrap-mac and upgrades poetry
+  noupdate          Runs bootstrap-mac minus homebrew playbooks
+  password          Resets become password
+  op                Runs op-cli secrets push/pull
+  reset             Uninstall Apps and remove bootstrap-mac
+  reset-edge        Reset Microsoft Edge
+  reset-teams       Reset Microsoft Teams
+  reset-onedrive    Reset Microsoft OneDrive
+  reset-nextcloud   Reset Nextcloud
+  create-backup     Backup user git, ssh, and user.yml
+  "
+  exit 1
+}
 
 ########################################################################
 #  Run Playbook
@@ -427,15 +522,17 @@ fi
 
 if [[ $1 == "install" ]]; then
   install-apps
-  clone-bootstrap-mac
+  install-bootstrapmac
   cd ~/.pj/bootstrap-mac
   reset-dock
   if [[ $IT_SETUP_FOLDER_CHECK == 1 ]]; then
     echo "Log into OneDrive"
     read -r -s -k '?Press any key to continue.'
+    echo ""
     open "https://purplejayio.sharepoint.com/sites/PurpleJay2/Shared%20Documents/Forms/AllItems.aspx"
     echo "Sync Purple Jay Documents"
     read -r -s -k '?Press any key to continue.'
+    echo ""
     sleep 5
   fi
   IT_SETUP_FOLDER_CHECK=$(test -d "$IT_SETUP_FOLDER";echo $?)
@@ -449,14 +546,14 @@ if [[ $1 == "update" ]]; then
   brew update
   brew upgrade
   poetry self update
-  sync-user-yml
+  check-useryml
   poetry run ansible-playbook local.yml
   exit 1
 fi
 
 if [[ $1 == "noupdate" ]]; then
   check-become-password
-  sync-user-yml
+  check-useryml
   poetry run ansible-playbook local.yml --skip-tags update
   exit 1
 fi
@@ -477,13 +574,33 @@ if [[ $1 == "op" ]]; then
   exit 1
 fi
 
+if [[ $1 == "reset" ]]; then
+  reset-bootstrapmac
+  exit 1
+fi
+
+if [[ $1 == "reset-edge" ]]; then
+  reset-edge
+  exit 1
+fi
+
+if [[ $1 == "reset-teams" ]]; then
+  reset-teams
+  exit 1
+fi
+
 if [[ $1 == "reset-onedrive" ]]; then
   reset-onedrive
   exit 1
 fi
 
-if [[ $1 == "reset" ]]; then
-  reset-bootstrap-mac
+if [[ $1 == "reset-nextcloud" ]]; then
+  reset-nextcloud
+  exit 1
+fi
+
+if [[ $1 == "create-backup" ]]; then
+  create-backup
   exit 1
 fi
 
