@@ -367,7 +367,7 @@ function reset-onedrive {
   if [[ -d "$HOME/OneDrive-SharedLibraries-PurpleJay (Archive)/" ]]; then
     echo "Zipping Shared Libraries OneDrive folder ... \n"
     zip -r "$HOME/OneDrive-SharedLibraries-PurpleJay (Archive).zip" "$HOME/OneDrive-SharedLibraries-PurpleJay (Archive)/"
-    mv "$HOME/OneDrive-PurpleJay (Archive).zip" "$HOME/$ARCHIVE_FOLDER/"
+    mv "$HOME/OneDrive-SharedLibraries-PurpleJay (Archive).zip" "$HOME/$ARCHIVE_FOLDER/"
     rm -Rf "$HOME/OneDrive-SharedLibraries-PurpleJay (Archive)/"
   fi
 
@@ -490,6 +490,8 @@ function op-create {
   if [[ -f "op_create.sh" ]];then
     ./op_create.sh > /dev/null
   fi
+  echo "Contact PJ Admin and let them know you have ran 'pj-op' successfully."
+  echo "Your Wireguard public key will need to be added until you can connect.\n"
 }
 
 
@@ -526,18 +528,23 @@ if [[ $1 == "install" ]]; then
   cd ~/.pj/bootstrap-mac
   reset-dock
   if [[ $IT_SETUP_FOLDER_CHECK == 1 ]]; then
+    echo "Ensure Device is Compliant in Company Portal."
+    open "/Applications/Company Portal.app"
+    read -r -s -k '?Press any key to continue.\n'
+
+    open "/Applications/OneDrive.app"
     echo "Log into OneDrive"
-    read -r -s -k '?Press any key to continue.'
-    echo ""
+    read -r -s -k '?Press any key to continue.\n'
+
     open "https://purplejayio.sharepoint.com/sites/PurpleJay2/Shared%20Documents/Forms/AllItems.aspx"
     echo "Sync Purple Jay Documents"
-    read -r -s -k '?Press any key to continue.'
-    echo ""
+    read -r -s -k '?Press any key to continue.\n'
     sleep 5
   fi
   IT_SETUP_FOLDER_CHECK=$(test -d "$IT_SETUP_FOLDER";echo $?)
   check-become-password
   poetry run ansible-playbook local.yml
+  source ~/.zprofile
   exit 1
 fi
 

@@ -12,3 +12,4 @@ vars/*
 .venv
 collections/*
 !collections/.gitkeep
+op_create.sh
