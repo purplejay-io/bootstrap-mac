@@ -600,7 +600,7 @@ if [[ $1 == "reset-nextcloud" ]]; then
 fi
 
 if [[ $1 == "create-backup" ]]; then
-  create-backup
+  create-userbackup
   exit 1
 fi
 
