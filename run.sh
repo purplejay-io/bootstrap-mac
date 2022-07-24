@@ -528,17 +528,28 @@ if [[ $1 == "install" ]]; then
   cd ~/.pj/bootstrap-mac
   reset-dock
   if [[ $IT_SETUP_FOLDER_CHECK == 1 ]]; then
+    FILEVAULT_CHECK=$(sudo fdesetup isactive)
+    if [[ $FILEVAULT_CHECK != "true" ]]; then
+      echo "Turn on Filevault before you proceed."
+      open "x-apple.systempreferences:com.apple.preference.security?FileVault"
+      read -r -s -k '?Press any key to continue.'
+      echo ""
+    fi
+
     echo "Ensure Device is Compliant in Company Portal."
     open "/Applications/Company Portal.app"
-    read -r -s -k '?Press any key to continue.\n'
+    read -r -s -k '?Press any key to continue.'
+    echo ""
 
     open "/Applications/OneDrive.app"
     echo "Log into OneDrive"
-    read -r -s -k '?Press any key to continue.\n'
+    read -r -s -k '?Press any key to continue.'
+    echo ""
 
     open "https://purplejayio.sharepoint.com/sites/PurpleJay2/Shared%20Documents/Forms/AllItems.aspx"
     echo "Sync Purple Jay Documents"
-    read -r -s -k '?Press any key to continue.\n'
+    read -r -s -k '?Press any key to continue.'
+    echo ""
     sleep 5
   fi
   IT_SETUP_FOLDER_CHECK=$(test -d "$IT_SETUP_FOLDER";echo $?)
