@@ -530,26 +530,28 @@ if [[ $1 == "install" ]]; then
   if [[ $IT_SETUP_FOLDER_CHECK == 1 ]]; then
     FILEVAULT_CHECK=$(sudo fdesetup isactive)
     if [[ $FILEVAULT_CHECK != "true" ]]; then
-      echo "Turn on Filevault before you proceed."
+      echo "Opening System Preferences, turn on Filevault before you proceed."
       open "x-apple.systempreferences:com.apple.preference.security?FileVault"
       read -r -s -k '?Press any key to continue.'
       echo "\n"
     fi
 
-    echo "Ensure Device is Compliant in Company Portal."
+    echo "Opening Company Portal, ensure your device is compliant before continuing."
     open "/Applications/Company Portal.app"
     read -r -s -k '?Press any key to continue.'
     echo "\n"
 
     open "/Applications/OneDrive.app"
-    echo "Log into OneDrive"
+    echo "Opening OneDrive, log into your Office 365 account before continuing."
     read -r -s -k '?Press any key to continue.'
     echo "\n"
 
     DEFAULT_BROWSER=$(defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers | sed -n -e '/LSHandlerURLScheme = https;/{x;p;d;}' -e 's/.*=[^"]"\(.*\)";/\1/g' -e x)
     if [[ $DEFAULT_BROWSER != "com.microsoft.edgemac" ]]; then
-      echo "Set the default browser to Microsoft Edge"
       open /System/Library/PreferencePanes/Appearance.prefPane
+      echo "Opening System Preferences, set the default browser to Microsoft Edge before continuing."
+      read -r -s -k '?Press any key to continue.'
+      echo "\n"
     fi
     DEFAULT_BROWSER=$(defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers | sed -n -e '/LSHandlerURLScheme = https;/{x;p;d;}' -e 's/.*=[^"]"\(.*\)";/\1/g' -e x)
     if [[ $DEFAULT_BROWSER != "com.microsoft.edgemac" ]]; then
@@ -559,12 +561,12 @@ if [[ $1 == "install" ]]; then
     fi
 
     open "https://office.com"
-    echo "Ensure you are logged into your Purple Jay Office365 Account before continuing."
+    echo "Opening Browser, ensure you are logged into your Purple Jay Office365 Account before continuing."
     read -r -s -k '?Press any key to continue.'
     echo "\n"
 
     open "https://purplejayio.sharepoint.com/sites/PurpleJay2/Shared%20Documents/Forms/AllItems.aspx"
-    echo "Sync Purple Jay Documents"
+    echo "Opening Browser, Sync Purple Jay Documents before continuing."
     read -r -s -k '?Press any key to continue.'
     echo "\n"
     sleep 5
