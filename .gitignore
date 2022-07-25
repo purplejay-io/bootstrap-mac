@@ -13,3 +13,5 @@ vars/*
 collections/*
 !collections/.gitkeep
 op_create.sh
+stderr.txt
+stdout.txt
