@@ -533,23 +533,40 @@ if [[ $1 == "install" ]]; then
       echo "Turn on Filevault before you proceed."
       open "x-apple.systempreferences:com.apple.preference.security?FileVault"
       read -r -s -k '?Press any key to continue.'
-      echo ""
+      echo "\n"
     fi
 
     echo "Ensure Device is Compliant in Company Portal."
     open "/Applications/Company Portal.app"
     read -r -s -k '?Press any key to continue.'
-    echo ""
+    echo "\n"
 
     open "/Applications/OneDrive.app"
     echo "Log into OneDrive"
     read -r -s -k '?Press any key to continue.'
-    echo ""
+    echo "\n"
+
+    DEFAULT_BROWSER=$(defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers | sed -n -e '/LSHandlerURLScheme = https;/{x;p;d;}' -e 's/.*=[^"]"\(.*\)";/\1/g' -e x)
+    if [[ $DEFAULT_BROWSER != "com.microsoft.edgemac" ]]; then
+      echo "Set the default browser to Microsoft Edge"
+      open /System/Library/PreferencePanes/Appearance.prefPane
+    fi
+    DEFAULT_BROWSER=$(defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers | sed -n -e '/LSHandlerURLScheme = https;/{x;p;d;}' -e 's/.*=[^"]"\(.*\)";/\1/g' -e x)
+    if [[ $DEFAULT_BROWSER != "com.microsoft.edgemac" ]]; then
+      echo "Set the default browser to Microsoft Edge before continuing. Exiting script now... "
+      open /System/Library/PreferencePanes/Appearance.prefPane
+      exit 1
+    fi
+
+    open "https://office.com"
+    echo "Ensure you are logged into your Purple Jay Office365 Account before continuing."
+    read -r -s -k '?Press any key to continue.'
+    echo "\n"
 
     open "https://purplejayio.sharepoint.com/sites/PurpleJay2/Shared%20Documents/Forms/AllItems.aspx"
     echo "Sync Purple Jay Documents"
     read -r -s -k '?Press any key to continue.'
-    echo ""
+    echo "\n"
     sleep 5
   fi
   IT_SETUP_FOLDER_CHECK=$(test -d "$IT_SETUP_FOLDER";echo $?)
