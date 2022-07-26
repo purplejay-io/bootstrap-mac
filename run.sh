@@ -597,7 +597,17 @@ if [[ $1 == "install" ]]; then
   IT_SETUP_FOLDER_CHECK=$(test -d "$IT_SETUP_FOLDER";echo $?)
   check-become-password
   poetry run ansible-playbook local.yml
-  source ~/.zprofile
+
+  open "/Applications/1Password.app"
+  echo "Opening 1Password, enable 'Biometric unlock for 1Password CLI' in Preferences > Developer"
+  read -r -s -k '?Press any key to continue.'
+  echo "\n"
+
+  check-useryml
+  op-login
+  poetry run ansible-playbook local.yml
+  op-create
+
   exit 1
 fi
 
