@@ -271,9 +271,6 @@ function check-ansible-readiness {
     exit 1
   fi
 
-  cp $IT_SETUP_FOLDER/pj-mac-1.0.0.tar.gz collections/
-  poetry run ansible-galaxy collection install -r galaxy.yml --force
-
   if [[ ! -f $HOME/.ansible/collections/ansible_collections/pj/mac/MANIFEST.json ]]; then
     echo "function: check-ansible-readiness"
     echo "Ansible Collection was not installed correctly, try again."
@@ -492,6 +489,26 @@ function op-create {
   fi
   echo "Contact PJ Admin and let them know you have ran 'pj-op' successfully."
   echo "Your Wireguard public key will need to be added until you can connect.\n"
+}
+
+function pull-ansiblecollections {
+  cd /tmp
+  security find-certificate -c "purplejaynet-ca" -p > ca.pem
+  openssl x509 -pubkey -noout -in ca.pem > pubkey.pem
+
+  curl -O https://pjansiblecollections.blob.core.windows.net/pj-ansiblecollections/ansiblecollection_keyfile.key.enc
+  curl -O https://pjansiblecollections.blob.core.windows.net/pj-ansiblecollections/pj-mac-1.0.0.tar.gz.enc
+  curl -O https://pjansiblecollections.blob.core.windows.net/pj-ansiblecollections/pj-ubuntu-1.0.0.tar.gz.enc
+
+  openssl rsautl -inkey pubkey.pem -pubin -in ansiblecollection_keyfile.key.enc -out ansiblecollection_keyfile.key
+  openssl enc -in pj-mac-1.0.0.tar.gz.enc -out pj-mac-1.0.0.tar.gz -d -aes256 -k ansiblecollection_keyfile.key
+  openssl enc -in pj-ubuntu-1.0.0.tar.gz.enc -out pj-ubuntu-1.0.0.tar.gz -d -aes256 -k ansiblecollection_keyfile.key
+
+  rm ansiblecollection_keyfile.key.enc ansiblecollection_keyfile.key pj-mac-1.0.0.tar.gz.enc pj-ubuntu-1.0.0.tar.gz.enc
+  rm ca.pem pubkey.pem
+
+  cd $BOOTSTRAP_MAC_PATH
+  poetry run ansible-galaxy collection install -r galaxy.yml --force
 }
 
 
