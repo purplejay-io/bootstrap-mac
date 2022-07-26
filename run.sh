@@ -271,6 +271,8 @@ function check-ansible-readiness {
     exit 1
   fi
 
+  pull-ansiblecollections
+
   if [[ ! -f $HOME/.ansible/collections/ansible_collections/pj/mac/MANIFEST.json ]]; then
     echo "function: check-ansible-readiness"
     echo "Ansible Collection was not installed correctly, try again."
