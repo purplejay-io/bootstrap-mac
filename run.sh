@@ -421,6 +421,18 @@ function reset-edge {
   sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Edge/installEdge.sh)"
 }
 
+function prune-logs {
+  if [[ -f ansible-logs.txt ]]; then
+    sed -i '' '2000,$ d' ansible-logs.txt
+  fi
+  if [[ -f stderr.txt ]]; then
+    sed -i '' '2000,$ d' stderr.txt
+  fi
+  if [[ -f stdout.txt ]]; then
+    sed -i '' '2000,$ d' stdout.txt
+  fi
+}
+
 function reset-bootstrapmac {
   echo "About to remove bootstrap-mac, are you sure you want to continue?"
   # https://unix.stackexchange.com/questions/293940/how-can-i-make-press-any-key-to-continue
@@ -573,7 +585,7 @@ if [[ $1 == "install" ]]; then
       read -r -s -k '?Press any key to continue.'
       echo "\n"
     fi
-    sleep 2
+    sleep 5
     DEFAULT_BROWSER=$(defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers | sed -n -e '/LSHandlerURLScheme = https;/{x;p;d;}' -e 's/.*=[^"]"\(.*\)";/\1/g' -e x)
     if [[ $DEFAULT_BROWSER != "com.microsoft.edgemac" ]]; then
       echo "Set the default browser to Microsoft Edge before continuing. Exiting script now... "
@@ -612,6 +624,7 @@ if [[ $1 == "install" ]]; then
 fi
 
 if [[ $1 == "update" ]]; then
+  prune-logs
   check-become-password
   brew update
   brew upgrade
@@ -622,6 +635,7 @@ if [[ $1 == "update" ]]; then
 fi
 
 if [[ $1 == "noupdate" ]]; then
+  prune-logs
   check-become-password
   check-useryml
   poetry run ansible-playbook local.yml --skip-tags update
