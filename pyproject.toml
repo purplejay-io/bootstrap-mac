@@ -6,8 +6,8 @@ authors = ["Brian Carlin <brian@purplejay.io>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-ansible = "^5.9.0"
-ansible-lint = "^6.3.0"
+ansible = "^6.2.0"
+ansible-lint = "^6.4.0"
 
 [tool.poetry.dev-dependencies]
 
