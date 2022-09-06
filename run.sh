@@ -15,13 +15,13 @@ else
   HOMEBREW_PATH="/usr/local"
 fi
 HOMEBREW_INSTALLED=$(test -f $HOMEBREW_PATH/bin/brew;echo $?)
-export PATH="$HOMEBREW_PATH/bin:$HOME/.poetry/bin:$PATH"
+export PATH="$HOMEBREW_PATH/bin:$HOME/.local/bin:$PATH"
 
 # Is Python3 Installed with
 PYTHON_INSTALLED=$(test -f $HOMEBREW_PATH/bin/python3;echo $?)
 
 # Is Poetry Installed
-POETRY_INSTALLED=$(test -f $HOME/.poetry/bin/poetry;echo $?)
+POETRY_INSTALLED=$(test -f $HOME/.local/bin/poetry;echo $?)
 
 # Is 1Password Installed
 OP_INSTALLED=$(test -d /Applications/1Password.app;echo $?)
@@ -72,7 +72,7 @@ function install-python {
 function install-poetry {
   if [[ $HOMEBREW_INSTALLED == 0  && $PYTHON_INSTALLED == 0 && $POETRY_INSTALLED == 1 ]]; then
     curl -sSL https://install.python-poetry.org | python3 -
-    POETRY_INSTALLED=$(test -f $HOME/.poetry/bin/poetry;echo $?)
+    POETRY_INSTALLED=$(test -f $HOME/.local/bin/poetry;echo $?)
   fi
   if [[ $POETRY_INSTALLED != 0 ]]; then
     echo "function: install-poetry"
