@@ -631,10 +631,10 @@ fi
 
 if [[ $1 == "update" ]]; then
   prune-logs
+  install-poetry
   check-become-password
   brew update
   brew upgrade
-  install-poetry
   poetry self update
   check-useryml
   poetry run ansible-playbook local.yml
