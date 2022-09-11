@@ -70,6 +70,11 @@ function install-python {
 }
 
 function install-poetry {
+  OLD_POETRY_INSTALLED=$(test -f $HOME/.poetry/bin/poetry;echo $?)
+  if [[ $OLD_POETRY_INSTALLED == 0 ]]; then
+    curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 - --uninstall
+    curl -sSL https://install.python-poetry.org | python3 - --uninstall
+  fi
   if [[ $HOMEBREW_INSTALLED == 0  && $PYTHON_INSTALLED == 0 && $POETRY_INSTALLED == 1 ]]; then
     curl -sSL https://install.python-poetry.org | python3 -
     POETRY_INSTALLED=$(test -f $HOME/.local/bin/poetry;echo $?)
