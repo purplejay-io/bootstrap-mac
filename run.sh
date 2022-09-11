@@ -427,6 +427,8 @@ function reset-poetry {
   curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 - --uninstall
   curl -sSL https://install.python-poetry.org | python3 - --uninstall
   rm -Rf $HOME/.pj/bootstrap-mac/.venv
+  curl -sSL https://install.python-poetry.org | python3 -
+  POETRY_INSTALLED=$(test -f $HOME/.local/bin/poetry;echo $?)
 }
 
 function prune-logs {
