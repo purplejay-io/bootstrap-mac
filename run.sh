@@ -70,12 +70,6 @@ function install-python {
 }
 
 function install-poetry {
-  OLD_POETRY_INSTALLED=$(test -f $HOME/.poetry/bin/poetry;echo $?)
-  if [[ $OLD_POETRY_INSTALLED == 0 ]]; then
-    curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 - --uninstall
-    curl -sSL https://install.python-poetry.org | python3 - --uninstall
-    rm -Rf $HOME/.pj/bootstrap-mac/.venv
-  fi
   if [[ $HOMEBREW_INSTALLED == 0  && $PYTHON_INSTALLED == 0 && $POETRY_INSTALLED == 1 ]]; then
     curl -sSL https://install.python-poetry.org | python3 -
     POETRY_INSTALLED=$(test -f $HOME/.local/bin/poetry;echo $?)
@@ -427,6 +421,14 @@ function reset-edge {
   sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Edge/installEdge.sh)"
 }
 
+function reset-poetry {
+  # OLD_POETRY_INSTALLED=$(test -f $HOME/.poetry/bin/poetry;echo $?)
+  # if [[ $OLD_POETRY_INSTALLED == 0 ]]; then
+  curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 - --uninstall
+  curl -sSL https://install.python-poetry.org | python3 - --uninstall
+  rm -Rf $HOME/.pj/bootstrap-mac/.venv
+}
+
 function prune-logs {
   if [[ -f ansible-logs.txt ]]; then
     sed -i '' '2000,$ d' ansible-logs.txt
@@ -631,7 +633,6 @@ fi
 
 if [[ $1 == "update" ]]; then
   prune-logs
-  install-poetry
   check-become-password
   brew update
   brew upgrade
@@ -667,6 +668,13 @@ fi
 
 if [[ $1 == "reset" ]]; then
   reset-bootstrapmac
+  exit 1
+fi
+
+if [[ $1 == "reset-poetry" ]]; then
+  reset-poetry
+  install-poetry
+  poetry install
   exit 1
 fi
 
