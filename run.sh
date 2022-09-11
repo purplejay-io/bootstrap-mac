@@ -74,6 +74,7 @@ function install-poetry {
   if [[ $OLD_POETRY_INSTALLED == 0 ]]; then
     curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 - --uninstall
     curl -sSL https://install.python-poetry.org | python3 - --uninstall
+    rm -Rf $HOME/.pj/bootstrap-mac/.venv
   fi
   if [[ $HOMEBREW_INSTALLED == 0  && $PYTHON_INSTALLED == 0 && $POETRY_INSTALLED == 1 ]]; then
     curl -sSL https://install.python-poetry.org | python3 -
@@ -633,6 +634,7 @@ if [[ $1 == "update" ]]; then
   check-become-password
   brew update
   brew upgrade
+  install-poetry
   poetry self update
   check-useryml
   poetry run ansible-playbook local.yml
