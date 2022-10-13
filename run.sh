@@ -342,6 +342,13 @@ function create-userbackup {
   git/ .pj/bootstrap-mac/vars/user.yml .ssh/
 }
 
+function check-poetry {
+  POETRY_WORKING=$(poetry --version;echo $?)
+  if [[ $POETRY_WORKING != 0 ]]; then
+     curl -sSL https://install.python-poetry.org | python3 -
+  fi
+}
+
 function reset-dock {
   defaults write com.apple.dock persistent-apps -array
   killall Dock
@@ -635,11 +642,12 @@ fi
 
 if [[ $1 == "update" ]]; then
   prune-logs
-  check-become-password
   brew update
   brew upgrade
+  check-poetry
   poetry self update
   check-useryml
+  check-become-password
   poetry run ansible-playbook local.yml
   exit 1
 fi
