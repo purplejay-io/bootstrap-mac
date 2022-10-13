@@ -343,7 +343,7 @@ function create-userbackup {
 }
 
 function check-poetry {
-  POETRY_WORKING=$(poetry --version;echo $?)
+  POETRY_WORKING=$(poetry --version > /dev/null;echo $?)
   if [[ $POETRY_WORKING != 0 ]]; then
      echo "There is an issue with Poetry, reinstalling...\n"
      curl -sSL https://install.python-poetry.org | python3 - --uninstall
