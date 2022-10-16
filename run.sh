@@ -191,9 +191,9 @@ function check-dir {
 
 function check-useryml {
   if [[ -f $PERSONAL_FOLDER/user.yml ]]; then
-    echo "user.yml was found in OneDrive, will sync with bootstrap-mac."
+    echo "user.yml was found in OneDrive, will sync with bootstrap-mac if OneDrive version newer."
     echo "\n"
-    cp $PERSONAL_FOLDER/user.yml $BOOTSTRAP_MAC_PATH/vars/
+    rsync -uq $PERSONAL_FOLDER/user.yml $BOOTSTRAP_MAC_PATH/vars/user.yml
   fi
 }
 
