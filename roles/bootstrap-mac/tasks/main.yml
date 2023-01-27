@@ -1,0 +1,16 @@
+---
+# tasks file for bootstrap-mac
+- name: If this command hangs, your Become Password is incorrect
+  shell: echo "If this command hangs, your Become Password is incorrect"
+  become: yes
+  changed_when: no
+
+- name: Set additional facts
+  import_tasks: set_facts.yml
+
+- name: Package baselines
+  import_tasks: packages.yml
+  tags: update
+
+- name: Apply PJ Environment settings
+  import_tasks: pj_environment.yml

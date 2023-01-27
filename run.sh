@@ -34,8 +34,8 @@ BOOTSTRAP_MAC_PATH="$HOME/.pj/bootstrap-mac/"
 BOOTSTRAP_MAC_REPO=$(test -d $HOME/.pj/bootstrap-mac/.git/;echo $?)
 
 # Is the OneDrive IT Setup Folder being synced?
-IT_SETUP_FOLDER="$HOME/Library/CloudStorage/OneDrive-SharedLibraries-PurpleJay/Purple Jay - Documents/IT Setup"
-IT_SETUP_FOLDER_CHECK=$(test -d "$IT_SETUP_FOLDER";echo $?)
+#IT_SETUP_FOLDER="$HOME/Library/CloudStorage/OneDrive-SharedLibraries-PurpleJay/Purple Jay - Documents/IT Setup"
+#IT_SETUP_FOLDER_CHECK=$(test -d "$IT_SETUP_FOLDER";echo $?)
 
 # Personal OneDrive Folder
 PERSONAL_FOLDER="$HOME/Library/CloudStorage/OneDrive-PurpleJay"
@@ -82,10 +82,10 @@ function install-poetry {
 }
 
 function install-op {
-  if [[ $HOMEBREW_INSTALLED == 0  && $OP_INSTALLED == 1 ]]; then
-    brew install --cask 1password
-    OP_INSTALLED=$(test -d /Applications/1Password.app;echo $?)
-  fi
+#  if [[ $HOMEBREW_INSTALLED == 0  && $OP_INSTALLED == 1 ]]; then
+#    brew install --cask 1password
+#    OP_INSTALLED=$(test -d /Applications/1Password.app;echo $?)
+#  fi
   if [[ $OP_INSTALLED != 0 ]]; then
     echo "function: install-op"
     echo "1Password did not install successfully, try again."
@@ -176,7 +176,7 @@ function install-apps {
   install-homebrew
   install-python
   install-poetry
-  install-o365apps
+#  install-o365apps
   install-op
   install-op-cli
 }
@@ -197,20 +197,20 @@ function check-useryml {
   fi
 }
 
-function check-keychain-password {
-  ANSIBLE_KEYCHAIN_PASS=1
-  ANSIBLE_KEYCHAIN_PASS_CHECK=$(security find-generic-password -a pj-bootstrap-ansible -w)
-  if [[ $ANSIBLE_KEYCHAIN_PASS_CHECK == "" ]]; then
-    security add-generic-password -a pj-bootstrap-ansible -s ansible -w "$(openssl rand -base64 25)"
-    ANSIBLE_KEYCHAIN_PASS_CHECK=$(security find-generic-password -a pj-bootstrap-ansible -w)
-  fi
-  if [[ $ANSIBLE_KEYCHAIN_PASS_CHECK == "" ]]; then
-    echo "function: check-keychain-password"
-    echo "The ephemeral password did not get created successfully in keychain, try again"
-    exit 1
-  fi
-  ANSIBLE_KEYCHAIN_PASS=0
-}
+#function check-keychain-password {
+#  ANSIBLE_KEYCHAIN_PASS=1
+#  ANSIBLE_KEYCHAIN_PASS_CHECK=$(security find-generic-password -a pj-bootstrap-ansible -w)
+#  if [[ $ANSIBLE_KEYCHAIN_PASS_CHECK == "" ]]; then
+#    security add-generic-password -a pj-bootstrap-ansible -s ansible -w "$(openssl rand -base64 25)"
+#    ANSIBLE_KEYCHAIN_PASS_CHECK=$(security find-generic-password -a pj-bootstrap-ansible -w)
+#  fi
+#  if [[ $ANSIBLE_KEYCHAIN_PASS_CHECK == "" ]]; then
+#    echo "function: check-keychain-password"
+#    echo "The ephemeral password did not get created successfully in keychain, try again"
+#    exit 1
+#  fi
+#  ANSIBLE_KEYCHAIN_PASS=0
+#}
 
 function check-ansible-readiness {
   if [[ $HOMEBREW_INSTALLED == 1 ]]; then
@@ -243,11 +243,11 @@ function check-ansible-readiness {
     echo "bootstrap-mac repo must be cloned locally before you can run bootstrap-mac"
     exit 1
   fi
-  if [[ $IT_SETUP_FOLDER_CHECK == 1 ]]; then
-    echo "function: check-ansible-readiness"
-    echo "IT Setup OneDrive folder must be synced before you can run bootstrap-mac"
-    exit 1
-  fi
+#  if [[ $IT_SETUP_FOLDER_CHECK == 1 ]]; then
+#    echo "function: check-ansible-readiness"
+#    echo "IT Setup OneDrive folder must be synced before you can run bootstrap-mac"
+#    exit 1
+#  fi
 
   # Remove old bootstrap_mac folder if found
   if [[ -d $HOME/.pj/bootstrap_mac/ ]]; then
@@ -256,9 +256,9 @@ function check-ansible-readiness {
 
   # Create empty secrets and user vars files if not found
   cd $BOOTSTRAP_MAC_PATH
-  if [[ ! -f vars/secrets.yml ]]; then
-    echo "---" > vars/secrets.yml
-  fi
+#  if [[ ! -f vars/secrets.yml ]]; then
+#    echo "---" > vars/secrets.yml
+#  fi
   if [[ ! -f vars/user.yml ]]; then
     echo "---" > vars/user.yml
   fi
@@ -271,13 +271,13 @@ function check-ansible-readiness {
     exit 1
   fi
 
-  pull-ansiblecollections
-
-  if [[ ! -f $HOME/.ansible/collections/ansible_collections/pj/mac/MANIFEST.json ]]; then
-    echo "function: check-ansible-readiness"
-    echo "Ansible Collection was not installed correctly, try again."
-    exit 1
-  fi
+#  pull-ansiblecollections
+#
+#  if [[ ! -f $HOME/.ansible/collections/ansible_collections/pj/mac/MANIFEST.json ]]; then
+#    echo "function: check-ansible-readiness"
+#    echo "Ansible Collection was not installed correctly, try again."
+#    exit 1
+#  fi
 
   # If none of the above failed, we can assume bootstrap_mac can be ran
   ANSIBLE_READINESS=0
@@ -577,67 +577,66 @@ if [[ $1 == "install" ]]; then
   install-bootstrapmac
   cd ~/.pj/bootstrap-mac
   reset-dock
-  if [[ $IT_SETUP_FOLDER_CHECK == 1 ]]; then
-    FILEVAULT_CHECK=$(sudo fdesetup isactive)
-    if [[ $FILEVAULT_CHECK != "true" ]]; then
-      echo "Opening System Preferences, turn on Filevault before you proceed."
-      open "x-apple.systempreferences:com.apple.preference.security?FileVault"
-      read -r -s -k '?Press any key to continue.'
-      echo "\n"
-    fi
 
-    echo "Opening Company Portal, ensure your device is compliant before continuing."
-    open "/Applications/Company Portal.app"
+  FILEVAULT_CHECK=$(sudo fdesetup isactive)
+  if [[ $FILEVAULT_CHECK != "true" ]]; then
+    echo "Opening System Preferences, turn on Filevault before you proceed."
+    open "x-apple.systempreferences:com.apple.preference.security?FileVault"
     read -r -s -k '?Press any key to continue.'
     echo "\n"
-
-    open "/Applications/OneDrive.app"
-    echo "Opening OneDrive, log into your Office 365 account before continuing."
-    read -r -s -k '?Press any key to continue.'
-    echo "\n"
-
-    DEFAULT_BROWSER=$(defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers | sed -n -e '/LSHandlerURLScheme = https;/{x;p;d;}' -e 's/.*=[^"]"\(.*\)";/\1/g' -e x)
-    if [[ $DEFAULT_BROWSER != "com.microsoft.edgemac" ]]; then
-      open /System/Library/PreferencePanes/Appearance.prefPane
-      echo "Opening System Preferences, set the default browser to Microsoft Edge before continuing."
-      echo "Close the System Preferences Pane to ensure the default browser setting was saved."
-      read -r -s -k '?Press any key to continue.'
-      echo "\n"
-    fi
-    sleep 5
-    DEFAULT_BROWSER=$(defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers | sed -n -e '/LSHandlerURLScheme = https;/{x;p;d;}' -e 's/.*=[^"]"\(.*\)";/\1/g' -e x)
-    if [[ $DEFAULT_BROWSER != "com.microsoft.edgemac" ]]; then
-      echo "Set the default browser to Microsoft Edge before continuing. Exiting script now... "
-      open /System/Library/PreferencePanes/Appearance.prefPane
-      exit 1
-    fi
-
-    open "https://office.com"
-    echo "Opening Browser: https://office.com"
-    echo "Ensure you are logged into your Purple Jay Office365 Account before continuing."
-    read -r -s -k '?Press any key to continue.'
-    echo "\n"
-
-    open "https://purplejayio.sharepoint.com/sites/PurpleJay2/Shared%20Documents/Forms/AllItems.aspx"
-    echo "Opening Browser: https://purplejayio.sharepoint.com/sites/PurpleJay2/Shared%20Documents/Forms/AllItems.aspx"
-    echo "Sync Purple Jay Documents before continuing."
-    read -r -s -k '?Press any key to continue.'
-    echo "\n"
-    sleep 5
   fi
-  IT_SETUP_FOLDER_CHECK=$(test -d "$IT_SETUP_FOLDER";echo $?)
-  check-become-password
-  poetry run ansible-playbook local.yml
 
-  open "/Applications/1Password.app"
-  echo "Opening 1Password, enable 'Biometric unlock for 1Password CLI' in Preferences > Developer"
+  echo "Opening Company Portal, ensure your device is compliant before continuing."
+  open "/Applications/Company Portal.app"
   read -r -s -k '?Press any key to continue.'
   echo "\n"
 
-  check-useryml
-  op-login
-  poetry run ansible-playbook local.yml
-  op-create
+  open "/Applications/OneDrive.app"
+  echo "Opening OneDrive, log into your Office 365 account before continuing."
+  read -r -s -k '?Press any key to continue.'
+  echo "\n"
+
+  DEFAULT_BROWSER=$(defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers | sed -n -e '/LSHandlerURLScheme = https;/{x;p;d;}' -e 's/.*=[^"]"\(.*\)";/\1/g' -e x)
+  if [[ $DEFAULT_BROWSER != "com.microsoft.edgemac" ]]; then
+    open /System/Library/PreferencePanes/Appearance.prefPane
+    echo "Opening System Preferences, set the default browser to Microsoft Edge before continuing."
+    echo "Close the System Preferences Pane to ensure the default browser setting was saved."
+    read -r -s -k '?Press any key to continue.'
+    echo "\n"
+  fi
+  sleep 5
+  DEFAULT_BROWSER=$(defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers | sed -n -e '/LSHandlerURLScheme = https;/{x;p;d;}' -e 's/.*=[^"]"\(.*\)";/\1/g' -e x)
+  if [[ $DEFAULT_BROWSER != "com.microsoft.edgemac" ]]; then
+    echo "Set the default browser to Microsoft Edge before continuing. Exiting script now... "
+    open /System/Library/PreferencePanes/Appearance.prefPane
+    exit 1
+  fi
+
+  open "https://office.com"
+  echo "Opening Browser: https://office.com"
+  echo "Ensure you are logged into your Purple Jay Office365 Account before continuing."
+  read -r -s -k '?Press any key to continue.'
+  echo "\n"
+
+#  open "https://purplejayio.sharepoint.com/sites/PurpleJay2/Shared%20Documents/Forms/AllItems.aspx"
+#  echo "Opening Browser: https://purplejayio.sharepoint.com/sites/PurpleJay2/Shared%20Documents/Forms/AllItems.aspx"
+#  echo "Sync Purple Jay Documents before continuing."
+#  read -r -s -k '?Press any key to continue.'
+#  echo "\n"
+#  sleep 5
+
+#  check-become-password
+  poetry run ansible-playbook local.yml -K
+
+#  open "/Applications/1Password.app"
+#  echo "Opening 1Password, enable 'Biometric unlock for 1Password CLI' in Preferences > Developer"
+#  read -r -s -k '?Press any key to continue.'
+#  echo "\n"
+#
+#  check-useryml
+#  op-login
+#  poetry run ansible-playbook local.yml
+#  op-create
 
   exit 1
 fi
@@ -649,34 +648,34 @@ if [[ $1 == "update" ]]; then
   check-poetry
   poetry self update
   check-useryml
-  check-become-password
-  poetry run ansible-playbook local.yml
+#  check-become-password
+  poetry run ansible-playbook local.yml -K
   exit 1
 fi
 
 if [[ $1 == "noupdate" ]]; then
   prune-logs
-  check-become-password
+#  check-become-password
   check-useryml
-  poetry run ansible-playbook local.yml --skip-tags update
+  poetry run ansible-playbook local.yml --skip-tags update -K
   exit 1
 fi
 
-if [[ $1 == "password" ]]; then
-  reset-become-password
-  check-become-password
-  poetry run ansible-playbook local.yml --skip-tags update
-  exit 1
-fi
-
-if [[ $1 == "op" ]]; then
-  check-dir
-  check-become-password
-  op-login
-  poetry run ansible-playbook local.yml --skip-tags update
-  op-create
-  exit 1
-fi
+#if [[ $1 == "password" ]]; then
+#  reset-become-password
+#  check-become-password
+#  poetry run ansible-playbook local.yml --skip-tags update
+#  exit 1
+#fi
+#
+#if [[ $1 == "op" ]]; then
+#  check-dir
+#  check-become-password
+#  op-login
+#  poetry run ansible-playbook local.yml --skip-tags update
+#  op-create
+#  exit 1
+#fi
 
 if [[ $1 == "reset" ]]; then
   reset-bootstrapmac
@@ -690,10 +689,10 @@ if [[ $1 == "reset-poetry" ]]; then
   exit 1
 fi
 
-if [[ $1 == "reset-edge" ]]; then
-  reset-edge
-  exit 1
-fi
+#if [[ $1 == "reset-edge" ]]; then
+#  reset-edge
+#  exit 1
+#fi
 
 if [[ $1 == "reset-teams" ]]; then
   reset-teams
@@ -705,10 +704,10 @@ if [[ $1 == "reset-onedrive" ]]; then
   exit 1
 fi
 
-if [[ $1 == "reset-nextcloud" ]]; then
-  reset-nextcloud
-  exit 1
-fi
+#if [[ $1 == "reset-nextcloud" ]]; then
+#  reset-nextcloud
+#  exit 1
+#fi
 
 if [[ $1 == "create-backup" ]]; then
   create-userbackup

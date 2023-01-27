@@ -14,17 +14,16 @@
 
 - hosts: localhost
   vars_files:
-    - vars/pass.yml
     - vars/user.yml
   roles:
-    - role: pj.mac.bootstrap
+    - role: bootstrap-mac
       when: ansible_distribution == "MacOSX"
 
-- hosts: localhost
-  vars_files:
-    - vars/pass.yml
-    - vars/user.yml
-    - vars/secrets.yml
-  roles:
-    - role: pj.mac.wg
-      when: wg_priv is defined and ansible_distribution == "MacOSX"
+#- hosts: localhost
+#  vars_files:
+#    - vars/pass.yml
+#    - vars/user.yml
+#    - vars/secrets.yml
+#  roles:
+#    - role: pj.mac.wg
+#      when: wg_priv is defined and ansible_distribution == "MacOSX"

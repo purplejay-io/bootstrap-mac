@@ -1,0 +1,174 @@
+---
+# zprofile baseline
+- name: Ensure jetbrains dir exist
+  file:
+    path: ~/.jetbrains
+    state: directory
+    mode: '0755'
+
+- name: Ensure git dir exist
+  file:
+    path: ~/git
+    state: directory
+    mode: '0755'
+
+#- name: Remove .zprofile to avoid dups
+#  file:
+#    path: ~/.zprofile
+#    state: absent
+#
+
+- name: zprofile baseline for Apple Silicon
+  blockinfile:
+    block: |
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+    path: $HOME/.zprofile
+    marker: "### {mark} PJ zprofile apple silicon baseline ###"
+    create: yes
+  when: ansible_architecture == 'arm64'
+
+- name: Additional zprofile baseline
+  blockinfile:
+    block: |
+      export PATH="$HOME/.LOCAL/bin:$PATH"
+      
+      HOMEBREW_CHECK=$(which brew)
+      HOMEBREW_PATH=$(echo "$HOMEBREW_CHECK" | cut -d "/" -f 1-3)
+      
+      alias python3="$HOMEBREW_PATH/bin/python3"
+      alias python="python3"
+
+      export PATH=~/.jetbrains:$PATH
+      
+      function pj-update {
+        cd ~/.pj/bootstrap-mac
+        ./run.sh update
+      }
+
+      function pj-op {
+              cd ~/.pj/bootstrap-mac
+              ./run.sh op
+      }
+      function pj-noupdate {
+              cd ~/.pj/bootstrap-mac
+              ./run.sh noupdate
+      }
+      function pj-passreset {
+              cd ~/.pj/bootstrap-mac
+              ./run.sh password
+      }
+      function pj-reset {
+              cd ~/.pj/bootstrap-mac
+              ./run.sh reset
+      }
+      function pj-reset-onedrive {
+              cd ~/.pj/bootstrap-mac
+              ./run.sh reset-onedrive
+      }
+      function pj-reset-edge {
+              cd ~/.pj/bootstrap-mac
+              ./run.sh reset-edge
+      }
+      function pj-reset-teams {
+              cd ~/.pj/bootstrap-mac
+              ./run.sh reset-teams
+      }
+      function pj-reset-nextcloud {
+              cd ~/.pj/bootstrap-mac
+              ./run.sh reset-nextcloud
+      }
+      function pj-create-backup {
+              cd ~/.pj/bootstrap-mac
+              ./run.sh create-backup
+      }
+      function gitd {
+          cd "$HOME/git/"
+      }
+
+      function venv {
+          POETRY_LOCAL_CHECK=$(poetry config virtualenvs.in-project --local)
+          if [[ $POETRY_LOCAL_CHECK != 'true' ]]; then
+            poetry config virtualenvs.in-project true --local
+          fi
+          rm -Rf $(poetry env info --path)
+          rm -Rf .venv
+          rm -f poetry.lock
+          poetry install
+      }
+      function reset-dns {
+          sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder
+      }
+      
+      alias typora="open -a typora"
+    path: $HOME/.zprofile
+    marker: "### {mark} PJ zprofile baseline ###"
+    create: yes
+
+- name: Additional user zprofile baseline
+  blockinfile:
+    block: "{{ zprofile_user }}"
+    path: $HOME/.zprofile
+    marker: "### {mark} USER zprofile baseline ###"
+    create: yes
+
+#- name: Remove sudo from pam.d
+#  lineinfile:
+#    line: auth       sufficient     pam_tid.so
+#    path: /etc/pam.d/sudo
+#    state: absent
+#  become: yes
+
+#- name: Remove old 10 addresses from hosts
+#  lineinfile:
+#    regexp: '^10.*'
+#    path: /etc/hosts
+#    state: absent
+#  become: yes
+
+#- name: Trackpad 3 Finger Drag
+#  community.general.osx_defaults:
+#    domain: com.apple.AppleMultitouchTrackpad
+#    key: TrackpadThreeFingerDrag
+#    type: int
+#    value: "{{ three_finger_drag|int }}"
+#    state: present
+#
+#- name: Trackpad Single Touch Tap - AppleMultitouchTrackpad
+#  community.general.osx_defaults:
+#    domain: com.apple.AppleMultitouchTrackpad
+#    key: Clicking
+#    type: int
+#    value: "{{ single_touch_tap|int }}"
+#    state: present
+#
+#- name: Trackpad Single Touch Tap - AppleBluetoothMultitouch
+#  community.general.osx_defaults:
+#    domain: com.apple.driver.AppleBluetoothMultitouch.trackpad
+#    key: Clicking
+#    type: int
+#    value: "{{ single_touch_tap|int }}"
+#    state: present
+#
+#- name: Finder search within current folder
+#  community.general.osx_defaults:
+#    domain: com.apple.finder
+#    key: FXDefaultSearchScope
+#    type: string
+#    value: "{{ search_folder }}"
+#    state: present
+#
+#- name: Finder Show Status Bar
+#  community.general.osx_defaults:
+#    domain: com.apple.finder
+#    key: ShowStatusBar
+#    type: int
+#    value: "{{ show_status_bar|int }}"
+#    state: present
+#
+#- name: Safari show Developer Menu
+#  community.general.osx_defaults:
+#    domain: com.apple.Safari
+#    key: IncludeInternalDebugMenu
+#    type: bool
+#    value: "{{ safari_developer_menu }}"
+#    state: present

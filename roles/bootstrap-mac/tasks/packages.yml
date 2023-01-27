@@ -1,0 +1,92 @@
+---
+# Confirm sudo works
+- name: If tasks doesn't execute, press CTR-C and try running again
+  shell: echo "Laptop password successful"
+  changed_when: false
+  become: yes
+
+# Homebrew installer and dependencies
+- name: Install baseline homebrew packages
+  homebrew:
+    name: "{{ item }}"
+    update_homebrew: true
+    upgrade_all: true
+
+  loop: "{{ brew_packages }}"
+
+- name: Remove homebrew packages
+  homebrew:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ brew_packages_removed }}"
+
+- name: Install user homebrew packages
+  homebrew:
+    name: "{{ item }}"
+    upgrade_all: true
+  loop: "{{ brew_packages_user }}"
+
+- name: Install baseline homebrew cask packages
+  homebrew_cask:
+    name: "{{ item }}"
+    state: upgraded
+    greedy: yes
+    sudo_password: "{{ ansible_become_password }}"
+    install_options: force
+  loop: "{{ brew_cask_packages }}"
+
+- name: Remove homebrew cask packages
+  homebrew_cask:
+    name: "{{ item }}"
+    state: absent
+    install_options: force
+    sudo_password: "{{ ansible_become_password }}"
+  loop: "{{ brew_cask_packages_removed }}"
+
+- name: Install user homebrew cask packages
+  homebrew_cask:
+    name: "{{ item }}"
+    state: upgraded
+    sudo_password: "{{ ansible_become_password }}"
+    install_options: force
+  loop: "{{ brew_cask_packages_user }}"
+
+- name: Check if signed into Apple ID
+  shell: defaults read MobileMeAccounts Accounts
+  failed_when: no
+  changed_when: no
+  register: appleid_check
+
+- name: Install App Store packages using mas
+  community.general.mas:
+    id: "{{ item.id }}"
+    state: present
+  loop: "{{ mas_apps }}"
+  when: appleid_check.stdout != ""
+
+- name: Remove App Store packages using mas
+  community.general.mas:
+    id: "{{ item.id }}"
+    state: absent
+  loop: "{{ mas_apps_removed }}"
+  when: appleid_check.stdout != ""
+
+- name: pip baseline packages
+  pip:
+    executable: "{{ homebrew_path }}/bin/pip3"
+    name: "{{ item }}"
+    extra_args: --upgrade
+  loop: "{{ pip_packages }}"
+
+- name: Remove pip baseline packages
+  pip:
+    executable: "{{ homebrew_path }}/bin/pip3"
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ pip_packages_removed }}"
+
+#- name: macOS Software Update
+#  shell: softwareupdate -iaR
+#  become: yes
+#  register: osupdate_status
+#  changed_when: 'osupdate_status.stderr != "No updates are available."'
