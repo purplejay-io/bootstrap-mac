@@ -286,10 +286,10 @@ function check-ansible-readiness {
 function check-become-password {
   BECOME_PASSWORD_CHECK=1
   # 1. Check is the ephemeral password in keychain was successfully created.
-  check-keychain-password
-  if [[ $ANSIBLE_KEYCHAIN_PASS == 1 ]]; then
-    exit 1
-  fi
+#  check-keychain-password
+#  if [[ $ANSIBLE_KEYCHAIN_PASS == 1 ]]; then
+#    exit 1
+#  fi
 
   # 2. Ensure ansible-vault can be ran
   install-bootstrapmac
@@ -625,7 +625,7 @@ if [[ $1 == "install" ]]; then
 #  echo "\n"
 #  sleep 5
 
-#  check-become-password
+  check-become-password
   poetry run ansible-playbook local.yml -K
 
 #  open "/Applications/1Password.app"
