@@ -648,14 +648,14 @@ if [[ $1 == "update" ]]; then
   check-poetry
   poetry self update
   check-useryml
-#  check-become-password
+  check-become-password
   poetry run ansible-playbook local.yml -K
   exit 1
 fi
 
 if [[ $1 == "noupdate" ]]; then
   prune-logs
-#  check-become-password
+  check-become-password
   check-useryml
   poetry run ansible-playbook local.yml --skip-tags update -K
   exit 1
