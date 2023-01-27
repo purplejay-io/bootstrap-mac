@@ -303,22 +303,22 @@ function check-become-password {
   cd $BOOTSTRAP_MAC_PATH
 
   # 4. If pass.yml does not exist, then ask user for it
-  if [[ ! -f vars/pass.yml ]]; then
-    echo -n Local Password:
-    read -s password
-    echo "\n"
-    echo "---" > vars/pass.yml
-    echo "ansible_become_password: $password" >> vars/pass.yml
-
-    echo `security find-generic-password -a pj-bootstrap-ansible -w` | poetry run ansible-vault encrypt vars/pass.yml
-  fi
-
-  # 5. Check to make sure become password is encrypted
-  if [[ $(poetry run ansible-vault view vars/pass.yml) == "" ]]; then
-    echo "function: check-become-password"
-    echo "Ansible-Vault wasn't able to encrypt your become password, try again."
-    exit 1
-  fi
+#  if [[ ! -f vars/pass.yml ]]; then
+#    echo -n Local Password:
+#    read -s password
+#    echo "\n"
+#    echo "---" > vars/pass.yml
+#    echo "ansible_become_password: $password" >> vars/pass.yml
+#
+#    echo `security find-generic-password -a pj-bootstrap-ansible -w` | poetry run ansible-vault encrypt vars/pass.yml
+#  fi
+#
+#  # 5. Check to make sure become password is encrypted
+#  if [[ $(poetry run ansible-vault view vars/pass.yml) == "" ]]; then
+#    echo "function: check-become-password"
+#    echo "Ansible-Vault wasn't able to encrypt your become password, try again."
+#    exit 1
+#  fi
   BECOME_PASSWORD_CHECK=0
 }
 
