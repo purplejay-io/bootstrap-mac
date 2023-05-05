@@ -24,10 +24,14 @@ PYTHON_INSTALLED=$(test -f $HOMEBREW_PATH/bin/python3;echo $?)
 POETRY_INSTALLED=$(test -f $HOME/.local/bin/poetry;echo $?)
 
 # Is 1Password Installed
-OP_INSTALLED=$(test -d /Applications/1Password.app;echo $?)
+# Overriding for now as 1Password no longer a dependency for employees to connect
+# OP_INSTALLED=$(test -d /Applications/1Password.app;echo $?)
+OP_INSTALLED=0
 
 # Is 1Password CLI Installed
-OP_CLI_INSTALLED=$(test -f /usr/local/bin/op;echo $?)
+# Overriding for now as 1Password no longer a dependency for employees to connect
+# OP_CLI_INSTALLED=$(test -f /usr/local/bin/op;echo $?)
+OP_CLI_INSTALLED=0
 
 # Is bootstrap_mac repo synced on mac?
 BOOTSTRAP_MAC_PATH="$HOME/.pj/bootstrap-mac/"
@@ -48,6 +52,9 @@ function install-homebrew {
   if [[ $HOMEBREW_INSTALLED == 1 ]]; then
     NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     HOMEBREW_INSTALLED=$(test -f $HOMEBREW_PATH/bin/brew;echo $?)
+    if [[ $(uname -m) == 'arm64' ]]; then
+      (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile
+    else
   fi
   if [[ $HOMEBREW_INSTALLED != 0 ]]; then
     echo "function: install-homebrew"
@@ -88,7 +95,7 @@ function install-op {
 #  fi
   if [[ $OP_INSTALLED != 0 ]]; then
     echo "function: install-op"
-    echo "1Password did not install successfully, try again."
+    echo "1Password did not install successfully from Intune, please contact an administrator."
     exit 1
   fi
 }
@@ -114,9 +121,12 @@ function install-bootstrapmac {
     fi
 
     if [[ $BOOTSTRAP_MAC_REPO == 1 ]]; then
-      mkdir -p "$HOME"/.pj
-      git clone https://github.com/purplejay-io/bootstrap-mac.git $BOOTSTRAP_MAC_PATH
-      BOOTSTRAP_MAC_REPO=$(test -d $HOME/.pj/bootstrap-mac/.git/;echo $?)
+#      mkdir -p "$HOME"/.pj
+#      git clone git@gitlab.purplejay.net:purple-jay/bootstrap-mac.git $BOOTSTRAP_MAC_PATH
+#      BOOTSTRAP_MAC_REPO=$(test -d $HOME/.pj/bootstrap-mac/.git/;echo $?)
+      echo "Bootstrap-mac was not found in ~/.pj/bootstrap-mac/"
+      echo "Please follow the instructions and try again."
+      exit 1
     else
       cd $BOOTSTRAP_MAC_PATH || exit
       git reset --hard HEAD
@@ -335,7 +345,6 @@ function create-userbackup {
   echo "Creating user backup... \n"
   tar --exclude='venv' --exclude='*.box' --exclude='__pycache__' --exclude='node_modules' \
   --exclude='[Bb]in' --exclude='[Oo]bj' --exclude='[Dd]ebug' --exclude='[Rr]elease' --exclude='x64'\
-  --exclude='id_rsa' --exclude='id_rsa.pub' --exclude='data' --exclude='output' \
   --exclude='.venv' \
   -czf "$HOME/$ARCHIVE_FOLDER/$SN-backup.tar.gz" \
   -C $HOME \
@@ -586,10 +595,10 @@ if [[ $1 == "install" ]]; then
     echo "\n"
   fi
 
-#  echo "Opening Company Portal, ensure your device is compliant before continuing."
-#  open "/Applications/Company Portal.app"
-#  read -r -s -k '?Press any key to continue.'
-#  echo "\n"
+  echo "Opening Company Portal, ensure your device is compliant before continuing."
+  open "/Applications/Company Portal.app"
+  read -r -s -k '?Press any key to continue.'
+  echo "\n"
 #
 #  open "/Applications/OneDrive.app"
 #  echo "Opening OneDrive, log into your Office 365 account before continuing."
@@ -647,7 +656,7 @@ if [[ $1 == "update" ]]; then
   brew upgrade
   check-poetry
   poetry self update
-  check-useryml
+  # check-useryml
   check-become-password
   poetry run ansible-playbook local.yml -K
   exit 1
@@ -656,7 +665,7 @@ fi
 if [[ $1 == "noupdate" ]]; then
   prune-logs
   check-become-password
-  check-useryml
+  # check-useryml
   poetry run ansible-playbook local.yml --skip-tags update -K
   exit 1
 fi

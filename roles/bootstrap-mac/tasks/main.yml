@@ -14,3 +14,6 @@
 
 - name: Apply PJ Environment settings
   import_tasks: pj_environment.yml
+
+- name: Apply SSH Settings
+  import_tasks: ssh.yml

@@ -1,0 +1,101 @@
+---
+- name: Determine if SSH is running
+  block:
+    - name: Use launchctl to determine if sshd is running
+      shell: launchctl list | grep ssh
+      become: yes
+      register: ssh_check
+      failed_when: false
+      changed_when: false
+    - name: Set ssh_status
+      set_fact:
+        ssh_status: "{{ ssh_check.rc }}"
+
+- name: .ssh directory
+  file:
+    path: ~/.ssh/
+    state: directory
+    mode: '0700'
+
+#- name: Generate sshkey if doesn't exist
+#  block:
+#    - name: Retrive generated sshkey password
+#      shell: security find-generic-password -a pj-sshkey-pwd -w
+#      register: pj_sshkey_pwd
+#      changed_when: false
+#      failed_when: false
+#    - name: Generate a random password for sshkey-pwd if doesn't exist
+#      shell: security add-generic-password -a pj-sshkey-pwd -s ansible -w "$(openssl rand -base64 25)"
+#      when: pj_sshkey_pwd.stdout == ''
+#    - name: Generate SSH Key if not in 1password
+#      shell: >
+#        echo "y\n" |
+#        ssh-keygen -t rsa -C "{{ host_serial }}@{{ ansible_user_id }}"
+#        -N "{{ pj_sshkey_pwd.stdout }}" -f ~/.ssh/id_rsa
+#  when: not sshkey_exists
+#  no_log: false
+
+- name: ssh config file
+  blockinfile:
+    path: ~/.ssh/config
+    block: |
+      Host gitlab.purplejay.net
+        User git
+        HostName 10.0.1.40
+        UseKeychain yes
+      Host github.com
+        User git
+        HostName github.com
+        UseKeychain yes
+    marker: "# {mark} PJ baseline ssh config #"
+    create: yes
+    mode: 0644
+
+- name: SSH Config File lockdown
+  block:
+    - name: Restrict Password Authentication
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: ^(#PasswordAuthentication|PasswordAuthentication)
+        line: PasswordAuthentication no
+    - name: Restrict Password Authentication
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: ^(#ChallengeResponseAuthentication|ChallengeResponseAuthentication)
+        line: ChallengeResponseAuthentication no
+    - name: Restrict Password Authentication
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: ^(#UsePAM|UsePAM)
+        line: UsePAM no
+    - name: Pubkey Authentication
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: ^(#PubkeyAuthentication|PubkeyAuthentication)
+        line: PubkeyAuthentication yes
+    - name: Disable Agent Forwarding
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: ^(#AllowAgentForwarding|AllowAgentForwarding)
+        line: AllowAgentForwarding no
+  become: yes
+  notify: reload ssh
+
+- name: Add ssh pubkeys to authorized_keys
+  ansible.posix.authorized_key:
+    user: "{{ ansible_user_id }}"
+    state: present
+    key: "{{ item }}"
+    path: "{{ ansible_user_dir }}/.ssh/authorized_keys"
+    manage_dir: yes
+  loop: "{{ ssh_authorized_keys }}"
+  notify: reload ssh
+
+- name: Remove ssh pubkeys to authorized_keys
+  ansible.posix.authorized_key:
+    user: "{{ ansible_user_id }}"
+    state: absent
+    key: "{{ item }}"
+    path: "{{ ansible_user_dir }}/.ssh/authorized_keys"
+  loop: "{{ ssh_authorized_keys_removed }}"
+  notify: reload ssh

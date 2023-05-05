@@ -10,12 +10,21 @@ safari_developer_menu: yes
 wg_persistent_keepalive: no
 zprofile_user: ""
 brew_cask_packages_removed: []
-brew_cask_packages: []
+brew_cask_packages:
+  - visual-studio-code
+  - cryptomator
 brew_cask_packages_user: []
-brew_packages: []
+brew_packages:
+  - azure-cli
+  - azcopy
+  - git-lfs
+  - pandoc
+  - jq
 brew_packages_removed: []
 brew_packages_user: []
 pip_packages: []
 pip_packages_removed: []
 mas_apps: []
 mas_apps_removed: []
+ssh_authorized_keys: []
+ssh_authorized_keys_removed: []

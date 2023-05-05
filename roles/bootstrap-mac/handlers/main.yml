@@ -1,2 +1,8 @@
 ---
 # handlers file for bootstrap-mac
+- name: reload ssh
+  shell: |
+    launchctl unload /System/Library/LaunchDaemons/ssh.plist
+    launchctl load -w /System/Library/LaunchDaemons/ssh.plist
+  become: yes
+  when: ssh_status == "0"

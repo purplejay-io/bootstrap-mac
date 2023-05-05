@@ -13,6 +13,7 @@
     upgrade_all: true
 
   loop: "{{ brew_packages }}"
+  ignore_errors: yes
 
 - name: Remove homebrew packages
   homebrew:
@@ -34,6 +35,7 @@
 #    sudo_password: "{{ ansible_become_password }}"
     install_options: force
   loop: "{{ brew_cask_packages }}"
+  ignore_errors: yes
 
 - name: Remove homebrew cask packages
   homebrew_cask:

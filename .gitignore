@@ -15,3 +15,4 @@ collections/*
 op_create.sh
 stderr.txt
 stdout.txt
+poetry.lock

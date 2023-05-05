@@ -100,6 +100,8 @@
       }
       
       alias typora="open -a typora"
+      alias fde="sudo fdesetup authrestart"
+      alias dns="sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder"
     path: $HOME/.zprofile
     marker: "### {mark} PJ zprofile baseline ###"
     create: yes
