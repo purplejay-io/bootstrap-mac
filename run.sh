@@ -121,12 +121,12 @@ function install-bootstrapmac {
     fi
 
     if [[ $BOOTSTRAP_MAC_REPO == 1 ]]; then
-#      mkdir -p "$HOME"/.pj
-#      git clone git@gitlab.purplejay.net:purple-jay/bootstrap-mac.git $BOOTSTRAP_MAC_PATH
-#      BOOTSTRAP_MAC_REPO=$(test -d $HOME/.pj/bootstrap-mac/.git/;echo $?)
-      echo "Bootstrap-mac was not found in ~/.pj/bootstrap-mac/"
-      echo "Please follow the instructions and try again."
-      exit 1
+      mkdir -p "$HOME"/.pj
+      git clone git@gitlab.purplejay.net:purple-jay/bootstrap-mac.git $BOOTSTRAP_MAC_PATH
+      BOOTSTRAP_MAC_REPO=$(test -d $HOME/.pj/bootstrap-mac/.git/;echo $?)
+#      echo "Bootstrap-mac was not found in ~/.pj/bootstrap-mac/"
+#      echo "Please follow the instructions and try again."
+#      exit 1
     else
       cd $BOOTSTRAP_MAC_PATH || exit
       git reset --hard HEAD
@@ -187,8 +187,8 @@ function install-apps {
   install-python
   install-poetry
 #  install-o365apps
-  install-op
-  install-op-cli
+#  install-op
+#  install-op-cli
 }
 
 function check-dir {
