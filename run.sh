@@ -122,7 +122,7 @@ function install-bootstrapmac {
 
     if [[ $BOOTSTRAP_MAC_REPO == 1 ]]; then
       mkdir -p "$HOME"/.pj
-      git clone git@gitlab.purplejay.net:purple-jay/bootstrap-mac.git $BOOTSTRAP_MAC_PATH
+      git clone https://github.com/purplejay-io/bootstrap-mac.git $BOOTSTRAP_MAC_PATH
       BOOTSTRAP_MAC_REPO=$(test -d $HOME/.pj/bootstrap-mac/.git/;echo $?)
 #      echo "Bootstrap-mac was not found in ~/.pj/bootstrap-mac/"
 #      echo "Please follow the instructions and try again."
