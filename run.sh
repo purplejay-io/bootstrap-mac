@@ -54,7 +54,7 @@ function install-homebrew {
     HOMEBREW_INSTALLED=$(test -f $HOMEBREW_PATH/bin/brew;echo $?)
     if [[ $(uname -m) == 'arm64' ]]; then
       (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile
-    else
+    fi
   fi
   if [[ $HOMEBREW_INSTALLED != 0 ]]; then
     echo "function: install-homebrew"

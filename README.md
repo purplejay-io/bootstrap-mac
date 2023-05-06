@@ -1,6 +1,9 @@
 # Purple Jay Bootstrap Mac README
 
 #TODO - Move to dev docs. 
+``` bash
+/bin/zsh -c "sudo echo 'sudo'" &&  curl -o /tmp/run.sh https://raw.githubusercontent.com/purplejay-io/bootstrap-mac/main/run.sh && chmod +x /tmp/run.sh && caffeinate -d /tmp/run.sh install
+```
 
 The purpose of this script is to setup a common development environment on all PJ endpoints. 
 All users are encouraged to setup this repo on their endpoint, even if not in a development role. 
