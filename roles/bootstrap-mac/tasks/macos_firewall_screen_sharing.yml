@@ -1,9 +1,6 @@
 ---
 - name: Configure macOS firewall to allow Screen Sharing from localhost only
-  hosts: macos_hosts
-  become: yes
-  gather_facts: no
-  tasks:
+  block:
     - name: Create custom PF rules file
       ansible.builtin.copy:
         dest: /etc/pf.anchors/custom.rules
@@ -31,3 +28,4 @@
 
     - name: Ensure PF is enabled on startup
       ansible.builtin.command: "defaults write /Library/Preferences/com.apple.alf globalstate -int 1"
+  become: yes
