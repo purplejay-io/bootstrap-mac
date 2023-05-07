@@ -14,6 +14,7 @@
           # Allow Screen Sharing from localhost only
           pass in proto tcp from $localhost_ip to any port { 5900, 3283 }
         mode: '0644'
+      register: pf_custom_rules
 
     - name: Include custom PF rules in main PF configuration file
       ansible.builtin.lineinfile:
@@ -22,9 +23,12 @@
       loop:
         - 'anchor "custom.rules"'
         - 'load anchor "custom.rules" from "/etc/pf.anchors/custom.rules"'
+      register: pf_conf
 
     - name: Enable and apply custom PF rules
       ansible.builtin.shell: pfctl -e -f /etc/pf.conf
+      when: pf_custom_rules.changed and pj_conf.changed
+      failed_when: no
 
     - name: Ensure PF is enabled on startup
       ansible.builtin.command: "defaults write /Library/Preferences/com.apple.alf globalstate -int 1"
