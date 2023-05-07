@@ -36,13 +36,12 @@ for line in pmset_settings.split('\n'):
         key, value = line.split()
         settings[current_profile][key] = int(value)
 
+schedule_profile = current_profile
+settings[current_profile] = []
 for line in pmset_schedule.split('\n'):
     line = line.strip().strip(":")
     if line == "Scheduled power events":
         break
-    elif line in schedule_profile:
-        current_profile = line
-        settings[current_profile] = []
     elif current_profile:
         scheduled_event: dict = check_schedule(line)
         if scheduled_event:
