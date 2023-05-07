@@ -120,3 +120,6 @@
 ##      when: op_check.stderr
 #  when: opconfig_exist
 
+- name: Get macOS Hardware UUID
+  shell: system_profiler SPHardwareDataType | awk '/UUID/ { print $NF }'
+  register: mac_UUID
