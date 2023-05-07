@@ -17,3 +17,11 @@
 
 - name: Apply SSH Settings
   import_tasks: ssh.yml
+  when: harden_ssh
+
+- name: Protect Screen Sharing to only localhost
+  import_tasks: macos_firewall_screen_sharing.yml
+  when: protect_screen_sharing
+
+- name: Power settings for macOS
+  import_tasks: macos_power_settings.yml

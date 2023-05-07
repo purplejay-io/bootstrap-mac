@@ -1,0 +1,33 @@
+---
+- name: Configure macOS firewall to allow Screen Sharing from localhost only
+  hosts: macos_hosts
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: Create custom PF rules file
+      ansible.builtin.copy:
+        dest: /etc/pf.anchors/custom.rules
+        content: |
+          # Define localhost
+          localhost_ip = "127.0.0.1"
+
+          # Block incoming Screen Sharing traffic
+          block in proto tcp from any to any port { 5900, 3283 }
+
+          # Allow Screen Sharing from localhost only
+          pass in proto tcp from $localhost_ip to any port { 5900, 3283 }
+        mode: '0644'
+
+    - name: Include custom PF rules in main PF configuration file
+      ansible.builtin.lineinfile:
+        path: /etc/pf.conf
+        line: '{{ item }}'
+      loop:
+        - 'anchor "custom.rules"'
+        - 'load anchor "custom.rules" from "/etc/pf.anchors/custom.rules"'
+
+    - name: Enable and apply custom PF rules
+      ansible.builtin.shell: pfctl -e -f /etc/pf.conf
+
+    - name: Ensure PF is enabled on startup
+      ansible.builtin.command: "defaults write /Library/Preferences/com.apple.alf globalstate -int 1"

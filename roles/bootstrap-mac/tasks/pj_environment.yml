@@ -1,10 +1,10 @@
 ---
 # zprofile baseline
-- name: Ensure jetbrains dir exist
-  file:
-    path: ~/.jetbrains
-    state: directory
-    mode: '0755'
+#- name: Ensure jetbrains dir exist
+#  file:
+#    path: ~/.jetbrains
+#    state: directory
+#    mode: '0755'
 
 - name: Ensure git dir exist
   file:
@@ -18,12 +18,19 @@
 #    state: absent
 #
 
+#- name: zprofile baseline for Apple Silicon
+#  blockinfile:
+#    block: |
+#      eval "$(/opt/homebrew/bin/brew shellenv)"
+#    path: $HOME/.zprofile
+#    marker: "### {mark} PJ zprofile apple silicon baseline ###"
+#    create: yes
+#  when: ansible_architecture == 'arm64'
+
 - name: zprofile baseline for Apple Silicon
-  blockinfile:
-    block: |
-      eval "$(/opt/homebrew/bin/brew shellenv)"
+  lineinfile:
+    line: eval "$(/opt/homebrew/bin/brew shellenv)"
     path: $HOME/.zprofile
-    marker: "### {mark} PJ zprofile apple silicon baseline ###"
     create: yes
   when: ansible_architecture == 'arm64'
 
@@ -37,8 +44,6 @@
       
       alias python3="$HOMEBREW_PATH/bin/python3"
       alias python="python3"
-
-      export PATH=~/.jetbrains:$PATH
       
       function pj-update {
         cd ~/.pj/bootstrap-mac
@@ -95,9 +100,6 @@
           rm -f poetry.lock
           poetry install
       }
-      function reset-dns {
-          sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder
-      }
       
       alias typora="open -a typora"
       alias fde="sudo fdesetup authrestart"
@@ -127,50 +129,58 @@
 #    state: absent
 #  become: yes
 
-#- name: Trackpad 3 Finger Drag
-#  community.general.osx_defaults:
-#    domain: com.apple.AppleMultitouchTrackpad
-#    key: TrackpadThreeFingerDrag
-#    type: int
-#    value: "{{ three_finger_drag|int }}"
-#    state: present
-#
-#- name: Trackpad Single Touch Tap - AppleMultitouchTrackpad
-#  community.general.osx_defaults:
-#    domain: com.apple.AppleMultitouchTrackpad
-#    key: Clicking
-#    type: int
-#    value: "{{ single_touch_tap|int }}"
-#    state: present
-#
-#- name: Trackpad Single Touch Tap - AppleBluetoothMultitouch
-#  community.general.osx_defaults:
-#    domain: com.apple.driver.AppleBluetoothMultitouch.trackpad
-#    key: Clicking
-#    type: int
-#    value: "{{ single_touch_tap|int }}"
-#    state: present
-#
-#- name: Finder search within current folder
-#  community.general.osx_defaults:
-#    domain: com.apple.finder
-#    key: FXDefaultSearchScope
-#    type: string
-#    value: "{{ search_folder }}"
-#    state: present
-#
-#- name: Finder Show Status Bar
-#  community.general.osx_defaults:
-#    domain: com.apple.finder
-#    key: ShowStatusBar
-#    type: int
-#    value: "{{ show_status_bar|int }}"
-#    state: present
-#
-#- name: Safari show Developer Menu
-#  community.general.osx_defaults:
-#    domain: com.apple.Safari
-#    key: IncludeInternalDebugMenu
-#    type: bool
-#    value: "{{ safari_developer_menu }}"
-#    state: present
+- name: Trackpad 3 Finger Drag
+  community.general.osx_defaults:
+    domain: com.apple.AppleMultitouchTrackpad
+    key: TrackpadThreeFingerDrag
+    type: int
+    value: "{{ three_finger_drag|int }}"
+    state: present
+
+- name: Trackpad Single Touch Tap - AppleMultitouchTrackpad
+  community.general.osx_defaults:
+    domain: com.apple.AppleMultitouchTrackpad
+    key: Clicking
+    type: int
+    value: "{{ single_touch_tap|int }}"
+    state: present
+
+- name: Trackpad Single Touch Tap - AppleBluetoothMultitouch
+  community.general.osx_defaults:
+    domain: com.apple.driver.AppleBluetoothMultitouch.trackpad
+    key: Clicking
+    type: int
+    value: "{{ single_touch_tap|int }}"
+    state: present
+
+- name: Finder search within current folder
+  community.general.osx_defaults:
+    domain: com.apple.finder
+    key: FXDefaultSearchScope
+    type: string
+    value: "{{ search_folder }}"
+    state: present
+
+- name: Finder Show Status Bar
+  community.general.osx_defaults:
+    domain: com.apple.finder
+    key: ShowStatusBar
+    type: int
+    value: "{{ show_status_bar|int }}"
+    state: present
+
+- name: Default Finder Location
+  community.general.osx_defaults:
+    domain: com.apple.finder
+    key: NewWindowTarget
+    type: string
+    value: "{{ new_window_target }}"
+    state: present
+
+- name: Safari show Developer Menu
+  community.general.osx_defaults:
+    domain: com.apple.Safari
+    key: IncludeInternalDebugMenu
+    type: bool
+    value: "{{ safari_developer_menu }}"
+    state: present

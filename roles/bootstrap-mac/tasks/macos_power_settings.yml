@@ -1,0 +1,77 @@
+---
+- name: Check current state of pmset
+  command:
+    cmd: python3 tools/pmset_check.py
+  register: current_sleep_settings
+  changed_when: false
+
+- name: Check current sleep settings for AC power
+  ansible.builtin.command:
+    cmd: "pmset -g custom | grep 'sleep'"
+  register: current_sleep_settings
+  changed_when: false
+
+- name: Convert JSON output to Ansible variables
+  set_fact:
+    power_settings: "{{ current_sleep_settings.stdout | from_json }}"
+
+- name: Disable auto sleep while connected to power using pmset
+  ansible.builtin.command:
+    cmd: "pmset -c sleep 0"
+  when: power_settings['AC Power']['sleep'] not 0 and prevent_auto_sleep
+  become: yes
+
+- name: Disable disk sleep while connected to power using pmset
+  ansible.builtin.command:
+    cmd: "pmset -c disksleep 0"
+  when: power_settings['AC Power']['disksleep'] not 0 and prevent_disk_sleep
+  become: yes
+
+- name: Autostart on power restore disk sleep while connected to power using pmset
+  ansible.builtin.command:
+    cmd: "pmset -c autorestart 1"
+  when: power_settings['AC Power']['autorestart'] is defined and power_settings['AC Power']['autorestart'] not 0 and autorestart
+  become: yes
+
+- name: Wakeup on network activity using pmset
+  ansible.builtin.command:
+    cmd: "pmset -c womp 1"
+  when: power_settings['AC Power']['womp'] not 1 and wake_network_activity
+  become: yes
+
+# This is a very ridged implementation
+- name: Determine if sleep has been scheduled
+  set_fact:
+    sleep_scheduled: "{{ power_settings['Repeating power events'] | selectattr('event_type', 'equalto', 'sleep') | list}}"
+  when: power_settings['Repeating power events'] is defined
+- name: Reapply pmset schedule if Sleep not already set
+  set_fact:
+    reapply_schedule: yes
+  when: sleep_scheduled | length == 0 and auto_sleep_schedule
+
+- name: Determine if wakepoweron has been scheduled
+  set_fact:
+    wakepoweron_scheduled: "{{ power_settings['Repeating power events'] | selectattr('event_type', 'equalto', 'wakepoweron') | list}}"
+  when: power_settings['Repeating power events'] is defined
+- name: Reapply pmset schedule if Power On not already set
+  set_fact:
+    reapply_schedule: yes
+  when: wakepoweron_scheduled | length == 0 and auto_wake_poweron_schedule
+
+#- name: Determine if pmset schedule needs to be reapplied
+#  block:
+#    - name: Sleep Scheduled
+#      set_fact:
+#        reapply_schedule: yes
+#      when: power_settings['Repeating power events'][0]['event_type'] not 'sleep'
+#    - name: Sleep time scheduled
+#      set_fact:
+#        reapply_schedule: yes
+#      when: power_settings['Repeating power events'][0]['time'] not s
+#  when: power_settings['Repeating power events'] is defined and auto_sleep
+
+- name: Apply pmset schedule if needed
+  command:
+    cmd: "pmset repeat {{ auto_wake_poweron_schedule_command }} {{ auto_sleep_schedule_command }}"
+  become: yes
+  when: reapply_schedule
