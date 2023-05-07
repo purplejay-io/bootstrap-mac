@@ -1,7 +1,6 @@
 ---
 - name: Check current state of pmset
-  command:
-    cmd: python3 tools/pmset_check.py
+  shell: /usr/bin/python3 tools/pmset_check.py
   register: current_sleep_settings
   changed_when: false
 
