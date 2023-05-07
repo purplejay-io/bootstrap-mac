@@ -36,16 +36,15 @@ for line in pmset_settings.split('\n'):
         key, value = line.split()
         settings[current_profile][key] = int(value)
 
-schedule_profile = current_profile
-settings[current_profile] = []
+settings[schedule_profile] = []
 for line in pmset_schedule.split('\n'):
     line = line.strip().strip(":")
     if line == "Scheduled power events":
         break
-    elif current_profile:
+    else:
         scheduled_event: dict = check_schedule(line)
         if scheduled_event:
-            settings[current_profile].append(scheduled_event)
+            settings[schedule_profile].append(scheduled_event)
 
 json_output = json.dumps(settings, indent=2)
 print(json_output)
