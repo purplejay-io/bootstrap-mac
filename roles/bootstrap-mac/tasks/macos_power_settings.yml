@@ -4,12 +4,6 @@
   register: current_sleep_settings
   changed_when: false
 
-- name: Check current sleep settings for AC power
-  ansible.builtin.command:
-    cmd: "pmset -g custom | grep 'sleep'"
-  register: current_sleep_settings
-  changed_when: false
-
 - name: Convert JSON output to Ansible variables
   set_fact:
     power_settings: "{{ current_sleep_settings.stdout | from_json }}"
