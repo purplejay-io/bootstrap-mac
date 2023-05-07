@@ -19,7 +19,7 @@
 
 - name: Set json fact for current UUID Power Manager
   set_fact:
-    mac_UUID_PowerManagement_defaults: "{{ mac_UUID_PowerManagement_defaults_raw.stdout | from_json }}"
+    mac_UUID_PowerManagement_defaults: "{{ current_powermanagement_settings.stdout | from_json }}"
   when: current_powermanagement_settings.stdout is defined
 
 - name: Set System Sleep Timer for UUID Power Manager
