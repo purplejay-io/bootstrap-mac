@@ -207,6 +207,14 @@ function check-useryml {
   fi
 }
 
+function check-corporateyml {
+  if [[ -f /tmp/corporate.yml ]]; then
+    echo "corporate.yml was found in tmp directory, will sync with bootstrap-mac if version newer."
+    echo "\n"
+    rsync -uq /tmp/corporate.yml $BOOTSTRAP_MAC_PATH/vars/corporate.yml
+  fi
+}
+
 #function check-keychain-password {
 #  ANSIBLE_KEYCHAIN_PASS=1
 #  ANSIBLE_KEYCHAIN_PASS_CHECK=$(security find-generic-password -a pj-bootstrap-ansible -w)
@@ -271,6 +279,9 @@ function check-ansible-readiness {
 #  fi
   if [[ ! -f vars/user.yml ]]; then
     echo "---" > vars/user.yml
+  fi
+  if [[ ! -f vars/corporate.yml ]]; then
+    echo "---" > vars/corporate.yml
   fi
 
   # Check Poetry
@@ -656,6 +667,7 @@ if [[ $1 == "update" ]]; then
   brew upgrade
   check-poetry
   poetry self update
+  check-corporateyml
   # check-useryml
   check-become-password
   poetry run ansible-playbook local.yml -K
@@ -665,6 +677,7 @@ fi
 if [[ $1 == "noupdate" ]]; then
   prune-logs
   check-become-password
+  check-corporateyml
   # check-useryml
   poetry run ansible-playbook local.yml --skip-tags update -K
   exit 1
