@@ -33,6 +33,10 @@
   become: yes
 
 # This is a very ridged implementation
+- name: Default value for reapply schedule
+  set_fact:
+    reapply_schedule: no
+
 - name: Determine if sleep has been scheduled
   set_fact:
     sleep_scheduled: "{{ power_settings['Repeating power events'] | selectattr('event_type', 'equalto', 'sleep') | list}}"
