@@ -19,12 +19,12 @@
 - name: Set System Sleep Timer for UUID Power Manager
   shell: defaults write /Library/Preferences/com.apple.PowerManagement.{{ mac_UUID }}.plist "AC Power" -dict-add "System Sleep Timer"  0
   become: yes
-  when: mac_UUID_PowerManagement_defaults['System Sleep Timer'] is defined and mac_UUID_PowerManagement_defaults['System Sleep Timer'] != 0
+  when: mac_UUID_PowerManagement_defaults['System Sleep Timer'] is not defined or mac_UUID_PowerManagement_defaults['System Sleep Timer'] != 0
 
 - name: Set Display Sleep Timer for UUID Power Manager
   shell: defaults write /Library/Preferences/com.apple.PowerManagement.{{ mac_UUID }}.plist "AC Power" -dict-add "Display Sleep Timer"  0
   become: yes
-  when: mac_UUID_PowerManagement_defaults['Display Sleep Timer'] is defined and mac_UUID_PowerManagement_defaults['Display Sleep Timer'] != 0
+  when: mac_UUID_PowerManagement_defaults['Display Sleep Timer'] is not defined or mac_UUID_PowerManagement_defaults['Display Sleep Timer'] != 0
 
 - name: Check current state of pmset
   shell: /usr/bin/python3 tools/pmset_check.py

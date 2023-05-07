@@ -123,3 +123,4 @@
 - name: Get macOS Hardware UUID
   shell: system_profiler SPHardwareDataType | awk '/UUID/ { print $NF }'
   register: mac_UUID
+  changed_when: no

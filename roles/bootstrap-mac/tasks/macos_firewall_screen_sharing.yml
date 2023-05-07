@@ -27,9 +27,10 @@
 
     - name: Enable and apply custom PF rules
       ansible.builtin.shell: pfctl -e -f /etc/pf.conf
-      when: pf_custom_rules.changed and pj_conf.changed
+      when: pf_custom_rules.changed and pj_conf.results | selectattr('changed') | list | count > 0
       failed_when: no
 
     - name: Ensure PF is enabled on startup
       ansible.builtin.command: "defaults write /Library/Preferences/com.apple.alf globalstate -int 1"
+      when: pf_custom_rules.changed and pj_conf.results | selectattr('changed') | list | count > 0
   become: yes
