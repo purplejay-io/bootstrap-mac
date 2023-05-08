@@ -79,7 +79,7 @@
         regexp: ^(#AllowAgentForwarding|AllowAgentForwarding)
         line: AllowAgentForwarding no
   become: yes
-  notify: reload ssh
+  notify: User Restart
 
 - name: Add ssh pubkeys to authorized_keys
   ansible.posix.authorized_key:
@@ -89,7 +89,7 @@
     path: "{{ ansible_user_dir }}/.ssh/authorized_keys"
     manage_dir: yes
   loop: "{{ ssh_authorized_keys }}"
-  notify: reload ssh
+  notify: User Restart
 
 - name: Remove ssh pubkeys to authorized_keys
   ansible.posix.authorized_key:
@@ -98,4 +98,4 @@
     key: "{{ item }}"
     path: "{{ ansible_user_dir }}/.ssh/authorized_keys"
   loop: "{{ ssh_authorized_keys_removed }}"
-  notify: reload ssh
+  notify: User Restart
