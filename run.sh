@@ -359,7 +359,7 @@ function create-userbackup {
   --exclude='.venv' \
   -czf "$HOME/$ARCHIVE_FOLDER/$SN-backup.tar.gz" \
   -C $HOME \
-  git/ .pj/bootstrap-mac/vars/user.yml .ssh/
+  git/ .pj/bootstrap-mac/vars/user.yml .ssh/ "Library/Containers/com.microsoft.rdc.macos/Data/Library/Application Support/com.microsoft.rdc.macos"
 }
 
 function check-poetry {
