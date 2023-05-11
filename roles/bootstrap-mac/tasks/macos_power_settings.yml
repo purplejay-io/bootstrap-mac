@@ -41,16 +41,16 @@
   set_fact:
     power_settings: "{{ current_sleep_settings.stdout | from_json }}"
 
+#- name: Disable disk sleep while connected to power using pmset
+#  ansible.builtin.command:
+#    cmd: "pmset -c disksleep 0"
+#  when: power_settings['AC Power']['disksleep'] != 0 and prevent_disk_sleep
+#  become: yes
+
 - name: Disable auto sleep while connected to power using pmset
   ansible.builtin.command:
-    cmd: "pmset -c sleep 0"
+    cmd: "pmset -c displaysleep 10 sleep 0"
   when: power_settings['AC Power']['sleep'] != 0 and prevent_auto_sleep
-  become: yes
-
-- name: Disable disk sleep while connected to power using pmset
-  ansible.builtin.command:
-    cmd: "pmset -c disksleep 0"
-  when: power_settings['AC Power']['disksleep'] != 0 and prevent_disk_sleep
   become: yes
 
 - name: Autostart on power restore disk sleep while connected to power using pmset
