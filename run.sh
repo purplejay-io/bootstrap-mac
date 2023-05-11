@@ -676,6 +676,7 @@ if [[ $1 == "update" ]]; then
 fi
 
 if [[ $1 == "check" ]]; then
+  check-corporateyml
   poetry run ansible-playbook local.yml -K --diff --check
   exit 1
 fi
