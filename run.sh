@@ -211,7 +211,8 @@ function check-corporateyml {
   if [[ -f /tmp/corporate.yml ]]; then
     echo "corporate.yml was found in tmp directory, will sync with bootstrap-mac if version newer."
     echo "\n"
-    rsync -uq /tmp/corporate.yml $BOOTSTRAP_MAC_PATH/vars/corporate.yml
+    # rsync -uq /tmp/corporate.yml $BOOTSTRAP_MAC_PATH/vars/corporate.yml
+    cp /tmp/corporate.yml $BOOTSTRAP_MAC_PATH/vars/corporate.yml
   fi
 }
 
