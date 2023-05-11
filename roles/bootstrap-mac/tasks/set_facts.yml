@@ -69,6 +69,7 @@
     - name: Set host_serial
       set_fact:
         host_serial: "{{content_of_mac_serial_num.stdout}}"
+  check_mode: no
 
 #- name: SSH Key Exist
 #  block:
@@ -124,3 +125,4 @@
   shell: system_profiler SPHardwareDataType | awk '/UUID/ { print $NF }'
   register: mac_UUID
   changed_when: no
+  check_mode: no
