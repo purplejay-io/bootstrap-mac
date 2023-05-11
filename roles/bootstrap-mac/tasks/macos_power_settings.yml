@@ -16,6 +16,7 @@
   register: current_powermanagement_settings
   changed_when: false
   when: mac_UUID_PowerManagement.stat.exists
+  check_mode: no
 
 - name: Set json fact for current UUID Power Manager
   set_fact:
@@ -36,10 +37,12 @@
   shell: /usr/bin/python3 tools/pmset_check.py
   register: current_sleep_settings
   changed_when: false
+  check_mode: no
 
 - name: Convert JSON output to Ansible variables
   set_fact:
     power_settings: "{{ current_sleep_settings.stdout | from_json }}"
+  when: current_sleep_settings is defined
 
 #- name: Disable disk sleep while connected to power using pmset
 #  ansible.builtin.command:

@@ -677,6 +677,7 @@ fi
 
 if [[ $1 == "check" ]]; then
   check-corporateyml
+  check-become-password
   poetry run ansible-playbook local.yml -K --diff --check
   exit 1
 fi
