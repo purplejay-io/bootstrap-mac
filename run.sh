@@ -675,6 +675,11 @@ if [[ $1 == "update" ]]; then
   exit 1
 fi
 
+if [[ $1 == "check" ]]; then
+  poetry run ansible-playbook local.yml -K --diff --check
+  exit 1
+fi
+
 if [[ $1 == "noupdate" ]]; then
   prune-logs
   check-become-password
