@@ -54,6 +54,9 @@ function install-homebrew {
     HOMEBREW_INSTALLED=$(test -f $HOMEBREW_PATH/bin/brew;echo $?)
     if [[ $(uname -m) == 'arm64' ]]; then
       (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile
+    else
+      sudo chown -R $(whoami) /usr/local/share/zsh /usr/local/share/zsh/site-functions
+      chmod u+w /usr/local/share/zsh /usr/local/share/zsh/site-functions
     fi
   fi
   if [[ $HOMEBREW_INSTALLED != 0 ]]; then
@@ -66,7 +69,7 @@ function install-homebrew {
 function install-python {
   if [[ $HOMEBREW_INSTALLED == 0 && $PYTHON_INSTALLED == 1 ]]; then
     brew install python3
-    python3 -m pip install pip --upgrade
+    $HOMEBREW_PATH/bin/python3 -m pip install pip --upgrade
     PYTHON_INSTALLED=$(test -f $HOMEBREW_PATH/bin/python3;echo $?)
   fi
   if [[ $PYTHON_INSTALLED != 0 ]]; then
