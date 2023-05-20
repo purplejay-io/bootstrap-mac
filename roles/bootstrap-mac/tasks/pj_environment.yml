@@ -153,13 +153,13 @@
     value: "{{ single_touch_tap|int }}"
     state: present
 
-- name: Finder search within current folder
-  community.general.osx_defaults:
-    domain: com.apple.finder
-    key: FXDefaultSearchScope
-    type: string
-    value: "{{ search_folder }}"
-    state: present
+#- name: Finder search within current folder
+#  community.general.osx_defaults:
+#    domain: com.apple.finder
+#    key: FXDefaultSearchScope
+#    type: string
+#    value: "{{ search_folder }}"
+#    state: present
 
 - name: Finder Show Status Bar
   community.general.osx_defaults:

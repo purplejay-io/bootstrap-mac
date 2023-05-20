@@ -80,6 +80,9 @@ function install-poetry {
   if [[ $HOMEBREW_INSTALLED == 0  && $PYTHON_INSTALLED == 0 && $POETRY_INSTALLED == 1 ]]; then
     curl -sSL https://install.python-poetry.org | python3 -
     POETRY_INSTALLED=$(test -f $HOME/.local/bin/poetry;echo $?)
+    if [[ $(uname -m) == 'x86_64' ]]; then
+      sudo ln -s /usr/local/bin/python3 /usr/local/bin/python
+    fi
   fi
   if [[ $POETRY_INSTALLED != 0 ]]; then
     echo "function: install-poetry"
