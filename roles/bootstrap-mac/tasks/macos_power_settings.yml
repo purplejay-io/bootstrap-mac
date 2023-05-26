@@ -27,11 +27,12 @@
 #  become: yes
 #  when: mac_UUID_PowerManagement_defaults['Display Sleep Timer'] is not defined or mac_UUID_PowerManagement_defaults['Display Sleep Timer'] != 0
 
-# sudo defaults write /Library/Preferences/com.apple.screensaver loginWindowIdleTime 0
+# sudo defaults write -currenthost /Library/Preferences/com.apple.screensaver loginWindowIdleTime 0
+# sudo defaults read -currenthost /Library/Preferences/com.apple.screensaver idleTime
 - name: Disable Screen Saver if enabled
   community.general.osx_defaults:
     domain: /Library/Preferences/com.apple.screensaver
-    key: loginWindowIdleTime
+    key: idleTime
     host: currentHost
     type: int
     value: 0
