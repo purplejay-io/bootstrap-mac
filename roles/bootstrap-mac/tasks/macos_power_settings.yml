@@ -1,37 +1,42 @@
 ---
 # https://apple.stackexchange.com/questions/350488/screen-saver-stuck-on-how-to-escape
-- name: Check if UUID com.apple.PowerManagement file created
-  stat:
-    path: "/Library/Preferences/com.apple.PowerManagement.{{ mac_UUID.stdout }}.plist"
-  register: mac_UUID_PowerManagement
-
-#- name: Pull the current defaults values for UUID PowerManager
-#  shell: defaults read /Library/Preferences/com.apple.PowerManagement.{{ mac_UUID.stdout }}.plist "AC Power"
-#  register: mac_UUID_PowerManagement_defaults_raw
+#- name: Check if UUID com.apple.PowerManagement file created
+#  stat:
+#    path: "/Library/Preferences/com.apple.PowerManagement.{{ mac_UUID.stdout }}.plist"
+#  register: mac_UUID_PowerManagement
+#
+#- name: Check current state of pmset
+#  shell: /usr/bin/python3 tools/defaults_plist2json.py /Library/Preferences/com.apple.PowerManagement.{{ mac_UUID.stdout }}.plist "AC Power"
+#  register: current_powermanagement_settings
+#  changed_when: false
 #  when: mac_UUID_PowerManagement.stat.exists
-#  failed_when: no
+#  check_mode: no
+#
+#- name: Set json fact for current UUID Power Manager
+#  set_fact:
+#    mac_UUID_PowerManagement_defaults: "{{ current_powermanagement_settings.stdout | from_json }}"
+#  when: current_powermanagement_settings.stdout is defined
+#
+#- name: Set System Sleep Timer for UUID Power Manager
+#  shell: defaults write /Library/Preferences/com.apple.PowerManagement.{{ mac_UUID.stdout }}.plist "AC Power" -dict-add "System Sleep Timer" 0
+#  become: yes
+#  when: mac_UUID_PowerManagement_defaults['System Sleep Timer'] is not defined or mac_UUID_PowerManagement_defaults['System Sleep Timer'] != 0
+#
+#- name: Set Display Sleep Timer for UUID Power Manager
+#  shell: defaults write /Library/Preferences/com.apple.PowerManagement.{{ mac_UUID.stdout }}.plist "AC Power" -dict-add "Display Sleep Timer" 0
+#  become: yes
+#  when: mac_UUID_PowerManagement_defaults['Display Sleep Timer'] is not defined or mac_UUID_PowerManagement_defaults['Display Sleep Timer'] != 0
 
-- name: Check current state of pmset
-  shell: /usr/bin/python3 tools/defaults_plist2json.py /Library/Preferences/com.apple.PowerManagement.{{ mac_UUID.stdout }}.plist "AC Power"
-  register: current_powermanagement_settings
-  changed_when: false
-  when: mac_UUID_PowerManagement.stat.exists
-  check_mode: no
-
-- name: Set json fact for current UUID Power Manager
-  set_fact:
-    mac_UUID_PowerManagement_defaults: "{{ current_powermanagement_settings.stdout | from_json }}"
-  when: current_powermanagement_settings.stdout is defined
-
-- name: Set System Sleep Timer for UUID Power Manager
-  shell: defaults write /Library/Preferences/com.apple.PowerManagement.{{ mac_UUID.stdout }}.plist "AC Power" -dict-add "System Sleep Timer" 0
+# sudo defaults write /Library/Preferences/com.apple.screensaver loginWindowIdleTime 0
+- name: Disable Screen Saver if enabled
+  community.general.osx_defaults:
+    domain: /Library/Preferences/com.apple.screensaver
+    key: loginWindowIdleTime
+    type: int
+    value: 0
+    state: present
   become: yes
-  when: mac_UUID_PowerManagement_defaults['System Sleep Timer'] is not defined or mac_UUID_PowerManagement_defaults['System Sleep Timer'] != 0
-
-- name: Set Display Sleep Timer for UUID Power Manager
-  shell: defaults write /Library/Preferences/com.apple.PowerManagement.{{ mac_UUID.stdout }}.plist "AC Power" -dict-add "Display Sleep Timer" 0
-  become: yes
-  when: mac_UUID_PowerManagement_defaults['Display Sleep Timer'] is not defined or mac_UUID_PowerManagement_defaults['Display Sleep Timer'] != 0
+  when: prevent_auto_sleep
 
 - name: Check current state of pmset
   shell: /usr/bin/python3 tools/pmset_check.py
