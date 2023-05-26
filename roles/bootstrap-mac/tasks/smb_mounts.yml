@@ -1,0 +1,24 @@
+---
+- name: Check if SMB Share is mounted
+  stat:
+    path: /Volumes/{{ item.name }}
+  register: smb_mount_check
+
+- name: Open SMB Share for User if not mounted
+  shell: open 'smb://{{ smb_usr }}:{{ smb_pwd }}@{{ item.hostname }}/{{ item.name }}'
+  when: not smb_mount_check.stat.exists
+
+- name: Pause for User Interaction of SMB Mount
+  pause:
+    prompt: Continue once {{ item.name }} SMB is mounted
+  when: not smb_mount_check.stat.exists
+
+- name: Add item as login items
+  shell: osascript -e 'tell application "System Events" to make login item at end with properties {path:"/Volumes/{{ item.name }}/", hidden:false}'
+  when: not smb_mount_check.stat.exists
+
+# osascript -e 'tell application "System Events" to get the name of every login item'
+- name: Pause for User Interaction of Auto Login
+  pause:
+    prompt: Continue once {{ item.name }} SMB is in auto login items
+  when: not smb_mount_check.stat.exists

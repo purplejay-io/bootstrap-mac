@@ -25,3 +25,7 @@
 
 - name: Power settings for macOS
   import_tasks: macos_power_settings.yml
+
+- name: Check SMB Mounts
+  include_tasks: smb_mounts.yml
+  loop: "{{ smb_mounts }}"
