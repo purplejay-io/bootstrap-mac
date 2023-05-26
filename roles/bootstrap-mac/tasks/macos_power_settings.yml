@@ -1,9 +1,9 @@
 ---
 # https://apple.stackexchange.com/questions/350488/screen-saver-stuck-on-how-to-escape
-#- name: Check if UUID com.apple.PowerManagement file created
-#  stat:
-#    path: "/Library/Preferences/com.apple.PowerManagement.{{ mac_UUID.stdout }}.plist"
-#  register: mac_UUID_PowerManagement
+- name: Check if UUID com.apple.PowerManagement file created
+  stat:
+    path: "/Library/Preferences/com.apple.PowerManagement.{{ mac_UUID.stdout }}.plist"
+  register: mac_UUID_PowerManagement
 
 #- name: Pull the current defaults values for UUID PowerManager
 #  shell: defaults read /Library/Preferences/com.apple.PowerManagement.{{ mac_UUID.stdout }}.plist "AC Power"
