@@ -5,7 +5,7 @@
   register: smb_mount_check
 
 - name: Open SMB Share for User if not mounted
-  shell: open 'smb://{{ smb_usr }}:{{ smb_pwd }}@{{ item.hostname }}/{{ item.name }}'
+  shell: open 'smb://{{ item.hostname }}/{{ item.name }}'
   when: not smb_mount_check.stat.exists
 
 - name: Pause for User Interaction of SMB Mount

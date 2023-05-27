@@ -39,8 +39,6 @@ auto_wake_poweron_schedule_command: ""
 #Example: wakeorpoweron MTWRFSU 08:00:00
 
 # SMB Mounts
-smb_usr: smith
-smb_pwd: john
 smb_mounts: []
 #  - name: pjstack
 #    hostname: nas.purplejay.net
