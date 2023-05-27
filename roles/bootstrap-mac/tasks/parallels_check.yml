@@ -1,0 +1,15 @@
+---
+- name: Confirm Parallels license is active
+  shell: prlsrvctl info --license --json | jq -r '.status'
+  register: parallels_license_check
+  failed_when: parallels_license_check.stdout != 'ACTIVE'
+  changed_when: no
+
+- name: Check if USB is set to host
+  shell: prlsrvctl info -j | jq -r '."External device auto connect"'
+  register: parallels_host_usb
+  changed_when: no
+
+- name: Set USB to Host
+  shell: prlsrvctl set --external-dev-auto-connect host
+  when: parallels_host_usb.stdout != 'host'

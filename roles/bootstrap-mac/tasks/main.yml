@@ -29,3 +29,7 @@
 - name: Check SMB Mounts
   include_tasks: smb_mounts.yml
   loop: "{{ smb_mounts }}"
+
+- name: Check Parallels
+  import_tasks: parallels_check.yml
+  when: check_parallels

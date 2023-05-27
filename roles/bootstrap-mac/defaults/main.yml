@@ -7,6 +7,7 @@ show_status_bar: yes
 new_window_target: PfDe
 safari_developer_menu: yes
 zprofile_user: ""
+
 # Packages
 brew_cask_packages_removed: []
 brew_cask_packages: []
@@ -18,11 +19,13 @@ pip_packages: []
 pip_packages_removed: []
 mas_apps: []
 mas_apps_removed: []
+
 # Hardening
 ssh_authorized_keys: []
 ssh_authorized_keys_removed: []
 harden_ssh: no
 protect_screen_sharing: no
+
 # Power Management
 prevent_auto_sleep: no
 prevent_disk_sleep: no
@@ -34,6 +37,7 @@ auto_sleep_schedule_command: ""
 auto_wake_poweron_schedule: no
 auto_wake_poweron_schedule_command: ""
 #Example: wakeorpoweron MTWRFSU 08:00:00
+
 # SMB Mounts
 smb_usr: smith
 smb_pwd: john
@@ -42,3 +46,6 @@ smb_mounts: []
 #    hostname: nas.purplejay.net
 #  - name: macOS-TM
 #    hostname: nas.purplejay.net
+
+# Parallels
+check_parallels: no
