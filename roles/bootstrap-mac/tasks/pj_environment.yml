@@ -12,20 +12,10 @@
     state: directory
     mode: '0755'
 
-#- name: Remove .zprofile to avoid dups
-#  file:
-#    path: ~/.zprofile
-#    state: absent
-#
-
-#- name: zprofile baseline for Apple Silicon
-#  blockinfile:
-#    block: |
-#      eval "$(/opt/homebrew/bin/brew shellenv)"
-#    path: $HOME/.zprofile
-#    marker: "### {mark} PJ zprofile apple silicon baseline ###"
-#    create: yes
-#  when: ansible_architecture == 'arm64'
+- name: Remove old poetry preferences file
+  file:
+    path: "{{ ansible_user_dir }}/Library/Preferences/pypoetry"
+    state: absent
 
 - name: zprofile baseline for Apple Silicon
   lineinfile:
@@ -98,7 +88,7 @@
           rm -Rf $(poetry env info --path)
           rm -Rf .venv
           rm -f poetry.lock
-          poetry install
+          poetry install --no-root
       }
       
       alias typora="open -a typora"
