@@ -99,6 +99,14 @@
           prlctl restart "$vm_name"
         done <<(echo "$vm_list")
       }
+      function shutdown-vms {
+        vm_list=$(prlctl list -o name --no-header)
+        while IFS= read -r vm_name
+        do
+          echo "VM Name: $vm_name"
+          prlctl stop "$vm_name"
+        done <<(echo "$vm_list")
+      }
       alias p="prlctl"
       alias typora="open -a typora"
       alias fde="sudo fdesetup authrestart"
