@@ -10,9 +10,15 @@ zprofile_user: ""
 
 # Packages
 brew_cask_packages_removed: []
-brew_cask_packages: []
+brew_cask_packages:
+  - visual-studio-code
+  - docker
+  - jetbrains-toolbox
+  - powershell
 brew_cask_packages_user: []
-brew_packages: []
+brew_packages:
+  - node@18
+  - python@3.11
 brew_packages_removed: []
 brew_packages_user: []
 pip_packages: []
@@ -47,3 +53,6 @@ smb_mounts: []
 
 # Parallels
 check_parallels: no
+
+# Miscellaneous
+gitlab_api_token: 'please_update_user_yml'
