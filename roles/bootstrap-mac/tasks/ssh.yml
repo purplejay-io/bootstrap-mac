@@ -41,7 +41,7 @@
     block: |
       Host gitlab.purplejay.net
         User git
-        HostName 10.0.1.30
+        HostName 10.1.0.30
         UseKeychain yes
       Host github.com
         User git
