@@ -196,10 +196,10 @@
     value: "{{ new_window_target }}"
     state: present
 
-- name: Safari show Developer Menu
-  community.general.osx_defaults:
-    domain: com.apple.Safari
-    key: IncludeInternalDebugMenu
-    type: bool
-    value: "{{ safari_developer_menu }}"
-    state: present
+#- name: Safari show Developer Menu
+#  community.general.osx_defaults:
+#    domain: com.apple.Safari
+#    key: IncludeInternalDebugMenu
+#    type: bool
+#    value: "{{ safari_developer_menu }}"
+#    state: present
