@@ -126,3 +126,7 @@
   register: mac_UUID
   changed_when: no
   check_mode: no
+
+- name: set home directory
+  ansible.builtin.set_fact:
+    ansible_local_user_home_dir: "{{ lookup('env', 'HOME') }}"

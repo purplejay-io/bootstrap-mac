@@ -29,15 +29,33 @@
     block: |
       export PATH="$HOME/.LOCAL/bin:$PATH"
       
-      HOMEBREW_CHECK=$(which brew)
-      HOMEBREW_PATH=$(echo "$HOMEBREW_CHECK" | cut -d "/" -f 1-3)
+      HOMEBREW_PATH="$(brew --prefix)"
+      
+      # node
+      export PATH="$HOMEBREW_PATH/opt/node@18/bin:$PATH"
+      
+      # Python 3.11
+      export PATH="$HOMEBREW_PATH/opt/python@3.11/libexec/bin:$PATH"
       
       alias python3="$HOMEBREW_PATH/bin/python3"
       alias python="python3"
       
+      export REQUESTS_CA_BUNDLE="$HOME/python_cacert.pem"
+      export SSL_CERT_FILE="$HOME/python_cacert.pem"
+      
       function pj-update {
         cd ~/.pj/bootstrap-mac
         ./run.sh update
+      }
+      
+      function update-python-ca-store {
+        export REQUESTS_CA_BUNDLE=""
+        export SSL_CERT_FILE=""
+        python3 -m pip install certifi
+        cat $(python3 -m certifi) > ~/python_cacert.pem
+        security find-certificate -c purplejaynet-ca -p >> ~/python_cacert.pem
+        export REQUESTS_CA_BUNDLE="$HOME/python_cacert.pem"
+        export SSL_CERT_FILE="$HOME/python_cacert.pem"
       }
 
       function pj-op {
@@ -133,6 +151,11 @@
     path: $HOME/.zprofile
     marker: "### {mark} USER zprofile baseline ###"
     create: yes
+
+- name: setup npmrc files
+  template:
+    src: .npmrc
+    dest: '{{ ansible_local_user_home_dir }}'
 
 #- name: Remove sudo from pam.d
 #  lineinfile:
