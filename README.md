@@ -2,7 +2,7 @@
 
 #TODO - Move to dev docs. 
 ``` bash
-/bin/zsh -c "sudo echo 'sudo'" &&  curl -o /tmp/run.sh https://raw.githubusercontent.com/purplejay-io/bootstrap-mac/main/run.sh && chmod +x /tmp/run.sh && caffeinate -d /tmp/run.sh install
+/bin/zsh -c "sudo echo 'sudo'" &&  curl -o /tmp/run.sh https://raw.githubusercontent.com/purplejay-io/bootstrap-mac/remove-poetry/run.sh && chmod +x /tmp/run.sh && caffeinate -d /tmp/run.sh install
 ```
 
 The purpose of this script is to setup a common development environment on all PJ endpoints. 

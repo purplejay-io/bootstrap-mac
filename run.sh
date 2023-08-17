@@ -81,9 +81,9 @@ function install-python {
 
 function setup-venv {
   sudo ln -s $HOMEBREW_PATH/bin/python3 $HOMEBREW_PATH/bin/python
-  python -m venv .venv
-  . .venv/bin/activate
-  python -m pip install -r requirements.txt
+  python -m venv "$ROOT_DIR/.venv"
+  . $ROOT_DIR/.venv/bin/activate
+  python -m pip install -r $ROOT_DIR/requirements.txt
 }
 
 function install-poetry {
