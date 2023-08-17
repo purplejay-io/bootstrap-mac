@@ -2,7 +2,7 @@
 
 #TODO - Move to dev docs. 
 ``` bash
-/bin/zsh -c "sudo echo 'sudo'" &&  git clone -b remove-poetry https://github.com/purplejay-io/bootstrap-mac /tmp/bootstrap-mac && caffeinate -d /tmp/boostrap-mac/run.sh install
+/bin/zsh -c "sudo echo 'sudo'" &&  git clone -b remove-poetry https://github.com/purplejay-io/bootstrap-mac /tmp/bootstrap-mac && caffeinate -d /tmp/bootstrap-mac/run.sh install
 ```
 
 The purpose of this script is to setup a common development environment on all PJ endpoints. 
