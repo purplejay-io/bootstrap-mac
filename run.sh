@@ -680,8 +680,8 @@ if [[ $1 == "update" ]]; then
   prune-logs
   brew update
   brew upgrade
-  check-poetry
-  poetry self update
+  # check-poetry
+  # poetry self update
   check-corporateyml
   # check-useryml
   check-become-password
