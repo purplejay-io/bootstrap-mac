@@ -1,11 +1,11 @@
 ---
 # Environment
-three_finger_drag: yes
-single_touch_tap: yes
+three_finger_drag: true
+single_touch_tap: true
 search_folder: SCcf
-show_status_bar: yes
+show_status_bar: true
 new_window_target: PfDe
-safari_developer_menu: yes
+safari_developer_menu: true
 zprofile_user: ""
 
 # Packages
@@ -29,7 +29,7 @@ mas_apps_removed: []
 # Hardening
 ssh_authorized_keys: []
 ssh_authorized_keys_removed: []
-harden_ssh: no
+harden_ssh: true
 protect_screen_sharing: no
 
 # Power Management
