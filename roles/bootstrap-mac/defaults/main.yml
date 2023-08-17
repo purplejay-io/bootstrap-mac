@@ -13,12 +13,20 @@ brew_cask_packages_removed: []
 brew_cask_packages:
   - visual-studio-code
   - docker
+  - powershell
   - jetbrains-toolbox
   - powershell
+  - 1password
+  - nextcloud
+  - 1password-cli
 brew_cask_packages_user: []
 brew_packages:
   - node@18
   - python@3.11
+  - nmap
+  - tree
+  - wget
+  - jq
 brew_packages_removed: []
 brew_packages_user: []
 pip_packages: []
