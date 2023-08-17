@@ -79,11 +79,17 @@ function install-python {
   fi
 }
 
+function setup-venv {
+  sudo ln -s $HOMEBREW_PATH/bin/python3 $HOMEBREW_PATH/bin/python
+  python -m venv .venv
+  . .venv/bin/activate
+  python -m pip install -r requirements.txt
+}
+
 function install-poetry {
   if [[ $HOMEBREW_INSTALLED == 0  && $PYTHON_INSTALLED == 0 && $POETRY_INSTALLED == 1 ]]; then
     curl -sSL https://install.python-poetry.org | python3 -
     POETRY_INSTALLED=$(test -f $HOME/.local/bin/poetry;echo $?)
-    sudo ln -s $HOMEBREW_PATH/bin/python3 $HOMEBREW_PATH/bin/python
   fi
   if [[ $POETRY_INSTALLED != 0 ]]; then
     echo "function: install-poetry"
@@ -189,7 +195,7 @@ function install-o365apps {
 function install-apps {
   install-homebrew
   install-python
-  install-poetry
+#  install-poetry
 #  install-o365apps
 #  install-op
 #  install-op-cli
@@ -246,11 +252,11 @@ function check-ansible-readiness {
     echo "Python 3 must be installed before you can run bootstrap-mac"
     exit 1
   fi
-  if [[ $POETRY_INSTALLED == 1 ]]; then
-    echo "function: check-ansible-readiness"
-    echo "Poetry must be installed before you can run bootstrap-mac"
-    exit 1
-  fi
+#  if [[ $POETRY_INSTALLED == 1 ]]; then
+#    echo "function: check-ansible-readiness"
+#    echo "Poetry must be installed before you can run bootstrap-mac"
+#    exit 1
+#  fi
   if [[ $OP_INSTALLED == 1 ]]; then
     echo "function: check-ansible-readiness"
     echo "1password must be installed before you can run bootstrap-mac"
@@ -597,6 +603,8 @@ if [[ $# -gt 1 ]]; then
   display-help
 fi
 
+setup-venv
+
 if [[ $1 == "install" ]]; then
   install-apps
   install-bootstrapmac
@@ -675,14 +683,14 @@ if [[ $1 == "update" ]]; then
   check-corporateyml
   # check-useryml
   check-become-password
-  poetry run ansible-playbook local.yml -K
+  ansible-playbook local.yml -K
   exit 1
 fi
 
 if [[ $1 == "check" ]]; then
   check-corporateyml
   check-become-password
-  poetry run ansible-playbook local.yml -K --diff --check -vv
+  ansible-playbook local.yml -K --diff --check -vv
   exit 1
 fi
 
