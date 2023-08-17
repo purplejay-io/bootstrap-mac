@@ -298,12 +298,12 @@ function check-ansible-readiness {
   fi
 
   # Check Poetry
-  poetry install
-  if [[ ! -f .venv/bin/python ]]; then
-    echo "function: check-ansible-readiness"
-    echo "Poetry Virtual Enviornment was not setup correctly, try again."
-    exit 1
-  fi
+  # poetry install
+  # if [[ ! -f .venv/bin/python ]]; then
+  #   echo "function: check-ansible-readiness"
+  #   echo "Poetry Virtual Enviornment was not setup correctly, try again."
+  #   exit 1
+  # fi
 
 #  pull-ansiblecollections
 #
