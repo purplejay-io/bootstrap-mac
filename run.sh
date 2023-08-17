@@ -574,7 +574,7 @@ function pull-ansiblecollections {
   rm ca.pem pubkey.pem
 
   cd $BOOTSTRAP_MAC_PATH
-  poetry run ansible-galaxy collection install -r galaxy.yml --force
+  ansible-galaxy collection install -r galaxy.yml --force
 }
 
 
@@ -661,7 +661,7 @@ if [[ $1 == "install" ]]; then
 #  sleep 5
 
   check-become-password
-  poetry run ansible-playbook local.yml -K
+  ansible-playbook local.yml -K
 
 #  open "/Applications/1Password.app"
 #  echo "Opening 1Password, enable 'Biometric unlock for 1Password CLI' in Preferences > Developer"
@@ -701,7 +701,7 @@ if [[ $1 == "noupdate" ]]; then
   check-become-password
   check-corporateyml
   # check-useryml
-  poetry run ansible-playbook local.yml --skip-tags update -K
+  ansible-playbook local.yml --skip-tags update -K
   exit 1
 fi
 
