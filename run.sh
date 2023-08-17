@@ -5,7 +5,7 @@
 ########################################################################
 
 script_path=$(readlink -f "${BASH_SOURCE:-$0}")
-ROOT_DIR=$(dirname -f "$script_path")
+ROOT_DIR=$(dirname "$script_path")
 echo $ROOT_DIR
 
 # Is Homebrew installed correctly?
