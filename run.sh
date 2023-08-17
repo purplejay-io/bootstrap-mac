@@ -4,7 +4,8 @@
 #  Collect System Facts
 ########################################################################
 
-ROOT_DIR=$(pwd)
+ROOT_DIR=$(readlink -f "${BASH_SOURCE:-$0}")/../
+echo $ROOT_DIR
 
 # Is Homebrew installed correctly?
 if [[ $(uname -m) == 'arm64' ]]; then
