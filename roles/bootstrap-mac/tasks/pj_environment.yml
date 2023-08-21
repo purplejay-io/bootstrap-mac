@@ -109,16 +109,6 @@
           cd "$HOME/git/"
       }
 
-#      function venv {
-#          POETRY_LOCAL_CHECK=$(poetry config virtualenvs.in-project --local)
-#          if [[ $POETRY_LOCAL_CHECK != 'true' ]]; then
-#            poetry config virtualenvs.in-project true --local
-#          fi
-#          rm -Rf $(poetry env info --path)
-#          rm -Rf .venv
-#          rm -f poetry.lock
-#          poetry install --no-root
-#      }
       function venv {
           if [[ -d ".venv" ]]; then
              rm -Rf .venv
@@ -128,7 +118,7 @@
                 pip install -f requirements.txt
              fi
           fi
-      }      
+       }      
       
       function reboot-vms {
         vm_list=$(prlctl list -o name --no-header)
@@ -165,6 +155,17 @@
     path: $HOME/.zprofile
     marker: "### {mark} PJ zprofile baseline ###"
     create: yes
+
+#      function venv {
+#          POETRY_LOCAL_CHECK=$(poetry config virtualenvs.in-project --local)
+#          if [[ $POETRY_LOCAL_CHECK != 'true' ]]; then
+#            poetry config virtualenvs.in-project true --local
+#          fi
+#          rm -Rf $(poetry env info --path)
+#          rm -Rf .venv
+#          rm -f poetry.lock
+#          poetry install --no-root
+#      }
 
 - name: Additional user zprofile baseline
   blockinfile:
