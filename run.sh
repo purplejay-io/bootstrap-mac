@@ -256,20 +256,20 @@ function check-corporateyml {
   fi
 }
 
-#function check-keychain-password {
-#  ANSIBLE_KEYCHAIN_PASS=1
-#  ANSIBLE_KEYCHAIN_PASS_CHECK=$(security find-generic-password -a pj-bootstrap-ansible -w)
-#  if [[ $ANSIBLE_KEYCHAIN_PASS_CHECK == "" ]]; then
-#    security add-generic-password -a pj-bootstrap-ansible -s ansible -w "$(openssl rand -base64 25)"
-#    ANSIBLE_KEYCHAIN_PASS_CHECK=$(security find-generic-password -a pj-bootstrap-ansible -w)
-#  fi
-#  if [[ $ANSIBLE_KEYCHAIN_PASS_CHECK == "" ]]; then
-#    echo "function: check-keychain-password"
-#    echo "The ephemeral password did not get created successfully in keychain, try again"
-#    exit 1
-#  fi
-#  ANSIBLE_KEYCHAIN_PASS=0
-#}
+function check-keychain-password {
+  ANSIBLE_KEYCHAIN_PASS=1
+  ANSIBLE_KEYCHAIN_PASS_CHECK=$(security find-generic-password -a pj-bootstrap-ansible -w)
+  if [[ $ANSIBLE_KEYCHAIN_PASS_CHECK == "" ]]; then
+    security add-generic-password -a pj-bootstrap-ansible -s ansible -w "$(openssl rand -base64 25)"
+    ANSIBLE_KEYCHAIN_PASS_CHECK=$(security find-generic-password -a pj-bootstrap-ansible -w)
+  fi
+  if [[ $ANSIBLE_KEYCHAIN_PASS_CHECK == "" ]]; then
+    echo "function: check-keychain-password"
+    echo "The ephemeral password did not get created successfully in keychain, try again"
+    exit 1
+  fi
+  ANSIBLE_KEYCHAIN_PASS=0
+}
 
 function check-ansible-readiness {
   if [[ $HOMEBREW_INSTALLED == 1 ]]; then
@@ -348,10 +348,10 @@ function check-ansible-readiness {
 function check-become-password {
   BECOME_PASSWORD_CHECK=1
   # 1. Check is the ephemeral password in keychain was successfully created.
-#  check-keychain-password
-#  if [[ $ANSIBLE_KEYCHAIN_PASS == 1 ]]; then
-#    exit 1
-#  fi
+  check-keychain-password
+  if [[ $ANSIBLE_KEYCHAIN_PASS == 1 ]]; then
+    exit 1
+  fi
 
   # 2. Ensure ansible-vault can be ran
   install-bootstrapmac
