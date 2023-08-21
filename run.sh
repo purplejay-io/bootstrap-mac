@@ -692,7 +692,7 @@ if [[ $1 == "install" ]]; then
 #  sleep 5
   setup-venv
   check-become-password
-  ansible-playbook local.yml -K
+  ansible-playbook local.yml
   update-python-ca-store
 
 #  open "/Applications/1Password.app"
@@ -718,7 +718,7 @@ if [[ $1 == "update" ]]; then
   # check-useryml
   activate-venv
   check-become-password
-  ansible-playbook local.yml -K
+  ansible-playbook local.yml
   exit 1
 fi
 
@@ -726,7 +726,7 @@ if [[ $1 == "check" ]]; then
   check-corporateyml
   activate-venv
   check-become-password
-  ansible-playbook local.yml -K --diff --check -vv
+  ansible-playbook local.yml --diff --check -vv
   exit 1
 fi
 
@@ -736,14 +736,14 @@ if [[ $1 == "noupdate" ]]; then
   activate-venv
   check-become-password
   # check-useryml
-  ansible-playbook local.yml --skip-tags update -K
+  ansible-playbook local.yml --skip-tags update
   exit 1
 fi
 
 if [[ $1 == "reset-password" ]]; then
   reset-become-password
   check-become-password
-  poetry run ansible-playbook local.yml --skip-tags update
+  ansible-playbook local.yml --skip-tags update
   exit 1
 fi
 #
