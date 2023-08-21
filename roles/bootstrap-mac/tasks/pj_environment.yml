@@ -115,7 +115,7 @@
              python3 -m venv .venv
              . .venv/bin/activate
              if [[ -f "requirements.txt" ]]; then
-                pip install -f requirements.txt
+                pip install -r requirements.txt
              fi
           fi
        }
