@@ -128,16 +128,6 @@
                 pip install -f requirements.txt
              fi
           fi
-#          python3 -m venv .venv
-#          source .venv
-#          POETRY_LOCAL_CHECK=$(poetry config virtualenvs.in-project --local)
-#          if [[ $POETRY_LOCAL_CHECK != 'true' ]]; then
-#            poetry config virtualenvs.in-project true --local
-#          fi
-#          rm -Rf $(poetry env info --path)
-#          rm -Rf .venv
-#          rm -f poetry.lock
-#          poetry install --no-root
       }      
       
       function reboot-vms {
