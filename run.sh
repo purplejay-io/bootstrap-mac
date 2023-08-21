@@ -101,8 +101,19 @@ function activate-venv {
 
 function check-venv {
   if [[ -z "$VIRTUAL_ENV" ]] && [[ "$VIRTUAL_ENV" == "" ]]; then
+    echo "Something failed in activating the venv, try again."
     exit 1
   fi
+}
+
+function update-python-ca-store {
+  export REQUESTS_CA_BUNDLE=""
+  export SSL_CERT_FILE=""
+  python3 -m pip install certifi
+  cat $(python3 -m certifi) > ~/python_cacert.pem
+  security find-certificate -c "Purple Jay Root CA" -p >> ~/python_cacert.pem
+  export REQUESTS_CA_BUNDLE="$HOME/python_cacert.pem"
+  export SSL_CERT_FILE="$HOME/python_cacert.pem"
 }
 
 function install-poetry {
@@ -354,22 +365,23 @@ function check-become-password {
   cd $BOOTSTRAP_MAC_PATH
 
   # 4. If pass.yml does not exist, then ask user for it
-#  if [[ ! -f vars/pass.yml ]]; then
-#    echo -n Local Password:
-#    read -s password
-#    echo "\n"
-#    echo "---" > vars/pass.yml
-#    echo "ansible_become_password: $password" >> vars/pass.yml
-#
-#    echo `security find-generic-password -a pj-bootstrap-ansible -w` | poetry run ansible-vault encrypt vars/pass.yml
-#  fi
+  if [[ ! -f vars/pass.yml ]]; then
+    echo -n Local Password:
+    read -s password
+    echo "\n"
+    echo "---" > vars/pass.yml
+    echo "ansible_become_password: $password" >> vars/pass.yml
+    check-venv
+
+    echo `security find-generic-password -a pj-bootstrap-ansible -w` | ansible-vault encrypt vars/pass.yml
+  fi
 #
 #  # 5. Check to make sure become password is encrypted
-#  if [[ $(poetry run ansible-vault view vars/pass.yml) == "" ]]; then
-#    echo "function: check-become-password"
-#    echo "Ansible-Vault wasn't able to encrypt your become password, try again."
-#    exit 1
-#  fi
+  if [[ $(ansible-vault view vars/pass.yml) == "" ]]; then
+    echo "function: check-become-password"
+    echo "Ansible-Vault wasn't able to encrypt your become password, try again."
+    exit 1
+  fi
   BECOME_PASSWORD_CHECK=0
 }
 
@@ -407,6 +419,7 @@ function reset-dock {
 }
 
 function reset-become-password {
+  security delete-generic-password -a pj-bootstrap-ansible
   rm -f $BOOTSTRAP_MAC_PATH/vars/pass.yml
 }
 
@@ -605,6 +618,7 @@ function display-help {
   password          Resets become password
   op                Runs op-cli secrets push/pull
   reset             Uninstall Apps and remove bootstrap-mac
+  reset-venv        Reset Python Virtual Environment
   reset-edge        Reset Microsoft Edge
   reset-teams       Reset Microsoft Teams
   reset-onedrive    Reset Microsoft OneDrive
@@ -679,6 +693,7 @@ if [[ $1 == "install" ]]; then
   setup-venv
   check-become-password
   ansible-playbook local.yml -K
+  update-python-ca-store
 
 #  open "/Applications/1Password.app"
 #  echo "Opening 1Password, enable 'Biometric unlock for 1Password CLI' in Preferences > Developer"
@@ -701,36 +716,36 @@ if [[ $1 == "update" ]]; then
   # poetry self update
   check-corporateyml
   # check-useryml
-  check-become-password
   activate-venv
+  check-become-password
   ansible-playbook local.yml -K
   exit 1
 fi
 
 if [[ $1 == "check" ]]; then
   check-corporateyml
-  check-become-password
   activate-venv
+  check-become-password
   ansible-playbook local.yml -K --diff --check -vv
   exit 1
 fi
 
 if [[ $1 == "noupdate" ]]; then
   prune-logs
-  check-become-password
   check-corporateyml
-  # check-useryml
   activate-venv
+  check-become-password
+  # check-useryml
   ansible-playbook local.yml --skip-tags update -K
   exit 1
 fi
 
-#if [[ $1 == "password" ]]; then
-#  reset-become-password
-#  check-become-password
-#  poetry run ansible-playbook local.yml --skip-tags update
-#  exit 1
-#fi
+if [[ $1 == "reset-password" ]]; then
+  reset-become-password
+  check-become-password
+  poetry run ansible-playbook local.yml --skip-tags update
+  exit 1
+fi
 #
 #if [[ $1 == "op" ]]; then
 #  check-dir
