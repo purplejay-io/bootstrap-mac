@@ -118,7 +118,13 @@
                 pip install -f requirements.txt
              fi
           fi
-       }      
+       }
+      
+      function v {
+        if [[ -d ".venv" ]]; then
+          . .venv/bin/activate
+        fi
+      }
       
       function reboot-vms {
         vm_list=$(prlctl list -o name --no-header)
