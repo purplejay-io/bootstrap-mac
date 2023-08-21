@@ -23,7 +23,7 @@ export PATH="$HOMEBREW_PATH/bin:$HOME/.local/bin:$PATH"
 PYTHON_INSTALLED=$(test -f $HOMEBREW_PATH/bin/python3;echo $?)
 
 # Is Poetry Installed
-POETRY_INSTALLED=$(test -f $HOME/.local/bin/poetry;echo $?)
+#POETRY_INSTALLED=$(test -f $HOME/.local/bin/poetry;echo $?)
 
 # Is 1Password Installed
 # Overriding for now as 1Password no longer a dependency for employees to connect
@@ -82,10 +82,27 @@ function install-python {
 }
 
 function setup-venv {
-  sudo ln -s $HOMEBREW_PATH/bin/python3 $HOMEBREW_PATH/bin/python
+  #sudo ln -s $HOMEBREW_PATH/bin/python3 $HOMEBREW_PATH/bin/python
   python -m venv "$ROOT_DIR/.venv"
   . $ROOT_DIR/.venv/bin/activate
   python -m pip install -r $ROOT_DIR/requirements.txt
+  check-venv
+}
+
+function reset-venv {
+  rm -Rf $ROOT_DIR/.venv
+  setup-venv
+}
+
+function activate-venv {
+  . $ROOT_DIR/.venv/bin/activate
+  check-venv
+}
+
+function check-venv {
+  if [[ -z "$VIRTUAL_ENV" ]] && [[ "$VIRTUAL_ENV" == "" ]]; then
+    exit 1
+  fi
 }
 
 function install-poetry {
@@ -605,7 +622,7 @@ if [[ $# -gt 1 ]]; then
   display-help
 fi
 
-setup-venv
+
 
 if [[ $1 == "install" ]]; then
   install-apps
@@ -659,7 +676,7 @@ if [[ $1 == "install" ]]; then
 #  read -r -s -k '?Press any key to continue.'
 #  echo "\n"
 #  sleep 5
-
+  setup-venv
   check-become-password
   ansible-playbook local.yml -K
 
@@ -685,6 +702,7 @@ if [[ $1 == "update" ]]; then
   check-corporateyml
   # check-useryml
   check-become-password
+  activate-venv
   ansible-playbook local.yml -K
   exit 1
 fi
@@ -692,6 +710,7 @@ fi
 if [[ $1 == "check" ]]; then
   check-corporateyml
   check-become-password
+  activate-venv
   ansible-playbook local.yml -K --diff --check -vv
   exit 1
 fi
@@ -701,6 +720,7 @@ if [[ $1 == "noupdate" ]]; then
   check-become-password
   check-corporateyml
   # check-useryml
+  activate-venv
   ansible-playbook local.yml --skip-tags update -K
   exit 1
 fi
@@ -730,6 +750,11 @@ if [[ $1 == "reset-poetry" ]]; then
   reset-poetry
   install-poetry
   poetry install
+  exit 1
+fi
+
+if [[ $1 == "reset-venv" ]]; then
+  reset-venv
   exit 1
 fi
 
