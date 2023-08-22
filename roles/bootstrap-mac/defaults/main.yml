@@ -5,6 +5,8 @@ single_touch_tap: true
 search_folder: SCcf
 show_status_bar: true
 new_window_target: PfDe
+fn_as_standard_keys: 0
+mouse_button_mode: OneButton
 safari_developer_menu: true
 zprofile_user: ""
 

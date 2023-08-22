@@ -226,6 +226,14 @@
     value: "{{ single_touch_tap|int }}"
     state: present
 
+- name: Mouse Right Click
+  community.general.osx_defaults:
+    domain: com.apple.AppleBluetoothMultitouch.mouse
+    key: MouseButtonMode
+    type: string
+    value: "{{ mouse_button_mode }}"
+    state: present
+
 #- name: Finder search within current folder
 #  community.general.osx_defaults:
 #    domain: com.apple.finder
@@ -248,6 +256,15 @@
     key: NewWindowTarget
     type: string
     value: "{{ new_window_target }}"
+    state: present
+
+
+- name: Use F1, F2, etc. as standard function keys
+  community.general.osx_defaults:
+    domain: com.apple.keyboard
+    key: fnState
+    type: int
+    value: "{{ fn_as_standard_keys | int }}"
     state: present
 
 #- name: Safari show Developer Menu
