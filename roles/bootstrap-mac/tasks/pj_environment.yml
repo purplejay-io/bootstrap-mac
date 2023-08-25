@@ -242,6 +242,15 @@
 #    value: "{{ search_folder }}"
 #    state: present
 
+
+- name: Finder Show all files
+  community.general.osx_defaults:
+    domain: com.apple.finder
+    key: AppleShowAllFiles
+    type: bool
+    value: "{{ finder_show_all_files | bool }}"
+    state: present
+
 - name: Finder Show Status Bar
   community.general.osx_defaults:
     domain: com.apple.finder
