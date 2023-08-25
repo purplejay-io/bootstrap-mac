@@ -83,9 +83,9 @@ function install-python {
 
 function setup-venv {
   #sudo ln -s $HOMEBREW_PATH/bin/python3 $HOMEBREW_PATH/bin/python
-  python -m venv "$ROOT_DIR/.venv"
+  python3 -m venv "$ROOT_DIR/.venv"
   . $ROOT_DIR/.venv/bin/activate
-  python -m pip install -r $ROOT_DIR/requirements.txt
+  python3 -m pip install -r $ROOT_DIR/requirements.txt
   check-venv
 }
 
