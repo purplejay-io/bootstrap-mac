@@ -247,8 +247,8 @@
   community.general.osx_defaults:
     domain: com.apple.finder
     key: AppleShowAllFiles
-    type: bool
-    value: "{{ finder_show_all_files | bool }}"
+    type: string
+    value: "{{ finder_show_all_files }}"
     state: present
 
 - name: Finder Show Status Bar
