@@ -95,6 +95,9 @@ function reset-venv {
 }
 
 function activate-venv {
+  if [[ -d "$ROOT_DIR/.venv" ]]; then
+      setup-venv
+  fi
   . $ROOT_DIR/.venv/bin/activate
   check-venv
 }
