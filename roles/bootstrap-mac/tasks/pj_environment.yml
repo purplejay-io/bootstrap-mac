@@ -6,6 +6,12 @@
     state: directory
     mode: '0755'
 
+- name: Ensure pip conf dir exist
+  file:
+    path: "{{ ansible_local_user_home_dir }}/.pip"
+    state: directory
+    mode: '0755'
+
 - name: Ensure git dir exist
   file:
     path: ~/git
@@ -180,13 +186,15 @@
     marker: "### {mark} USER zprofile baseline ###"
     create: yes
 
-- name: setup .npmrc and pip auth with keystone
+- name: setup .npmrc auth with keystone
   template:
-    src: '{{ item }}'
+    src: .npmrc
     dest: '{{ ansible_local_user_home_dir }}'
-  loop:
-    - .npmrc
-    - pip.conf
+
+- name: setup pip auth with keystone
+  template:
+    src: pip.conf
+    dest: '{{ ansible_local_user_home_dir }}/.pip'
 
 #- name: Remove sudo from pam.d
 #  lineinfile:
