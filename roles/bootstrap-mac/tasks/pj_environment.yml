@@ -162,7 +162,7 @@
       alias fde="sudo fdesetup authrestart"
       alias dns="sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder"
       function ssh-kill {
-        ps -o pid,comm|grep "ssh -L"|grep -v grep|awk '{print $1}'|xargs kill
+        ps aux -o pid,comm | grep "ssh -f" | grep -v grep | awk '{print $2}'| xargs kill
       }
       function ssh-tunnels {
         ~/tunnels.sh
@@ -278,7 +278,7 @@
 
 - name: Add SSH Tunnels to Tunnels file
   lineinfile:
-    line: "ssh {{ item.host }} -L {{ item.port }}:127.0.0.1:5900 &"
+    line: "ssh -f -N -L {{ item.port }}:127.0.0.1:5900 {{ item.host }} &"
     path: "{{ ansible_user_dir }}/tunnels.sh"
   when: (ssh_tunnels | length>0)
   loop: "{{ ssh_tunnels }}"
