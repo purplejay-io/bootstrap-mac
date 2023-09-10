@@ -164,6 +164,9 @@
       function ssh-kill {
         ps -o pid,comm|grep "ssh -L"|grep -v grep|awk '{print $1}'|xargs kill
       }
+      function ssh-tunnels {
+        ~/tunnels.sh
+      }
 
     path: $HOME/.zprofile
     marker: "### {mark} PJ zprofile baseline ###"
@@ -275,7 +278,7 @@
 
 - name: Add SSH Tunnels to Tunnels file
   lineinfile:
-    line: "ssh {{ item.host }} -L {{ item.port }}:127.0.0.1:5900"
+    line: "ssh {{ item.host }} -L {{ item.port }}:127.0.0.1:5900 &"
     path: "{{ ansible_user_dir }}/tunnels.sh"
   when: (ssh_tunnels | length>0)
   loop: "{{ ssh_tunnels }}"
