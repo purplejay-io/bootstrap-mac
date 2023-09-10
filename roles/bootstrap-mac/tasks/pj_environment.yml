@@ -184,6 +184,7 @@
   template:
     src: '{{ item }}'
     dest: '{{ ansible_local_user_home_dir }}'
+  when: gitlab_api_token is not 'please_update_user_yml'
   loop:
     - .npmrc
     - pip.conf
