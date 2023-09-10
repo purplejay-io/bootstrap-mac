@@ -270,12 +270,12 @@
     line: "#!/bin/bash"
     mode: '0740'
     create: yes
-    path: {{ ansible_user_dir }}/tunnels.sh
+    path: "{{ ansible_user_dir }}/tunnels.sh"
   when: (ssh_tunnels | length>0)
 
 - name: Add SSH Tunnels to Tunnels file
   lineinfile:
     line: "ssh {{ item.host }} -L {{ item.port }}:127.0.0.1:5900"
-    path: {{ ansible_user_dir }}/tunnels.sh
+    path: "{{ ansible_user_dir }}/tunnels.sh"
   when: (ssh_tunnels | length>0)
   loop: "{{ ssh_tunnels }}"
