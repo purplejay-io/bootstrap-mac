@@ -114,9 +114,12 @@
              rm -Rf .venv
              python3 -m venv .venv
              . .venv/bin/activate
-             if [[ -f "requirements.txt" ]]; then
-                pip install -r requirements.txt
-             fi
+          else
+              python3 -m venv .venv
+              . .venv/bin/activate
+          fi
+          if [[ -f "requirements.txt" ]]; then
+            pip install -r requirements.txt
           fi
        }
       
@@ -184,7 +187,7 @@
   template:
     src: '{{ item }}'
     dest: '{{ ansible_local_user_home_dir }}'
-  when: gitlab_api_token is not 'please_update_user_yml'
+  when: gitlab_api_token != "please_update_user_yml"
   loop:
     - .npmrc
     - pip.conf
