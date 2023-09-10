@@ -161,6 +161,10 @@
       alias typora="open -a typora"
       alias fde="sudo fdesetup authrestart"
       alias dns="sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder"
+      function ssh-kill {
+        ps -o pid,comm|grep "ssh -L"|grep -v grep|awk '{print $1}'|xargs kill
+      }
+
     path: $HOME/.zprofile
     marker: "### {mark} PJ zprofile baseline ###"
     create: yes
@@ -261,3 +265,17 @@
 #    type: bool
 #    value: "{{ safari_developer_menu }}"
 #    state: present
+- name: Create SSH Tunnel file
+  lineinfile:
+    line: "#!/bin/bash"
+    mode: '0740'
+    create: yes
+    path: {{ ansible_user_dir }}/tunnels.sh
+  when: (ssh_tunnels | length>0)
+
+- name: Add SSH Tunnels to Tunnels file
+  lineinfile:
+    line: "ssh {{ item.host }} -L {{ item.port }}:127.0.0.1:5900"
+    path: {{ ansible_user_dir }}/tunnels.sh
+  when: (ssh_tunnels | length>0)
+  loop: "{{ ssh_tunnels }}"

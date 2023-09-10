@@ -67,3 +67,8 @@ check_parallels: no
 
 # Miscellaneous
 gitlab_api_token: 'please_update_user_yml'
+
+# SSH Tunnels
+ssh_tunnels: []
+#  - host: pj-dns
+#    port: 8900
