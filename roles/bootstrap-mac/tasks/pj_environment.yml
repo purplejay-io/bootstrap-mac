@@ -132,6 +132,13 @@
           deactivate
         fi
       }
+
+      function gitsub {
+        if [[ -f ".gitmodules" ]]; then
+          git submodule sync --recursive
+          git submodule update --init --recursive --remote
+        fi
+      }
       
       function v {
         if [[ -d ".venv" ]]; then
