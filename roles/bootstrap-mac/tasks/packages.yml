@@ -10,7 +10,7 @@
   homebrew:
     name: "{{ item }}"
     update_homebrew: true
-    upgrade_all: true
+    upgrade_all: false
 
   loop: "{{ brew_packages }}"
   ignore_errors: yes
@@ -24,13 +24,13 @@
 - name: Install user homebrew packages
   homebrew:
     name: "{{ item }}"
-    upgrade_all: true
+    upgrade_all: false
   loop: "{{ brew_packages_user }}"
 
 - name: Install baseline homebrew cask packages
   homebrew_cask:
     name: "{{ item }}"
-    state: upgraded
+    state: present
     greedy: yes
 #    sudo_password: "{{ ansible_become_password }}"
     install_options: force
@@ -48,7 +48,7 @@
 - name: Install user homebrew cask packages
   homebrew_cask:
     name: "{{ item }}"
-    state: upgraded
+    state: present
 #    sudo_password: "{{ ansible_become_password }}"
     install_options: force
   loop: "{{ brew_cask_packages_user }}"
