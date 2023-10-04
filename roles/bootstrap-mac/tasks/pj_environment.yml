@@ -119,10 +119,19 @@
               . .venv/bin/activate
           fi
           if [[ -f "requirements.txt" ]]; then
-            pip install pip-tools
             pip install -r requirements.txt
           fi
        }
+      
+      function pipc {
+        if [[ -f "requirements.in" ]]; then
+          . .venv/bin/activate
+          pip install pip-tools
+          rm -f requirements.txt
+          pip-compile --no-emit-index-url --output-file=requirements.txt requirements.in
+          deactivate
+        fi
+      }
       
       function v {
         if [[ -d ".venv" ]]; then
