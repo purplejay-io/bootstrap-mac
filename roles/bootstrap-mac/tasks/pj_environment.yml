@@ -37,7 +37,7 @@
       
       
       # Python
-      alias python3="$HOMEBREW_PATH/bin/python3"
+      # alias python3="$HOMEBREW_PATH/bin/python3"
       alias python="python3"
       
       export REQUESTS_CA_BUNDLE="$HOME/python_cacert.pem"
