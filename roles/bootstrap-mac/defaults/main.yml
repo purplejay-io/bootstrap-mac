@@ -24,7 +24,6 @@ brew_cask_packages:
   - 1password-cli
 brew_cask_packages_user: []
 brew_packages:
-  - node@18
   - python@3.11
   - nmap
   - tree
