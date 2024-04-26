@@ -5,6 +5,18 @@
   changed_when: false
   become: yes
 
+- name: Tap the autoupdate Homebrew repository, state present
+  community.general.homebrew_tap:
+    name: homebrew/autoupdate
+
+- name: Check if Auto update is running
+  shell: brew autoupdate status
+  register: brew_autoupdate
+
+- name: Start auto update if not already running
+  shell: brew autoupdate start
+  when: "'Autoupdate is installed and running.' not in brew_autoupdate.stdout"
+
 # Homebrew installer and dependencies
 - name: Install baseline homebrew packages
   homebrew:
