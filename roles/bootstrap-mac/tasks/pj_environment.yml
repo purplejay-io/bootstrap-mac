@@ -44,7 +44,7 @@
       export SSL_CERT_FILE="$HOME/python_cacert.pem"
       export NODE_EXTRA_CA_CERTS="$HOME/python_cacert.pem"
       
-      export SSH_AUTH_SOCK="$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+      PKCS11Provider=/usr/lib/ssh-keychain.dylib
       
       function pj-update {
         cd ~/.pj/bootstrap-mac
