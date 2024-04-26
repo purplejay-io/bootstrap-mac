@@ -44,8 +44,6 @@
       export SSL_CERT_FILE="$HOME/python_cacert.pem"
       export NODE_EXTRA_CA_CERTS="$HOME/python_cacert.pem"
       
-      PKCS11Provider=/usr/lib/ssh-keychain.dylib
-      
       function pj-update {
         cd ~/.pj/bootstrap-mac
         ./run.sh update
@@ -59,14 +57,6 @@
         security find-certificate -c "Purple Jay Root CA" -p >> ~/python_cacert.pem
         export REQUESTS_CA_BUNDLE="$HOME/python_cacert.pem"
         export SSL_CERT_FILE="$HOME/python_cacert.pem"
-      }
-      
-      function update-poetry-config {
-        poetry config virtualenvs.in-project true
-        poetry config virtualenvs.create true
-        op read op://private/gitlab-api-token/password | pbcopy
-        echo "your gitlab api token is copied to your clipboard (use this as the password)"
-        poetry config http-basic.keystone "__token__"
       }
 
       function pj-op {
