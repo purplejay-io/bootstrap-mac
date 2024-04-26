@@ -12,6 +12,7 @@
 - name: Check if Auto update is running
   shell: brew autoupdate status
   register: brew_autoupdate
+  changed_when: no
 
 - name: Start auto update if not already running
   shell: brew autoupdate start
