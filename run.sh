@@ -351,10 +351,10 @@ function check-ansible-readiness {
 function check-become-password {
   BECOME_PASSWORD_CHECK=1
   # 1. Check is the ephemeral password in keychain was successfully created.
-  check-keychain-password
-  if [[ $ANSIBLE_KEYCHAIN_PASS == 1 ]]; then
-    exit 1
-  fi
+#   check-keychain-password
+#  if [[ $ANSIBLE_KEYCHAIN_PASS == 1 ]]; then
+#    exit 1
+#  fi
 
   # 2. Ensure ansible-vault can be ran
   install-bootstrapmac
@@ -368,23 +368,23 @@ function check-become-password {
   cd $BOOTSTRAP_MAC_PATH
 
   # 4. If pass.yml does not exist, then ask user for it
-  if [[ ! -f vars/pass.yml ]]; then
-    echo -n Local Password:
-    read -s password
-    echo "\n"
-    echo "---" > vars/pass.yml
-    echo "ansible_become_password: $password" >> vars/pass.yml
-    check-venv
-
-    echo `security find-generic-password -a pj-bootstrap-ansible -w` | ansible-vault encrypt vars/pass.yml
-  fi
+#  if [[ ! -f vars/pass.yml ]]; then
+#    echo -n Local Password:
+#    read -s password
+#    echo "\n"
+#    echo "---" > vars/pass.yml
+#    echo "ansible_become_password: $password" >> vars/pass.yml
+#    check-venv
+#
+#    echo `security find-generic-password -a pj-bootstrap-ansible -w` | ansible-vault encrypt vars/pass.yml
+#  fi
 #
 #  # 5. Check to make sure become password is encrypted
-  if [[ $(ansible-vault view vars/pass.yml) == "" ]]; then
-    echo "function: check-become-password"
-    echo "Ansible-Vault wasn't able to encrypt your become password, try again."
-    exit 1
-  fi
+#  if [[ $(ansible-vault view vars/pass.yml) == "" ]]; then
+#    echo "function: check-become-password"
+#    echo "Ansible-Vault wasn't able to encrypt your become password, try again."
+#    exit 1
+#  fi
   BECOME_PASSWORD_CHECK=0
 }
 
@@ -694,7 +694,7 @@ if [[ $1 == "install" ]]; then
 #  echo "\n"
 #  sleep 5
   setup-venv
-  # check-become-password
+  check-become-password
   ansible-playbook local.yml -K
   update-python-ca-store
 
@@ -720,7 +720,7 @@ if [[ $1 == "update" ]]; then
   check-corporateyml
   # check-useryml
   activate-venv
-  # check-become-password
+  check-become-password
   ansible-playbook local.yml -K
   exit 1
 fi
@@ -728,7 +728,7 @@ fi
 if [[ $1 == "check" ]]; then
   check-corporateyml
   activate-venv
-  # check-become-password
+  check-become-password
   ansible-playbook local.yml --diff --check -vv
   exit 1
 fi
@@ -737,7 +737,7 @@ if [[ $1 == "noupdate" ]]; then
   prune-logs
   check-corporateyml
   activate-venv
-  # check-become-password
+  check-become-password
   # check-useryml
   ansible-playbook local.yml --skip-tags update -K
   exit 1
@@ -745,7 +745,7 @@ fi
 
 if [[ $1 == "reset-password" ]]; then
   reset-become-password
-  # check-become-password
+  check-become-password
   ansible-playbook local.yml --skip-tags update
   exit 1
 fi
