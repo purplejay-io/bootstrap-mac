@@ -77,7 +77,7 @@
   pip:
     executable: "{{ homebrew_path }}/bin/pip3"
     name: "{{ item }}"
-    extra_args: --upgrade
+    extra_args: --upgrade --break-system-packages
   loop: "{{ pip_packages }}"
 
 - name: Remove pip baseline packages

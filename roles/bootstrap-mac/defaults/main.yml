@@ -33,7 +33,10 @@ brew_packages:
   - pinentry-mac
 brew_packages_removed: []
 brew_packages_user: []
-pip_packages: []
+pip_packages:
+  - pip
+  - pip-tools
+  - keepercommander
 pip_packages_removed: []
 mas_apps: []
 mas_apps_removed: []
