@@ -52,7 +52,8 @@ PERSONAL_FOLDER="$HOME/Library/CloudStorage/OneDrive-PurpleJay"
 
 function install-homebrew {
   if [[ $HOMEBREW_INSTALLED == 1 ]]; then
-    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    # NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     HOMEBREW_INSTALLED=$(test -f $HOMEBREW_PATH/bin/brew;echo $?)
     if [[ $(uname -m) == 'arm64' ]]; then
       (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile
