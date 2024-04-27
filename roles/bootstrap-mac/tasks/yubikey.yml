@@ -1,0 +1,15 @@
+---
+- name: Check if Yubikey Identities are paried with macOS
+  shell: sc_auth list
+  register: sc_auth
+  changed_when: no
+
+- name: Determine if yubikey is inserted
+  shell: sc_auth identities | tail -1 | cut -d $'\t' -f1
+  register: piv_identity
+  changed_when: no
+
+- name: Pair the yubikey
+  shell: sc_auth pair -h {{ piv_identity.stdout }} -u {{ ansible_user_id }}
+  become: yes
+  when: sc_auth.stdout == '' and piv_identity.stdout not ''

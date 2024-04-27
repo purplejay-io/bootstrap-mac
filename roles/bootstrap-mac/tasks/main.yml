@@ -33,3 +33,7 @@
 - name: Check Parallels
   import_tasks: parallels_check.yml
   when: check_parallels
+
+- name: Bind Yubikey
+  import_tasks: yubikey.yml
+  when: bind_yk
