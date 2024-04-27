@@ -5,19 +5,6 @@
   changed_when: false
   become: yes
 
-- name: Tap the autoupdate Homebrew repository, state present
-  community.general.homebrew_tap:
-    name: homebrew/autoupdate
-
-- name: Check if Auto update is running
-  shell: brew autoupdate status
-  register: brew_autoupdate
-  changed_when: no
-
-- name: Start auto update if not already running
-  shell: brew autoupdate start
-  when: "'Autoupdate is installed and running.' not in brew_autoupdate.stdout"
-
 # Homebrew installer and dependencies
 - name: Install baseline homebrew packages
   homebrew:
@@ -105,3 +92,21 @@
 #  become: yes
 #  register: osupdate_status
 #  changed_when: 'osupdate_status.stderr != "No updates are available."'
+
+- name: Check to ensure the LaunchAgents directory does exists
+  file:
+    state: directory
+    path: "{{ ansible_user_dir }}/Library/LaunchAgents"
+
+- name: Tap the autoupdate Homebrew repository, state present
+  community.general.homebrew_tap:
+    name: homebrew/autoupdate
+
+- name: Check if Auto update is running
+  shell: brew autoupdate status
+  register: brew_autoupdate
+  changed_when: no
+
+- name: Start auto update if not already running
+  shell: brew autoupdate start --sudo
+  when: "'Autoupdate is installed and running.' not in brew_autoupdate.stdout"

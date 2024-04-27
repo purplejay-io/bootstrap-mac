@@ -29,6 +29,7 @@ brew_packages:
   - tree
   - wget
   - jq
+  - pinentry-mac
 brew_packages_removed: []
 brew_packages_user: []
 pip_packages: []
