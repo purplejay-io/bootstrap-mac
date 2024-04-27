@@ -12,4 +12,4 @@
 - name: Pair the yubikey
   shell: sc_auth pair -h {{ piv_identity.stdout }} -u {{ ansible_user_id }}
   become: yes
-  when: sc_auth.stdout == '' and piv_identity.stdout not ''
+  when: sc_auth.stdout == '' and piv_identity.stdout != ''
