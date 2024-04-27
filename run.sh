@@ -82,11 +82,11 @@ function install-python {
 }
 
 function setup-venv {
-  #sudo ln -s $HOMEBREW_PATH/bin/python3 $HOMEBREW_PATH/bin/python
-  python3 -m venv "$ROOT_DIR/.venv"
-  . $ROOT_DIR/.venv/bin/activate
-  python3 -m pip install -r $ROOT_DIR/requirements.txt
+  cd $HOME/.pj/bootstrap-mac/
+  $HOMEBREW_PATH/bin/python3 -m venv .venv
+  . .venv/bin/activate
   check-venv
+  python3 -m pip install -r requirements.txt
 }
 
 function reset-venv {
