@@ -32,6 +32,17 @@
       
       HOMEBREW_PATH="$(brew --prefix)"
       
+      # Keep handy in case bug comes backup
+      # https://www.nccs.nasa.gov/nccs-users/instructional/logging-in/connectivity-issues 
+      # alias ssh=/usr/libexec/ssh-apple-pkcs11
+      # alias scp="scp -S /usr/libexec/ssh-apple-pkcs11"
+      # alias sftp="sftp -S /usr/libexec/ssh-apple-pkcs11"
+      # alias rsync="rsync -e /usr/libexec/ssh-apple-pkcs11"
+      
+      function pivssh {
+        ssh-add -s /usr/lib/ssh-keychain.dylib
+      }
+      
       # node
       export PATH="$HOMEBREW_PATH/opt/node@18/bin:$PATH"
       
