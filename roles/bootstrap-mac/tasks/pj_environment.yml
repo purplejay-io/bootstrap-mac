@@ -40,6 +40,7 @@
       # alias rsync="rsync -e /usr/libexec/ssh-apple-pkcs11"
       
       function pivssh {
+        ssh-add -D
         ssh-add -s /usr/lib/ssh-keychain.dylib
       }
       
