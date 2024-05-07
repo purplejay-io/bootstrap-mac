@@ -302,3 +302,9 @@
     path: "{{ ansible_user_dir }}/tunnels.sh"
   when: (ssh_tunnels | length>0)
   loop: "{{ ssh_tunnels }}"
+
+- name: Add caffeinate to tunnels.shd
+  lineinfile:
+    line: "caffeinate -d"
+    path: "{{ ansible_user_dir }}/tunnels.sh"
+  when: (ssh_tunnels | length>0)
