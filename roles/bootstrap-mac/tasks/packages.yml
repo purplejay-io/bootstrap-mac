@@ -87,12 +87,6 @@
     state: absent
   loop: "{{ pip_packages_removed }}"
 
-#- name: macOS Software Update
-#  shell: softwareupdate -iaR
-#  become: yes
-#  register: osupdate_status
-#  changed_when: 'osupdate_status.stderr != "No updates are available."'
-
 - name: Check to ensure the LaunchAgents directory does exists
   file:
     state: directory
@@ -110,3 +104,9 @@
 - name: Start auto update if not already running
   shell: brew autoupdate start --sudo
   when: "'Autoupdate is installed and running.' not in brew_autoupdate.stdout"
+
+- name: macOS Software Update
+  shell: softwareupdate -iaR
+  become: yes
+  register: osupdate_status
+  changed_when: 'osupdate_status.stderr != "No updates are available."'
