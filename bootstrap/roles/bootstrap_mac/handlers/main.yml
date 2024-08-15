@@ -8,6 +8,8 @@
   when: ssh_status == "0"
 
 - name: User Restart
-  shell: |
-    message="You must restart for these settings to be implemented!"
-    osascript -e "tell application (path to frontmost application as text) to display dialog \"$message\" buttons {\"OK\"} with icon stop"
+  debug:
+    msg: 'You must restart for these settings to be implemented!'
+#  shell: |
+#    message="You must restart for these settings to be implemented!"
+#    osascript -e "tell application (path to frontmost application as text) to display dialog \"$message\" buttons {\"OK\"} with icon stop"
