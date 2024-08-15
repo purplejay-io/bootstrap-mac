@@ -13,7 +13,7 @@
 
 - name: .ssh directory
   file:
-    path: "{{ ansible_local_user_home_dir }}/.ssh/"
+    path: "{{ ansible_user_dir }}/.ssh/"
     state: directory
     mode: '0700'
 
@@ -37,7 +37,7 @@
 
 - name: ssh config file
   blockinfile:
-    path: "{{ ansible_local_user_home_dir }}/.ssh/config"
+    path: "{{ ansible_user_dir }}/.ssh/config"
     block: |
       Host gitlab.purplejay.net
         User git

@@ -2,7 +2,7 @@
 # zprofile baseline
 - name: Ensure jetbrains dir exist
   file:
-    path: "{{ ansible_local_user_home_dir }}/.jetbrains"
+    path: "{{ ansible_user_dir }}/.jetbrains"
     state: directory
     mode: '0755'
 
@@ -213,7 +213,7 @@
 - name: setup .npmrc and pip auth with keystone
   template:
     src: '{{ item }}'
-    dest: '{{ ansible_local_user_home_dir }}'
+    dest: '{{ ansible_user_dir }}'
   when: gitlab_api_token != "please_update_user_yml"
   loop:
     - .npmrc
