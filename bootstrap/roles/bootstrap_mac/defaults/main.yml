@@ -76,3 +76,8 @@ gitlab_api_token: 'please_update_user_yml'
 ssh_tunnels: []
 #  - host: pj-dns
 #    port: 8900
+
+# Ollama
+ollama_install: no
+ollama_expose: no
+ollama_models: []

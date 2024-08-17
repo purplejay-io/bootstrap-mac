@@ -1,0 +1,25 @@
+---
+- name: Install ollama cask
+  homebrew_cask:
+    name: "ollama"
+    state: present
+    greedy: yes
+
+- name: Ensure ollama is running the latest
+  shell: |
+    killall Ollama
+    open -a Ollama
+  changed_when: no
+
+- name: Verify OLLAMA_HOST environment variable
+  shell: launchctl getenv OLLAMA_HOST
+  register: ollama_host_env
+  changed_when: no
+
+- name: Set OLLAMA_HOST environment variable
+  shell: launchctl setenv OLLAMA_HOST "0.0.0.0"
+  when: "'0.0.0.0' in not ollama_host_env.stdout and ollama_expose"
+
+- name: Pull the models
+  shell: ollama pull {{ item }} &
+  loop: "{{ ollama_models }}"
