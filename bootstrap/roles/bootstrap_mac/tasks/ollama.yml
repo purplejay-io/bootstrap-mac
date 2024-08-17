@@ -4,6 +4,11 @@
     name: "ollama"
     state: present
     greedy: yes
+  register: ollama_installed
+
+- name: Open Ollama for the first time
+  shell: open /Applications/Ollama.app
+  when: ollama_installed.changed
 
 - name: Ensure ollama is running the latest
   shell: |
