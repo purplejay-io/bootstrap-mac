@@ -10,13 +10,6 @@
   shell: open /Applications/Ollama.app
   when: ollama_installed.changed
 
-- name: Ensure ollama is running the latest
-  shell: |
-    killall Ollama
-    sleep 5
-    open -a Ollama
-  changed_when: no
-
 - name: Verify OLLAMA_HOST environment variable
   shell: launchctl getenv OLLAMA_HOST
   register: ollama_host_env
@@ -24,7 +17,14 @@
 
 - name: Set OLLAMA_HOST environment variable
   shell: launchctl setenv OLLAMA_HOST "0.0.0.0"
-  when: "'0.0.0.0' in not ollama_host_env.stdout and ollama_expose"
+  when: ollama_expose and ('0.0.0.0' not in ollama_host_env.stdout)
+
+- name: Ensure ollama is running the latest
+  shell: |
+    killall Ollama
+    sleep 5
+    open -a Ollama
+  changed_when: no
 
 - name: Pull the models
   shell: ollama pull {{ item }} &
