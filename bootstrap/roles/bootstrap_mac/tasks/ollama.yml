@@ -13,6 +13,7 @@
 - name: Ensure ollama is running the latest
   shell: |
     killall Ollama
+    sleep 5
     open -a Ollama
   changed_when: no
 
