@@ -23,6 +23,7 @@
   shell: |
     killall Ollama
     sleep 5
+    export OLLAMA_HOST
     open -a Ollama
   changed_when: no
 
