@@ -49,28 +49,13 @@
       
       
       # Python
-      # alias python3="$HOMEBREW_PATH/bin/python3"
       alias python="python3"
       
-      export REQUESTS_CA_BUNDLE="$HOME/python_cacert.pem"
-      export SSL_CERT_FILE="$HOME/python_cacert.pem"
-      export NODE_EXTRA_CA_CERTS="$HOME/python_cacert.pem"
       
       function pj-update {
         cd ~/.pj/bootstrap-mac
         ./run.sh update
       }
-      
-      function update-python-ca-store {
-        export REQUESTS_CA_BUNDLE=""
-        export SSL_CERT_FILE=""
-        python3 -m pip install certifi
-        cat $(python3 -m certifi) > ~/python_cacert.pem
-        security find-certificate -c "Purple Jay Root CA" -p >> ~/python_cacert.pem
-        export REQUESTS_CA_BUNDLE="$HOME/python_cacert.pem"
-        export SSL_CERT_FILE="$HOME/python_cacert.pem"
-      }
-
       function pj-op {
               cd ~/.pj/bootstrap-mac
               ./run.sh op
@@ -81,7 +66,7 @@
       }
       function pj-passreset {
               cd ~/.pj/bootstrap-mac
-              ./run.sh password
+              ./run.sh reset-password
       }
       function pj-reset {
               cd ~/.pj/bootstrap-mac
@@ -191,17 +176,6 @@
     path: $HOME/.zprofile
     marker: "### {mark} PJ zprofile baseline ###"
     create: yes
-
-#      function venv {
-#          POETRY_LOCAL_CHECK=$(poetry config virtualenvs.in-project --local)
-#          if [[ $POETRY_LOCAL_CHECK != 'true' ]]; then
-#            poetry config virtualenvs.in-project true --local
-#          fi
-#          rm -Rf $(poetry env info --path)
-#          rm -Rf .venv
-#          rm -f poetry.lock
-#          poetry install --no-root
-#      }
 
 - name: Additional user zprofile baseline
   blockinfile:
