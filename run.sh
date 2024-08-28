@@ -110,53 +110,6 @@ function check-venv {
   fi
 }
 
-function update-python-ca-store {
-  export REQUESTS_CA_BUNDLE=""
-  export SSL_CERT_FILE=""
-  python3 -m pip install certifi
-  cat $(python3 -m certifi) > ~/python_cacert.pem
-  security find-certificate -c "Purple Jay Root CA" -p >> ~/python_cacert.pem
-  export REQUESTS_CA_BUNDLE="$HOME/python_cacert.pem"
-  export SSL_CERT_FILE="$HOME/python_cacert.pem"
-}
-
-function install-poetry {
-  if [[ $HOMEBREW_INSTALLED == 0  && $PYTHON_INSTALLED == 0 && $POETRY_INSTALLED == 1 ]]; then
-    curl -sSL https://install.python-poetry.org | python3 -
-    POETRY_INSTALLED=$(test -f $HOME/.local/bin/poetry;echo $?)
-  fi
-  if [[ $POETRY_INSTALLED != 0 ]]; then
-    echo "function: install-poetry"
-    echo "Poetry did not install successfully, try again."
-    exit 1
-  fi
-}
-
-function install-op {
-#  if [[ $HOMEBREW_INSTALLED == 0  && $OP_INSTALLED == 1 ]]; then
-#    brew install --cask 1password
-#    OP_INSTALLED=$(test -d /Applications/1Password.app;echo $?)
-#  fi
-  if [[ $OP_INSTALLED != 0 ]]; then
-    echo "function: install-op"
-    echo "1Password did not install successfully from Intune, please contact an administrator."
-    exit 1
-  fi
-}
-
-function install-op-cli {
-  if [[ $HOMEBREW_INSTALLED == 0 && $OP_CLI_INSTALLED == 1 ]]; then
-    brew install --cask 1password-cli
-    brew install jq
-    OP_CLI_INSTALLED=$(test -f /usr/local/bin/op;echo $?)
-  fi
-  if [[ $OP_CLI_INSTALLED != 0 ]]; then
-    echo "function: install-op-cli"
-    echo "1Password CLI did not install successfully, try again."
-    exit 1
-  fi
-}
-
 function install-bootstrapmac {
     if [[ $HOMEBREW_INSTALLED == 1 ]]; then
       echo "function: install-bootstrapmac"
@@ -229,10 +182,6 @@ function install-o365apps {
 function install-apps {
   install-homebrew
   install-python
-#  install-poetry
-#  install-o365apps
-#  install-op
-#  install-op-cli
 }
 
 function check-dir {
@@ -408,15 +357,6 @@ function create-userbackup {
   git/ .pj/bootstrap-mac/vars/user.yml .ssh/ "Library/Containers/com.microsoft.rdc.macos/Data/Library/Application Support/com.microsoft.rdc.macos"
 }
 
-function check-poetry {
-  POETRY_WORKING=$(poetry --version > /dev/null;echo $?)
-  if [[ $POETRY_WORKING != 0 ]]; then
-     echo "There is an issue with Poetry, reinstalling...\n"
-     curl -sSL https://install.python-poetry.org | python3 - --uninstall
-     curl -sSL https://install.python-poetry.org | python3 -
-  fi
-}
-
 function reset-dock {
   defaults write com.apple.dock persistent-apps -array
   killall Dock
@@ -497,16 +437,6 @@ function reset-edge {
   sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Edge/installEdge.sh)"
 }
 
-function reset-poetry {
-  # OLD_POETRY_INSTALLED=$(test -f $HOME/.poetry/bin/poetry;echo $?)
-  # if [[ $OLD_POETRY_INSTALLED == 0 ]]; then
-  curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 - --uninstall
-  curl -sSL https://install.python-poetry.org | python3 - --uninstall
-  rm -Rf $HOME/.pj/bootstrap-mac/.venv
-  curl -sSL https://install.python-poetry.org | python3 -
-  POETRY_INSTALLED=$(test -f $HOME/.local/bin/poetry;echo $?)
-}
-
 function prune-logs {
   if [[ -f ansible-logs.txt ]]; then
     sed -i '' '2000,$ d' ansible-logs.txt
@@ -571,46 +501,6 @@ function reset-bootstrapmac {
   exit 1
 }
 
-function op-login {
-  eval "$(op signin --account purplejayllc)"
-  check_op=$(op account get)
-  if [[ $check_op == "" ]];then
-    echo "function: op-login"
-    echo "You did not login into 1password, make sure you have enabled Biometric Unlock. \n"
-    exit 1
-  fi
-  rm vars/secrets.yml
-  export PULL_OP_SECRETS=true
-}
-
-function op-create {
-  if [[ -f "op_create.sh" ]];then
-    ./op_create.sh > /dev/null
-  fi
-  echo "Contact PJ Admin and let them know you have ran 'pj-op' successfully."
-  echo "Your Wireguard public key will need to be added until you can connect.\n"
-}
-
-function pull-ansiblecollections {
-  cd /tmp
-  security find-certificate -c "purplejaynet-ca" -p > ca.pem
-  openssl x509 -pubkey -noout -in ca.pem > pubkey.pem
-
-  curl -O https://pjansiblecollections.blob.core.windows.net/pj-ansiblecollections/ansiblecollection_keyfile.key.enc
-  curl -O https://pjansiblecollections.blob.core.windows.net/pj-ansiblecollections/pj-mac-1.0.0.tar.gz.enc
-  curl -O https://pjansiblecollections.blob.core.windows.net/pj-ansiblecollections/pj-ubuntu-1.0.0.tar.gz.enc
-
-  openssl rsautl -inkey pubkey.pem -pubin -in ansiblecollection_keyfile.key.enc -out ansiblecollection_keyfile.key
-  openssl enc -in pj-mac-1.0.0.tar.gz.enc -out pj-mac-1.0.0.tar.gz -d -aes256 -k ansiblecollection_keyfile.key
-  openssl enc -in pj-ubuntu-1.0.0.tar.gz.enc -out pj-ubuntu-1.0.0.tar.gz -d -aes256 -k ansiblecollection_keyfile.key
-
-  rm ansiblecollection_keyfile.key.enc ansiblecollection_keyfile.key pj-mac-1.0.0.tar.gz.enc pj-ubuntu-1.0.0.tar.gz.enc
-  rm ca.pem pubkey.pem
-
-  cd $BOOTSTRAP_MAC_PATH
-  ansible-galaxy collection install -r galaxy.yml --force
-}
-
 
 function display-help {
   echo "Usage: ./run.sh [Option]
@@ -620,7 +510,6 @@ function display-help {
   update            Runs bootstrap-mac and upgrades poetry
   noupdate          Runs bootstrap-mac minus homebrew playbooks
   password          Resets become password
-  op                Runs op-cli secrets push/pull
   reset             Uninstall Apps and remove bootstrap-mac
   reset-venv        Reset Python Virtual Environment
   reset-edge        Reset Microsoft Edge
@@ -660,54 +549,9 @@ if [[ $1 == "install" ]]; then
   open "/Applications/Company Portal.app"
   read -r -s -k '?Press any key to continue.'
   echo "\n"
-#
-#  open "/Applications/OneDrive.app"
-#  echo "Opening OneDrive, log into your Office 365 account before continuing."
-#  read -r -s -k '?Press any key to continue.'
-#  echo "\n"
-#
-#  DEFAULT_BROWSER=$(defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers | sed -n -e '/LSHandlerURLScheme = https;/{x;p;d;}' -e 's/.*=[^"]"\(.*\)";/\1/g' -e x)
-#  if [[ $DEFAULT_BROWSER != "com.microsoft.edgemac" ]]; then
-#    open /System/Library/PreferencePanes/Appearance.prefPane
-#    echo "Opening System Preferences, set the default browser to Microsoft Edge before continuing."
-#    echo "Close the System Preferences Pane to ensure the default browser setting was saved."
-#    read -r -s -k '?Press any key to continue.'
-#    echo "\n"
-#  fi
-#  sleep 5
-#  DEFAULT_BROWSER=$(defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers | sed -n -e '/LSHandlerURLScheme = https;/{x;p;d;}' -e 's/.*=[^"]"\(.*\)";/\1/g' -e x)
-#  if [[ $DEFAULT_BROWSER != "com.microsoft.edgemac" ]]; then
-#    echo "Set the default browser to Microsoft Edge before continuing. Exiting script now... "
-#    open /System/Library/PreferencePanes/Appearance.prefPane
-#    exit 1
-#  fi
-#
-#  open "https://office.com"
-#  echo "Opening Browser: https://office.com"
-#  echo "Ensure you are logged into your Purple Jay Office365 Account before continuing."
-#  read -r -s -k '?Press any key to continue.'
-#  echo "\n"
-
-#  open "https://purplejayio.sharepoint.com/sites/PurpleJay2/Shared%20Documents/Forms/AllItems.aspx"
-#  echo "Opening Browser: https://purplejayio.sharepoint.com/sites/PurpleJay2/Shared%20Documents/Forms/AllItems.aspx"
-#  echo "Sync Purple Jay Documents before continuing."
-#  read -r -s -k '?Press any key to continue.'
-#  echo "\n"
-#  sleep 5
   setup-venv
   check-become-password
   ansible-playbook local.yml -K
-  update-python-ca-store
-
-#  open "/Applications/1Password.app"
-#  echo "Opening 1Password, enable 'Biometric unlock for 1Password CLI' in Preferences > Developer"
-#  read -r -s -k '?Press any key to continue.'
-#  echo "\n"
-#
-#  check-useryml
-#  op-login
-#  poetry run ansible-playbook local.yml
-#  op-create
 
   exit 1
 fi
@@ -716,12 +560,9 @@ if [[ $1 == "update" ]]; then
   prune-logs
   brew update
   brew upgrade
-  # check-poetry
-  # poetry self update
   check-corporateyml
-  # check-useryml
   activate-venv
-  check-become-password
+  
   ansible-playbook local.yml -K
   exit 1
 fi
@@ -739,7 +580,6 @@ if [[ $1 == "noupdate" ]]; then
   check-corporateyml
   activate-venv
   check-become-password
-  # check-useryml
   ansible-playbook local.yml --skip-tags update -K
   exit 1
 fi
@@ -750,25 +590,9 @@ if [[ $1 == "reset-password" ]]; then
   ansible-playbook local.yml --skip-tags update
   exit 1
 fi
-#
-#if [[ $1 == "op" ]]; then
-#  check-dir
-#  check-become-password
-#  op-login
-#  poetry run ansible-playbook local.yml --skip-tags update
-#  op-create
-#  exit 1
-#fi
 
 if [[ $1 == "reset" ]]; then
   reset-bootstrapmac
-  exit 1
-fi
-
-if [[ $1 == "reset-poetry" ]]; then
-  reset-poetry
-  install-poetry
-  poetry install
   exit 1
 fi
 
@@ -776,11 +600,6 @@ if [[ $1 == "reset-venv" ]]; then
   reset-venv
   exit 1
 fi
-
-#if [[ $1 == "reset-edge" ]]; then
-#  reset-edge
-#  exit 1
-#fi
 
 if [[ $1 == "reset-teams" ]]; then
   reset-teams
@@ -791,11 +610,6 @@ if [[ $1 == "reset-onedrive" ]]; then
   reset-onedrive
   exit 1
 fi
-
-#if [[ $1 == "reset-nextcloud" ]]; then
-#  reset-nextcloud
-#  exit 1
-#fi
 
 if [[ $1 == "create-backup" ]]; then
   create-userbackup
