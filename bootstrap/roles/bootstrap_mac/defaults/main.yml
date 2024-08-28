@@ -23,9 +23,10 @@ brew_cask_packages:
   - 1password
   - nextcloud
   - 1password-cli
+  - yubico-yubikey-manager
 brew_cask_packages_user: []
 brew_packages:
-  - python@3.11
+  - python@3.12
   - nmap
   - tree
   - wget

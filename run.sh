@@ -182,10 +182,6 @@ function install-o365apps {
 function install-apps {
   install-homebrew
   install-python
-#  install-poetry
-#  install-o365apps
-#  install-op
-#  install-op-cli
 }
 
 function check-dir {
@@ -553,53 +549,9 @@ if [[ $1 == "install" ]]; then
   open "/Applications/Company Portal.app"
   read -r -s -k '?Press any key to continue.'
   echo "\n"
-#
-#  open "/Applications/OneDrive.app"
-#  echo "Opening OneDrive, log into your Office 365 account before continuing."
-#  read -r -s -k '?Press any key to continue.'
-#  echo "\n"
-#
-#  DEFAULT_BROWSER=$(defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers | sed -n -e '/LSHandlerURLScheme = https;/{x;p;d;}' -e 's/.*=[^"]"\(.*\)";/\1/g' -e x)
-#  if [[ $DEFAULT_BROWSER != "com.microsoft.edgemac" ]]; then
-#    open /System/Library/PreferencePanes/Appearance.prefPane
-#    echo "Opening System Preferences, set the default browser to Microsoft Edge before continuing."
-#    echo "Close the System Preferences Pane to ensure the default browser setting was saved."
-#    read -r -s -k '?Press any key to continue.'
-#    echo "\n"
-#  fi
-#  sleep 5
-#  DEFAULT_BROWSER=$(defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers | sed -n -e '/LSHandlerURLScheme = https;/{x;p;d;}' -e 's/.*=[^"]"\(.*\)";/\1/g' -e x)
-#  if [[ $DEFAULT_BROWSER != "com.microsoft.edgemac" ]]; then
-#    echo "Set the default browser to Microsoft Edge before continuing. Exiting script now... "
-#    open /System/Library/PreferencePanes/Appearance.prefPane
-#    exit 1
-#  fi
-#
-#  open "https://office.com"
-#  echo "Opening Browser: https://office.com"
-#  echo "Ensure you are logged into your Purple Jay Office365 Account before continuing."
-#  read -r -s -k '?Press any key to continue.'
-#  echo "\n"
-
-#  open "https://purplejayio.sharepoint.com/sites/PurpleJay2/Shared%20Documents/Forms/AllItems.aspx"
-#  echo "Opening Browser: https://purplejayio.sharepoint.com/sites/PurpleJay2/Shared%20Documents/Forms/AllItems.aspx"
-#  echo "Sync Purple Jay Documents before continuing."
-#  read -r -s -k '?Press any key to continue.'
-#  echo "\n"
-#  sleep 5
   setup-venv
   check-become-password
   ansible-playbook local.yml -K
-
-#  open "/Applications/1Password.app"
-#  echo "Opening 1Password, enable 'Biometric unlock for 1Password CLI' in Preferences > Developer"
-#  read -r -s -k '?Press any key to continue.'
-#  echo "\n"
-#
-#  check-useryml
-#  op-login
-#  poetry run ansible-playbook local.yml
-#  op-create
 
   exit 1
 fi
@@ -608,9 +560,7 @@ if [[ $1 == "update" ]]; then
   prune-logs
   brew update
   brew upgrade
-  # poetry self update
   check-corporateyml
-  # check-useryml
   activate-venv
   
   ansible-playbook local.yml -K
@@ -630,7 +580,6 @@ if [[ $1 == "noupdate" ]]; then
   check-corporateyml
   activate-venv
   check-become-password
-  # check-useryml
   ansible-playbook local.yml --skip-tags update -K
   exit 1
 fi
@@ -641,15 +590,6 @@ if [[ $1 == "reset-password" ]]; then
   ansible-playbook local.yml --skip-tags update
   exit 1
 fi
-#
-#if [[ $1 == "op" ]]; then
-#  check-dir
-#  check-become-password
-#  op-login
-#  poetry run ansible-playbook local.yml --skip-tags update
-#  op-create
-#  exit 1
-#fi
 
 if [[ $1 == "reset" ]]; then
   reset-bootstrapmac
@@ -661,11 +601,6 @@ if [[ $1 == "reset-venv" ]]; then
   exit 1
 fi
 
-#if [[ $1 == "reset-edge" ]]; then
-#  reset-edge
-#  exit 1
-#fi
-
 if [[ $1 == "reset-teams" ]]; then
   reset-teams
   exit 1
@@ -675,11 +610,6 @@ if [[ $1 == "reset-onedrive" ]]; then
   reset-onedrive
   exit 1
 fi
-
-#if [[ $1 == "reset-nextcloud" ]]; then
-#  reset-nextcloud
-#  exit 1
-#fi
 
 if [[ $1 == "create-backup" ]]; then
   create-userbackup
