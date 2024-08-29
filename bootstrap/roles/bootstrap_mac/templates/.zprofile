@@ -141,8 +141,8 @@ function venv {
      rm -Rf .venv
   fi
   uv venv
-  v
   pip-install
+  v
 }
 
 function pip-install {
@@ -160,8 +160,12 @@ function pipc {
     uv pip compile --no-emit-index-url --strip-extras --output-file=requirements.txt pyproject.toml
     uv pip compile --no-emit-index-url --extra=test --output-file=requirements-test.txt pyproject.toml
     uv pip compile --no-emit-index-url --extra=test --extra=dev --output-file=requirements-dev.txt pyproject.toml
+
+    pip-install
   elif [[ -f "requirements.in" ]]; then
     uv pip compile --no-emit-index-url --output-file=requirements.txt requirements.in
+
+    pip-install
   else
     echo "No requirements.in or pyproject.toml file found"
   fi
