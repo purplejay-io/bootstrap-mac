@@ -1,0 +1,13 @@
+- name: Set powershell facts
+  set_fact:
+    team_pwsh_profile_dir: "{{ ansible_user_dir }}/.config/powershell"
+
+- name: Create powershell Current User All Hosts profile directory
+  file:
+    state: directory
+    path: "{{ team_pwsh_profile_dir }}"
+
+- name: set powershell team profile
+  template:
+    src: profile.ps1
+    dest: '{{ team_pwsh_profile_dir }}/'

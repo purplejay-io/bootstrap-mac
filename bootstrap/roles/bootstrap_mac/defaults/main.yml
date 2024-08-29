@@ -12,6 +12,21 @@ finder_show_all_files: false
 zprofile_user: ""
 bind_yk: true
 
+# Local Development
+localhost_aliases:
+  - mongo1
+  - mongo2
+  - mongo3
+  - nats.local
+
+developer_repos:
+  - name: 'pj-stack'
+    url: git@gitlab.purplejay.net:infrastructure/pj-stack.git
+    group: infrastructure
+  - name: 'ansible-collections'
+    url: git@gitlab.purplejay.net:keystone/ansible-collections.git
+    group: keystone
+
 # Packages
 brew_cask_packages_removed: []
 brew_cask_packages:
@@ -24,14 +39,23 @@ brew_cask_packages:
   - nextcloud
   - 1password-cli
   - yubico-yubikey-manager
+  - postman
+  - signal
+  - visual-studio-code
+  - gitkraken
 brew_cask_packages_user: []
 brew_packages:
   - python@3.12
+  - node@18
   - nmap
   - tree
   - wget
   - jq
   - pinentry-mac
+  - mkcert
+  - kubectl
+  - uv
+  - nats-io/nats-tools/nats
 brew_packages_removed: []
 brew_packages_user: []
 pip_packages:

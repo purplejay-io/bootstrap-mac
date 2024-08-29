@@ -11,38 +11,20 @@
       set_fact:
         ssh_status: "{{ ssh_check.rc }}"
 
-- name: .ssh directory
-  file:
-    path: "{{ ansible_user_dir }}/.ssh/"
-    state: directory
-    mode: '0700'
-
-#- name: Generate sshkey if doesn't exist
-#  block:
-#    - name: Retrive generated sshkey password
-#      shell: security find-generic-password -a pj-sshkey-pwd -w
-#      register: pj_sshkey_pwd
-#      changed_when: false
-#      failed_when: false
-#    - name: Generate a random password for sshkey-pwd if doesn't exist
-#      shell: security add-generic-password -a pj-sshkey-pwd -s ansible -w "$(openssl rand -base64 25)"
-#      when: pj_sshkey_pwd.stdout == ''
-#    - name: Generate SSH Key if not in 1password
-#      shell: >
-#        echo "y\n" |
-#        ssh-keygen -t rsa -C "{{ host_serial }}@{{ ansible_user_id }}"
-#        -N "{{ pj_sshkey_pwd.stdout }}" -f ~/.ssh/id_rsa
-#  when: not sshkey_exists
-#  no_log: false
-
 - name: ssh config file
   blockinfile:
     path: "{{ ansible_user_dir }}/.ssh/config"
     block: |
+      Host *
+        PKCS11Provider /usr/lib/ssh-keychain.dylib
+        AddKeysToAgent yes
+        UseKeychain yes
+      
       Host gitlab.purplejay.net
         User git
         HostName 10.1.0.30
         UseKeychain yes
+      
       Host github.com
         User git
         HostName github.com
@@ -50,6 +32,13 @@
     marker: "# {mark} PJ baseline ssh config #"
     create: yes
     mode: 0644
+
+- name: Additional ssh config
+  ansible.builtin.blockinfile:
+    block: "{{ ssh_config_user }}"
+    path: $HOME/.ssh/config
+    marker: "### {mark} USER ssh config ###"
+  when: ssh_config_user is defined
 
 - name: SSH Config File lockdown
   block:

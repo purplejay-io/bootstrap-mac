@@ -1,16 +1,7 @@
 ---
 # zprofile baseline
-- name: Ensure jetbrains dir exist
-  file:
-    path: "{{ ansible_user_dir }}/.jetbrains"
-    state: directory
-    mode: '0755'
-
-- name: Ensure git dir exist
-  file:
-    path: ~/git
-    state: directory
-    mode: '0755'
+- name: Ensure common directories exist
+  include_tasks: common_directories.yml
 
 - name: Remove old poetry preferences file
   file:
@@ -27,152 +18,7 @@
 - name: Additional zprofile baseline
   blockinfile:
     block: |
-      export PATH="$HOME/.LOCAL/bin:$PATH"
-      export PATH="$HOME/.jetbrains:$PATH"
-      
-      HOMEBREW_PATH="$(brew --prefix)"
-      
-      # Keep handy in case bug comes backup
-      # https://www.nccs.nasa.gov/nccs-users/instructional/logging-in/connectivity-issues 
-      # alias ssh=/usr/libexec/ssh-apple-pkcs11
-      # alias scp="scp -S /usr/libexec/ssh-apple-pkcs11"
-      # alias sftp="sftp -S /usr/libexec/ssh-apple-pkcs11"
-      # alias rsync="rsync -e /usr/libexec/ssh-apple-pkcs11"
-      
-      function pivssh {
-        ssh-add -D
-        ssh-add -s /usr/lib/ssh-keychain.dylib
-      }
-      
-      # node
-      export PATH="$HOMEBREW_PATH/opt/node@18/bin:$PATH"
-      
-      
-      # Python
-      alias python="python3"
-      
-      
-      function pj-update {
-        cd ~/.pj/bootstrap-mac
-        ./run.sh update
-      }
-      function pj-op {
-              cd ~/.pj/bootstrap-mac
-              ./run.sh op
-      }
-      function pj-noupdate {
-              cd ~/.pj/bootstrap-mac
-              ./run.sh noupdate
-      }
-      function pj-passreset {
-              cd ~/.pj/bootstrap-mac
-              ./run.sh reset-password
-      }
-      function pj-reset {
-              cd ~/.pj/bootstrap-mac
-              ./run.sh reset
-      }
-      function pj-reset-onedrive {
-              cd ~/.pj/bootstrap-mac
-              ./run.sh reset-onedrive
-      }
-      function pj-reset-edge {
-              cd ~/.pj/bootstrap-mac
-              ./run.sh reset-edge
-      }
-      function pj-reset-teams {
-              cd ~/.pj/bootstrap-mac
-              ./run.sh reset-teams
-      }
-      function pj-reset-nextcloud {
-              cd ~/.pj/bootstrap-mac
-              ./run.sh reset-nextcloud
-      }
-      function pj-create-backup {
-              cd ~/.pj/bootstrap-mac
-              ./run.sh create-backup
-      }
-      function gitd {
-          cd "$HOME/git/"
-      }
-
-      function venv {
-          if [[ -d ".venv" ]]; then
-             rm -Rf .venv
-             python3 -m venv .venv
-             . .venv/bin/activate
-          else
-              python3 -m venv .venv
-              . .venv/bin/activate
-          fi
-          if [[ -f "requirements.txt" ]]; then
-            pip install -r requirements.txt
-            pip install --upgrade pip
-          fi
-       }
-      
-      function pipc {
-        if [[ -f "requirements.in" ]]; then
-          . .venv/bin/activate
-          pip install pip-tools
-          rm -f requirements.txt
-          pip-compile --no-emit-index-url --output-file=requirements.txt requirements.in
-          deactivate
-        fi
-      }
-
-      function gitsub {
-        if [[ -f ".gitmodules" ]]; then
-          git submodule sync --recursive
-          git submodule update --init --recursive --remote
-        fi
-      }
-      
-      function v {
-        if [[ -d ".venv" ]]; then
-          . .venv/bin/activate
-        fi
-      }
-      
-      function reboot-vms {
-        vm_list=$(prlctl list -o name --no-header)
-        while IFS= read -r vm_name
-        do
-          echo "VM Name: $vm_name"
-          prlctl restart "$vm_name"
-        done <<(echo "$vm_list")
-      }
-      function shutdown-vms {
-        vm_list=$(prlctl list -o name --no-header)
-        while IFS= read -r vm_name
-        do
-          echo "VM Name: $vm_name"
-          prlctl stop "$vm_name"
-        done <<(echo "$vm_list")
-      }
-      function start-vms {
-        vm_list=$(prlctl list -a -o name --no-header)
-        while IFS= read -r vm_name
-        do
-          echo "VM Name: $vm_name"
-          prlctl start "$vm_name"
-        done <<(echo "$vm_list")
-      }
-      function power-save {
-        shutdown-vms
-        sudo shutdown -s now
-      }
-      alias p="prlctl"
-      alias typora="open -a typora"
-      alias fde="sudo fdesetup authrestart"
-      alias dns="sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder"
-      function ssh-kill {
-        ps aux -o pid,comm | grep "ssh -f" | grep -v grep | awk '{print $2}'| xargs kill
-      }
-      function ssh-tunnels {
-        ~/tunnels.sh
-      }
-
+      {{ lookup("template", "templates/.zprofile") }}
     path: $HOME/.zprofile
     marker: "### {mark} PJ zprofile baseline ###"
     create: yes
@@ -182,16 +28,44 @@
     block: "{{ zprofile_user }}"
     path: $HOME/.zprofile
     marker: "### {mark} USER zprofile baseline ###"
-    create: yes
+
+- name: Configure git
+  include_tasks: git_config.yml
+  when: git_config is defined
+
+- name: Git checkout
+  include_tasks: git_repos.yml
+  vars:
+    repos: '{{ developer_repos }}'
+
+- name: Git checkout
+  include_tasks: git_repos.yml
+  vars:
+    repos: '{{ user_repos }}'
+  when: user_repos is defined
 
 - name: setup .npmrc and pip auth with keystone
   template:
-    src: '{{ item }}'
-    dest: '{{ ansible_user_dir }}'
+    src: .npmrc
+    dest: '{{ ansible_user_dir }}/'
   when: gitlab_api_token != "please_update_user_yml"
-  loop:
-    - .npmrc
-    - pip.conf
+
+- name: setup pip conf
+  template:
+    src: pip.conf
+    dest: '{{ ansible_user_dir }}/.config/pip/'
+  when: gitlab_api_token != "please_update_user_yml"
+
+- name: setup /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    state: present
+    search_string: '127.0.0.1'
+    line: "127.0.0.1  localhost {{ localhost_aliases | join(' ') }}"
+  become: true
+
+- name: setup powershell
+  include_tasks: powershell.yml
 
 #- name: Remove sudo from pam.d
 #  lineinfile:

@@ -1,0 +1,38 @@
+- name: Git config username
+  community.general.git_config:
+    name: user.name
+    scope: global
+    value: "{{ git_config.user_name }}"
+
+
+- name: Git config email
+  community.general.git_config:
+    name: user.email
+    scope: global
+    value: "{{ git_config.email }}"
+
+# TODO: save for later
+# - name: Git config signingkey
+#   community.general.git_config:
+#     name: user.signingkey
+#     scope: global
+#     value: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIALOLzo0OMd95pklsUJ7FbzweeKWEW5v2mkgOh/By8Mj
+
+# - name: Git config gpg program
+#   community.general.git_config:
+#     name: gpg.ssh.program
+#     scope: global
+#     value: "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+
+# - name: Git config gpg format
+#   community.general.git_config:
+#     name: gpg.format
+#     scope: global
+#     value: ssh
+
+# - name: Git config commit sign
+#   community.general.git_config:
+#     name: commit.gpgsign
+#     scope: global
+#     value: true
+

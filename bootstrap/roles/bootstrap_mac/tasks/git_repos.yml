@@ -1,0 +1,13 @@
+- name: Ensure repos dir exist
+  file:
+    path: "{{ ansible_user_dir }}/git/{{ item.group }}"
+    state: directory
+    mode: '0755'
+  loop: "{{ repos }}"
+
+- name: Git checkout
+  ansible.builtin.git:
+    repo: '{{ item.url }}'
+    dest: '{{ ansible_user_dir }}/git/{{ item.group }}/{{ item.name }}'
+  ignore_errors: true
+  loop: '{{ repos }}'
