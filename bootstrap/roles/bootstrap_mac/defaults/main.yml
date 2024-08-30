@@ -1,4 +1,6 @@
 ---
+node_type: 'employee'
+
 # Environment
 three_finger_drag: true
 single_touch_tap: true
@@ -19,13 +21,17 @@ localhost_aliases:
   - mongo3
   - nats.local
 
-developer_repos:
-  - name: 'pj-stack'
-    url: git@gitlab.purplejay.net:infrastructure/pj-stack.git
-    group: infrastructure
-  - name: 'ansible-collections'
-    url: git@gitlab.purplejay.net:keystone/ansible-collections.git
-    group: keystone
+# git
+git_config: {}
+# Schema
+# user_name: John Doe
+# email: jd@purplejay.io
+
+repos: []
+# Schema
+#  - name: 'ansible-collections'
+#    url: git@gitlab.purplejay.net:keystone/ansible-collections.git
+#    group: keystone
 
 # Packages
 brew_cask_packages_removed: []
@@ -51,24 +57,19 @@ brew_packages:
   - tree
   - wget
   - jq
-  - pinentry-mac
   - mkcert
   - kubectl
   - uv
   - nats-io/nats-tools/nats
 brew_packages_removed: []
 brew_packages_user: []
-pip_packages:
-  - pip
-  - pip-tools
-  - keepercommander
+pip_packages: []
 pip_packages_removed: []
 mas_apps: []
 mas_apps_removed: []
 
 # Hardening
 ssh_authorized_keys: []
-ssh_authorized_keys_removed: []
 harden_ssh: true
 protect_screen_sharing: no
 

@@ -3,6 +3,7 @@
     name: user.name
     scope: global
     value: "{{ git_config.user_name }}"
+  when: git_config.user_name is defined
 
 
 - name: Git config email
@@ -10,6 +11,7 @@
     name: user.email
     scope: global
     value: "{{ git_config.email }}"
+  when: git_config.email is defined
 
 # TODO: save for later
 # - name: Git config signingkey

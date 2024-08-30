@@ -1,0 +1,47 @@
+---
+
+- name: Additional user zprofile baseline
+  blockinfile:
+    block: "{{ zprofile_user }}"
+    path: $HOME/.zprofile
+    marker: "### {mark} USER zprofile baseline ###"
+
+- name: Trackpad 3 Finger Drag
+  community.general.osx_defaults:
+    domain: com.apple.AppleMultitouchTrackpad
+    key: TrackpadThreeFingerDrag
+    type: int
+    value: "{{ three_finger_drag|int }}"
+    state: present
+
+- name: Trackpad Single Touch Tap - AppleMultitouchTrackpad
+  community.general.osx_defaults:
+    domain: com.apple.AppleMultitouchTrackpad
+    key: Clicking
+    type: int
+    value: "{{ single_touch_tap|int }}"
+    state: present
+
+- name: Trackpad Single Touch Tap - AppleBluetoothMultitouch
+  community.general.osx_defaults:
+    domain: com.apple.driver.AppleBluetoothMultitouch.trackpad
+    key: Clicking
+    type: int
+    value: "{{ single_touch_tap|int }}"
+    state: present
+
+- name: Finder Show Status Bar
+  community.general.osx_defaults:
+    domain: com.apple.finder
+    key: ShowStatusBar
+    type: int
+    value: "{{ show_status_bar|int }}"
+    state: present
+
+- name: Default Finder Location
+  community.general.osx_defaults:
+    domain: com.apple.finder
+    key: NewWindowTarget
+    type: string
+    value: "{{ new_window_target }}"
+    state: present

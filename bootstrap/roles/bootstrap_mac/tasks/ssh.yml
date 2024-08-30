@@ -14,21 +14,7 @@
 - name: ssh config file
   blockinfile:
     path: "{{ ansible_user_dir }}/.ssh/config"
-    block: |
-      Host *
-        PKCS11Provider /usr/lib/ssh-keychain.dylib
-        AddKeysToAgent yes
-        UseKeychain yes
-      
-      Host gitlab.purplejay.net
-        User git
-        HostName 10.1.0.30
-        UseKeychain yes
-      
-      Host github.com
-        User git
-        HostName github.com
-        UseKeychain yes
+    block: '{{ lookup("template", "templates/" + node_type + "_ssh_config") | default("") }}'
     marker: "# {mark} PJ baseline ssh config #"
     create: yes
     mode: 0644
@@ -75,16 +61,8 @@
     user: "{{ ansible_user_id }}"
     state: present
     key: "{{ item }}"
-    path: "{{ ansible_user_dir }}/.ssh/authorized_keys"
     manage_dir: yes
-  loop: "{{ ssh_authorized_keys }}"
-  notify: User Restart
-
-- name: Remove ssh pubkeys to authorized_keys
-  ansible.posix.authorized_key:
-    user: "{{ ansible_user_id }}"
-    state: absent
-    key: "{{ item }}"
-    path: "{{ ansible_user_dir }}/.ssh/authorized_keys"
-  loop: "{{ ssh_authorized_keys_removed }}"
+    exclusive: true
+  with_items:
+    - "{{ ssh_authorized_keys | join('\n') }}"
   notify: User Restart

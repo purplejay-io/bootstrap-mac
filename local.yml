@@ -15,7 +15,6 @@
 - hosts: localhost
   vars_files:
     - vars/user.yml
-    - vars/corporate.yml
 #    - vars/pass.yml
   roles:
     - role: bootstrap/roles/bootstrap_mac
