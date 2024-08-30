@@ -19,13 +19,23 @@ export UV_NATIVE_TLS="true"
 # alias sftp="sftp -S /usr/libexec/ssh-apple-pkcs11"
 # alias rsync="rsync -e /usr/libexec/ssh-apple-pkcs11"
 
-function pivssh {
+function pivssh-agent {
+  ssh-add -D
+  ssh-add -s /usr/lib/ssh-keychain.dylib
+}
+
+function pivssh-key {
   ssh-add -D
   ssh-add -s /usr/lib/ssh-keychain.dylib
 }
 
 function yk-ssh-key {
-  ssh-keygen -D /usr/lib/ssh-keychain.dylib
+  ssh-keygen -D /usr/local/lib/libykcs11.dylib
+}
+
+function yk-ssh-agent {
+  ssh-add -D
+  ssh-add -s /usr/local/lib/libykcs11.dylib
 }
 
 
