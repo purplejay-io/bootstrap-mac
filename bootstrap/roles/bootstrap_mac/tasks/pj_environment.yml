@@ -15,10 +15,22 @@
     create: yes
   when: ansible_architecture == 'arm64'
 
+- name: set template zprofile file path
+  set_fact:
+    template_file_path: "templates/{{ node_type }}.zprofile"
+
+- name: Check if the template zprofile file exists
+  stat:
+    path: "{{ template_file_path }}"
+  register: template_file_stat
+
+- name: Set the template zprofile content or default value
+  set_fact:
+    zprofile_template_content: "{{ lookup('template', template_file_path) if template_file_stat.stat.exists else '' }}"
+
 - name: Additional zprofile baseline
   blockinfile:
-    block: |
-      {{ lookup("template", "templates/" + node_type + ".zprofile") | default("") }}
+    block: "{{ zprofile_template_content }}"
     path: $HOME/.zprofile
     marker: "### {mark} PJ zprofile baseline ###"
     create: yes
