@@ -27,6 +27,13 @@
   stat:
     path: "{{ playbook_dir }}/bootstrap/roles/bootstrap_mac/{{ template_file_path }}"
   register: template_file_stat
+  when: ansible_hostname == 'localhost'
+
+- name: Check if the template zprofile file exists
+  stat:
+    path: "{{ template_file_path }}"
+  register: template_file_stat
+  when: ansible_hostname != 'localhost'
 
 - name: Set the template zprofile content or default value
   set_fact:
