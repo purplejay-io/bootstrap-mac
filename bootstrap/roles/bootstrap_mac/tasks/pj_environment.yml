@@ -15,25 +15,13 @@
     create: yes
   when: ansible_architecture == 'arm64'
 
-- name: set template zprofile file path
-  set_fact:
+
+- name: set zprofile block from template
+  include_tasks: utilities/set_block_from_template.yml
+  vars:
+    dest: "$HOME/.zprofile"
+    template_marker: "PJ zprofile baseline"
     template_file_path: "templates/{{ node_type }}.zprofile"
-
-- name: Check if the template zprofile file exists and set the content
-  set_fact:
-    zprofile_template_content: >-
-      {{ lookup('template', template_file_path) if lookup('template', template_file_path, errors='ignore') is not none else '' }}
-
-#- name: Set the template zprofile content or default value
-#  set_fact:
-#    zprofile_template_content: "{{ lookup('template', template_file_path) if template_file_stat.stat.exists else '' }}"
-
-- name: Additional zprofile baseline
-  blockinfile:
-    block: "{{ zprofile_template_content }}"
-    path: $HOME/.zprofile
-    marker: "### {mark} PJ zprofile baseline ###"
-    create: yes
 
 - name: Configure git
   include_tasks: git_config.yml

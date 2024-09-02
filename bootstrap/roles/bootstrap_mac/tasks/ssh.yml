@@ -11,27 +11,12 @@
       set_fact:
         ssh_status: "{{ ssh_check.rc }}"
 
-
-- name: set template ssh_config file path
-  set_fact:
+- name: set ssh config block from template
+  include_tasks: utilities/set_block_from_template.yml
+  vars:
+    dest: "{{ ansible_user_dir }}/.ssh/config"
+    template_marker: "PJ baseline ssh config"
     template_file_path: "templates/{{ node_type }}_ssh_config"
-
-- name: Check if the template ssh_config file exists
-  stat:
-    path: "{{ template_file_path }}"
-  register: template_file_stat
-
-- name: Set the template ssh_config content or default value
-  set_fact:
-    ssh_config_template_content: "{{ lookup('template', template_file_path) if template_file_stat.stat.exists else '' }}"
-
-- name: ssh config file
-  blockinfile:
-    path: "{{ ansible_user_dir }}/.ssh/config"
-    block: "{{ ssh_config_template_content }}"
-    marker: "# {mark} PJ baseline ssh config #"
-    create: yes
-    mode: 0644
 
 - name: Additional ssh config
   ansible.builtin.blockinfile:

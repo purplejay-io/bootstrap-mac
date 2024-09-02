@@ -1,0 +1,10 @@
+- name: place block from template into dest
+  vars:
+    template_content: >-
+      {{ lookup('template', template_file_path) if lookup('template', template_file_path, errors='ignore') is not none else '' }}
+  blockinfile:
+    block: "{{ template_content }}"
+    path: "{{ dest }}"
+    marker: "### {mark} {{ template_marker }} ###"
+    create: true
+    mode: "0644"
