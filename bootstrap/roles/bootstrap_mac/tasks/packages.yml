@@ -5,13 +5,18 @@
   changed_when: false
   become: yes
 
+- name: Tap nats Homebrew repository
+  community.general.homebrew_tap:
+    name: nats-io/nats-tools
+    state: present
+  when: 'nats-io/nats-tools/nats' in brew_packages
+
 # Homebrew installer and dependencies
 - name: Install baseline homebrew packages
   homebrew:
     name: "{{ item }}"
     update_homebrew: true
     upgrade_all: false
-
   loop: "{{ brew_packages }}"
   ignore_errors: yes
 
