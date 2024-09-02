@@ -9,7 +9,7 @@
   community.general.homebrew_tap:
     name: nats-io/nats-tools
     state: present
-  when: 'nats-io/nats-tools/nats' in brew_packages
+  when: '"nats-io/nats-tools/nats" in brew_packages'
 
 # Homebrew installer and dependencies
 - name: Install baseline homebrew packages
