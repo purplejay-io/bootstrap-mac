@@ -201,9 +201,6 @@ function check-ansible-readiness {
 
   # Create empty secrets and user vars files if not found
   cd "$BOOTSTRAP_MAC_PATH" || (echo "failed going to bootstrap mac path"; exit 1)
-#  if [[ ! -f vars/secrets.yml ]]; then
-#    echo "---" > vars/secrets.yml
-#  fi
   if [[ ! -f vars/user.yml ]]; then
     echo "---" > vars/user.yml
   fi
@@ -512,6 +509,7 @@ if [[ $1 == "noupdate" ]]; then
 fi
 
 if [[ $1 == "reset-password" ]]; then
+  activate-venv
   reset-become-password
   check-become-password
   ansible-playbook local.yml --skip-tags update --vault-password-file "$LOCAL_VAULT_PASS_FILE"
