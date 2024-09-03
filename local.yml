@@ -15,7 +15,7 @@
 - hosts: localhost
   vars_files:
     - vars/user.yml
-#    - vars/pass.yml
+    - vars/pass.yml
   roles:
     - role: bootstrap/roles/bootstrap_mac
       when: ansible_distribution == "MacOSX"

@@ -6,7 +6,7 @@
 
 script_path=$(readlink -f "${BASH_SOURCE:-$0}")
 ROOT_DIR=$(dirname "$script_path")
-echo $ROOT_DIR
+echo "$ROOT_DIR"
 
 # Is Homebrew installed correctly?
 if [[ $(uname -m) == 'arm64' ]]; then
@@ -22,29 +22,19 @@ export PATH="$HOMEBREW_PATH/bin:$HOME/.local/bin:$PATH"
 # Is Python3 Installed with
 PYTHON_INSTALLED=$(test -f $HOMEBREW_PATH/bin/python3;echo $?)
 
-# Is Poetry Installed
-#POETRY_INSTALLED=$(test -f $HOME/.local/bin/poetry;echo $?)
-
-# Is 1Password Installed
-# Overriding for now as 1Password no longer a dependency for employees to connect
-# OP_INSTALLED=$(test -d /Applications/1Password.app;echo $?)
-OP_INSTALLED=0
-
-# Is 1Password CLI Installed
-# Overriding for now as 1Password no longer a dependency for employees to connect
-# OP_CLI_INSTALLED=$(test -f /usr/local/bin/op;echo $?)
-OP_CLI_INSTALLED=0
+# Is yq Installed
+YQ_INSTALLED=$(test -f $HOMEBREW_PATH/bin/yq;echo $?)
 
 # Is bootstrap_mac repo synced on mac?
-BOOTSTRAP_MAC_PATH="$HOME/.pj/bootstrap-mac/"
-BOOTSTRAP_MAC_REPO=$(test -d $HOME/.pj/bootstrap-mac/.git/;echo $?)
+BOOTSTRAP_MAC_PATH="${2:-$HOME/.pj/bootstrap-mac/}"
+printf "Bootstrap Mac Path %s\n" "$BOOTSTRAP_MAC_PATH"
 
-# Is the OneDrive IT Setup Folder being synced?
-#IT_SETUP_FOLDER="$HOME/Library/CloudStorage/OneDrive-SharedLibraries-PurpleJay/Purple Jay - Documents/IT Setup"
-#IT_SETUP_FOLDER_CHECK=$(test -d "$IT_SETUP_FOLDER";echo $?)
+BOOTSTRAP_MAC_REPO=$(test -d "$BOOTSTRAP_MAC_PATH"/.git/;echo $?)
 
 # Personal OneDrive Folder
 PERSONAL_FOLDER="$HOME/Library/CloudStorage/OneDrive-PurpleJay"
+
+LOCAL_VAULT_PASS_FILE="$HOME/.pj-bootstrap-ansible.txt"
 
 ########################################################################
 #  Define Functions
@@ -56,9 +46,10 @@ function install-homebrew {
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     HOMEBREW_INSTALLED=$(test -f $HOMEBREW_PATH/bin/brew;echo $?)
     if [[ $(uname -m) == 'arm64' ]]; then
+      # shellcheck disable=SC2016
       (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile
     else
-      sudo chown -R $(whoami) /usr/local/share/zsh /usr/local/share/zsh/site-functions
+      sudo chown -R "$(whoami)" /usr/local/share/zsh /usr/local/share/zsh/site-functions
       chmod u+w /usr/local/share/zsh /usr/local/share/zsh/site-functions
     fi
   fi
@@ -71,7 +62,7 @@ function install-homebrew {
 
 function install-python {
   if [[ $HOMEBREW_INSTALLED == 0 && $PYTHON_INSTALLED == 1 ]]; then
-    brew install python3
+    brew install python3 uv
     $HOMEBREW_PATH/bin/python3 -m pip install pip --upgrade
     PYTHON_INSTALLED=$(test -f $HOMEBREW_PATH/bin/python3;echo $?)
   fi
@@ -82,16 +73,28 @@ function install-python {
   fi
 }
 
+function install-yq {
+  if [[ $HOMEBREW_INSTALLED == 0 && $YQ_INSTALLED == 1 ]]; then
+    brew install yq
+    YQ_INSTALLED=$(test -f $HOMEBREW_PATH/bin/yq;echo $?)
+  fi
+  if [[ $YQ_INSTALLED != 0 ]]; then
+    echo "function: install-yq"
+    echo "yq did not install successfully, try again."
+    exit 1
+  fi
+}
+
 function setup-venv {
-  cd $HOME/.pj/bootstrap-mac/
-  $HOMEBREW_PATH/bin/python3 -m venv .venv
+  cd "$BOOTSTRAP_MAC_PATH" || exit 1
+  uv venv
   . .venv/bin/activate
   check-venv
-  python3 -m pip install -r requirements.txt
+  uv pip install -r requirements.txt
 }
 
 function reset-venv {
-  rm -Rf $ROOT_DIR/.venv
+  rm -Rf "$ROOT_DIR"/.venv
   setup-venv
 }
 
@@ -99,7 +102,7 @@ function activate-venv {
   if [[ -d "$ROOT_DIR/.venv" ]]; then
       setup-venv
   fi
-  . $ROOT_DIR/.venv/bin/activate
+  . "$ROOT_DIR"/.venv/bin/activate
   check-venv
 }
 
@@ -118,85 +121,44 @@ function install-bootstrapmac {
     fi
 
     if [[ $BOOTSTRAP_MAC_REPO == 1 ]]; then
-      mkdir -p "$HOME"/.pj
-      git clone https://github.com/purplejay-io/bootstrap-mac.git $BOOTSTRAP_MAC_PATH
-      BOOTSTRAP_MAC_REPO=$(test -d $HOME/.pj/bootstrap-mac/.git/;echo $?)
-#      echo "Bootstrap-mac was not found in ~/.pj/bootstrap-mac/"
-#      echo "Please follow the instructions and try again."
-#      exit 1
+      mkdir -p "$BOOTSTRAP_MAC_PATH"
+      git clone https://github.com/purplejay-io/bootstrap-mac.git "$BOOTSTRAP_MAC_PATH"
+      BOOTSTRAP_MAC_REPO=$(test -d "$BOOTSTRAP_MAC_PATH"/.git/;echo $?)
     else
-      cd $BOOTSTRAP_MAC_PATH || exit
-      git reset --hard HEAD
-      git fetch
-      # Pull latest bootstrap-mac version
-      if [[ $(git rev-list HEAD...origin/main --count) != 0 ]]; then
-        git pull
-        echo "The bootstrap-mac script has been updated. Re run the script now."
-        exit 1
+      cd "$BOOTSTRAP_MAC_PATH" || exit 1
+      if [[ "$BOOTSTRAP_MAC_PATH" == *".pj"* ]]; then
+        git reset --hard HEAD
+        git fetch
+        # Pull latest bootstrap-mac version
+        if [[ $(git rev-list HEAD...origin/main --count) != 0 ]]; then
+          git pull
+          echo "The bootstrap-mac script has been updated. Re run the script now."
+          exit 1
+        fi
+        # Escape the script if git pull didn't get the latest
+        if [[ $(git rev-list HEAD...origin/main --count) != 0 ]]; then
+          echo "function: install-bootstrapmac"
+          echo "An error occurred with pulling the version of bootstrap_man. Try again. "
+          exit 1
+        fi
+      else
+        echo "The variable does not contain .pj -- Not pulling latest from git repo"
       fi
-      # Escape the script if git pull didn't get the latest
-      if [[ $(git rev-list HEAD...origin/main --count) != 0 ]]; then
-        echo "function: install-bootstrapmac"
-        echo "An error occurred with pulling the version of bootstrap_man. Try again. "
-        exit 1
-      fi
-    fi
-    if [[ $OP_CLI_INSTALLED != 0 ]]; then
-      echo "function: install-op-cli"
-      echo "1Password CLI did not install successfully, try again."
-      exit 1
     fi
 }
 
-function install-o365apps {
-  if [[ ! -f $HOMEBREW_PATH/bin/wget ]];then
-    brew install wget
-  fi
-
-  if [[ ! -d "/Applications/Company Portal.app" ]];then
-    sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Company%20Portal/installCompanyPortal.sh)"
-  fi
-  if [[ ! -d "/Applications/Company Portal.app" ]];then
-    echo "function: install-o365apps"
-    echo "Company Portal did not install, try again."
-    exit 1
-  fi
-  if [[ ! -d "/Applications/Microsoft Teams.app" ]];then
-    sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Misc/Rosetta2/installRosetta2.sh)"
-    sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Teams/installTeams.sh)"
-  fi
-  if [[ ! -d "/Applications/Microsoft Teams.app" ]];then
-    echo "function: install-o365apps"
-    echo "Teams did not install, try again."
-    exit 1
-  fi
-  if [[ ! -d "/Applications/Microsoft Edge.app" ]];then
-    sudo /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/microsoft/shell-intune-samples/master/Apps/Edge/installEdge.sh)"
-  fi
-  if [[ ! -d "/Applications/Microsoft Edge.app" ]];then
-    echo "function: install-o365apps"
-    echo "Edge did not install, try again."
-    exit 1
-  fi
-}
 function install-apps {
   install-homebrew
   install-python
-}
-
-function check-dir {
-  if [[ $ROOT_DIR != "$HOME/.pj/bootstrap-mac" ]]; then
-    echo "function: check-dir"
-    echo "You must run bootstrap-mac from ~/.pj/bootstrap-mac. Try again. \n"
-    exit 1
-  fi
+  install-yq
 }
 
 function check-useryml {
-  if [[ -f $PERSONAL_FOLDER/user.yml ]]; then
+  # shellcheck disable=SC2317
+  if [[ -f "$PERSONAL_FOLDER/user.yml" ]]; then
     echo "user.yml was found in OneDrive, will sync with bootstrap-mac if OneDrive version newer."
-    echo "\n"
-    rsync -uq $PERSONAL_FOLDER/user.yml $BOOTSTRAP_MAC_PATH/vars/user.yml
+    printf "\n"
+    rsync -uq "$PERSONAL_FOLDER"/user.yml "$BOOTSTRAP_MAC_PATH"/vars/user.yml
   fi
 }
 
@@ -226,64 +188,25 @@ function check-ansible-readiness {
     echo "Python 3 must be installed before you can run bootstrap-mac"
     exit 1
   fi
-#  if [[ $POETRY_INSTALLED == 1 ]]; then
-#    echo "function: check-ansible-readiness"
-#    echo "Poetry must be installed before you can run bootstrap-mac"
-#    exit 1
-#  fi
-  if [[ $OP_INSTALLED == 1 ]]; then
-    echo "function: check-ansible-readiness"
-    echo "1password must be installed before you can run bootstrap-mac"
-    exit 1
-  fi
-  if [[ $OP_CLI_INSTALLED == 1 ]]; then
-    echo "function: check-ansible-readiness"
-    echo "1password CLI must be installed before you can run bootstrap-mac"
-    exit 1
-  fi
   if [[ $BOOTSTRAP_MAC_REPO == 1 ]]; then
     echo "function: check-ansible-readiness"
     echo "bootstrap-mac repo must be cloned locally before you can run bootstrap-mac"
     exit 1
   fi
-#  if [[ $IT_SETUP_FOLDER_CHECK == 1 ]]; then
-#    echo "function: check-ansible-readiness"
-#    echo "IT Setup OneDrive folder must be synced before you can run bootstrap-mac"
-#    exit 1
-#  fi
 
   # Remove old bootstrap_mac folder if found
   if [[ -d $HOME/.pj/bootstrap_mac/ ]]; then
-    rm -Rf $HOME/.pj/bootstrap_mac/
+    rm -Rf "$HOME"/.pj/bootstrap_mac/
   fi
 
   # Create empty secrets and user vars files if not found
-  cd $BOOTSTRAP_MAC_PATH
+  cd "$BOOTSTRAP_MAC_PATH" || (echo "failed going to bootstrap mac path"; exit 1)
 #  if [[ ! -f vars/secrets.yml ]]; then
 #    echo "---" > vars/secrets.yml
 #  fi
   if [[ ! -f vars/user.yml ]]; then
     echo "---" > vars/user.yml
   fi
-  if [[ ! -f vars/corporate.yml ]]; then
-    echo "---" > vars/corporate.yml
-  fi
-
-  # Check Poetry
-  # poetry install
-  # if [[ ! -f .venv/bin/python ]]; then
-  #   echo "function: check-ansible-readiness"
-  #   echo "Poetry Virtual Enviornment was not setup correctly, try again."
-  #   exit 1
-  # fi
-
-#  pull-ansiblecollections
-#
-#  if [[ ! -f $HOME/.ansible/collections/ansible_collections/pj/mac/MANIFEST.json ]]; then
-#    echo "function: check-ansible-readiness"
-#    echo "Ansible Collection was not installed correctly, try again."
-#    exit 1
-#  fi
 
   # If none of the above failed, we can assume bootstrap_mac can be ran
   ANSIBLE_READINESS=0
@@ -306,22 +229,32 @@ function check-become-password {
   fi
 
   # 3. Change Directory
-  cd $BOOTSTRAP_MAC_PATH
+  cd "$BOOTSTRAP_MAC_PATH" || (echo "error going to bootstrap mac path"; exit 1;)
 
-  # 4. If pass.yml does not exist, then ask user for it
-  if [[ ! -f vars/pass.yml ]]; then
-    echo -n Local Password:
-    read -s password
-    echo "\n"
-    echo "---" > vars/pass.yml
-    echo "ansible_become_password: $password" >> vars/pass.yml
-    check-venv
-
-    echo `security find-generic-password -a pj-bootstrap-ansible -w` | ansible-vault encrypt vars/pass.yml
+  # 4. Create local ansible vault password file
+  if [[ ! -f "$LOCAL_VAULT_PASS_FILE" ]]; then
+    echo -n
+    echo -n "Create a Vault Password:"
+    read -rs vault_password
+    printf "\n"
+    echo "$vault_password" > "$LOCAL_VAULT_PASS_FILE"
   fi
 
-  # 5. Check to make sure become password is encrypted
-  if [[ $(ansible-vault view vars/pass.yml) == "" ]]; then
+  # 5. If pass.yml does not exist, then ask user for it
+  if [[ ! -f "$BOOTSTRAP_MAC_PATH"/vars/pass.yml ]]; then
+    echo -n
+    echo -n "Enter Local Mac Password:"
+    read -rs password
+    printf "\n"
+    echo "---" > "$BOOTSTRAP_MAC_PATH"/vars/pass.yml
+    echo "ansible_become_password: $password" >> "$BOOTSTRAP_MAC_PATH"/vars/pass.yml
+    check-venv
+
+    echo `security find-generic-password -a pj-bootstrap-ansible -w` | ansible-vault encrypt --vault-password-file "$LOCAL_VAULT_PASS_FILE" vars/pass.yml
+  fi
+
+  # 6. Check to make sure become password is encrypted
+  if [[ $(ansible-vault view vars/pass.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" ) == "" ]]; then
     echo "function: check-become-password"
     echo "Ansible-Vault wasn't able to encrypt your become password, try again."
     exit 1
@@ -332,7 +265,7 @@ function check-become-password {
 function create-archive {
   CURRENT_DATE=$(date +%m-%d-%Y)
   ARCHIVE_FOLDER="$CURRENT_DATE-Archive"
-  mkdir -p $HOME/$ARCHIVE_FOLDER
+  mkdir -p "$HOME/$ARCHIVE_FOLDER"
 }
 
 function create-userbackup {
@@ -344,8 +277,8 @@ function create-userbackup {
   --exclude='[Bb]in' --exclude='[Oo]bj' --exclude='[Dd]ebug' --exclude='[Rr]elease' --exclude='x64'\
   --exclude='.venv' \
   -czf "$HOME/$ARCHIVE_FOLDER/$SN-backup.tar.gz" \
-  -C $HOME \
-  git/ .pj/bootstrap-mac/vars/user.yml .ssh/ "Library/Containers/com.microsoft.rdc.macos/Data/Library/Application Support/com.microsoft.rdc.macos"
+  -C "$HOME" \
+  git/ "$BOOTSTRAP_MAC_PATH"/vars/user.yml .ssh/ "Library/Containers/com.microsoft.rdc.macos/Data/Library/Application Support/com.microsoft.rdc.macos"
 }
 
 function reset-dock {
@@ -355,7 +288,8 @@ function reset-dock {
 
 function reset-become-password {
   security delete-generic-password -a pj-bootstrap-ansible
-  rm -f $BOOTSTRAP_MAC_PATH/vars/pass.yml
+  rm -f "$BOOTSTRAP_MAC_PATH"/vars/pass.yml
+  rm -f "$LOCAL_VAULT_PASS_FILE"
 }
 
 function reset-onedrive {
@@ -494,13 +428,13 @@ function reset-bootstrapmac {
 
 
 function display-help {
-  echo "Usage: ./run.sh [Option]
+  echo "Usage: ./run.sh [Option] [Path]
 
   Options:
   install           Install Apps and Clones bootstrap-mac
   update            Runs bootstrap-mac and upgrades poetry
   noupdate          Runs bootstrap-mac minus homebrew playbooks
-  password          Resets become password
+  reset-password    Resets become password
   reset             Uninstall Apps and remove bootstrap-mac
   reset-venv        Reset Python Virtual Environment
   reset-edge        Reset Microsoft Edge
@@ -508,6 +442,9 @@ function display-help {
   reset-onedrive    Reset Microsoft OneDrive
   reset-nextcloud   Reset Nextcloud
   create-backup     Backup user git, ssh, and user.yml
+
+  Path:
+  <blank>           Will default to ~/.pj/bootstrap-mac
   "
   exit 1
 }
@@ -516,7 +453,7 @@ function display-help {
 #  Run Playbook
 ########################################################################
 
-if [[ $# -gt 1 ]]; then
+if [[ $# -gt 2 ]]; then
   display-help
 fi
 
@@ -525,24 +462,26 @@ fi
 if [[ $1 == "install" ]]; then
   install-apps
   install-bootstrapmac
-  cd ~/.pj/bootstrap-mac
+  cd "$BOOTSTRAP_MAC_PATH" || (echo "error going to bootstrap mac path"; exit 1)
   reset-dock
 
-  FILEVAULT_CHECK=$(sudo fdesetup isactive)
+  setup-venv
+  check-become-password
+
+  FILEVAULT_CHECK=$(ansible-vault view "$BOOTSTRAP_MAC_PATH"/vars/pass.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" | yq -r '.ansible_become_password' | sudo -S fdesetup isactive)
   if [[ $FILEVAULT_CHECK != "true" ]]; then
     echo "Opening System Preferences, turn on Filevault before you proceed."
     open "x-apple.systempreferences:com.apple.preference.security?FileVault"
     read -r -s -k '?Press any key to continue.'
-    echo "\n"
+    printf "\n"
   fi
 
   echo "Opening Company Portal, ensure your device is compliant before continuing."
   open "/Applications/Company Portal.app"
   read -r -s -k '?Press any key to continue.'
-  echo "\n"
-  setup-venv
-  check-become-password
-  ansible-playbook local.yml -K
+  printf "\n"
+
+  ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
 
   exit 1
 fi
@@ -553,7 +492,7 @@ if [[ $1 == "update" ]]; then
   brew upgrade
   activate-venv
   
-  ansible-playbook local.yml -K
+  ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
   exit 1
 fi
 
@@ -568,14 +507,14 @@ if [[ $1 == "noupdate" ]]; then
   prune-logs
   activate-venv
   check-become-password
-  ansible-playbook local.yml --skip-tags update -K
+  ansible-playbook local.yml --skip-tags update --vault-password-file "$LOCAL_VAULT_PASS_FILE"
   exit 1
 fi
 
 if [[ $1 == "reset-password" ]]; then
   reset-become-password
   check-become-password
-  ansible-playbook local.yml --skip-tags update
+  ansible-playbook local.yml --skip-tags update --vault-password-file "$LOCAL_VAULT_PASS_FILE"
   exit 1
 fi
 
