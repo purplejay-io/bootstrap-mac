@@ -37,7 +37,7 @@
     name: "{{ item }}"
     state: present
     greedy: yes
-#    sudo_password: "{{ ansible_become_password }}"
+    sudo_password: "{{ ansible_become_password }}"
 #    install_options: force
   loop: "{{ brew_cask_packages }}"
   ignore_errors: yes
@@ -47,14 +47,14 @@
     name: "{{ item }}"
     state: absent
     install_options: force
-#    sudo_password: "{{ ansible_become_password }}"
+    sudo_password: "{{ ansible_become_password }}"
   loop: "{{ brew_cask_packages_removed }}"
 
 - name: Install user homebrew cask packages
   homebrew_cask:
     name: "{{ item }}"
     state: present
-#    sudo_password: "{{ ansible_become_password }}"
+    sudo_password: "{{ ansible_become_password }}"
 #    install_options: force
   loop: "{{ brew_cask_packages_user }}"
 
