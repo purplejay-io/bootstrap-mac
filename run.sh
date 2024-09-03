@@ -496,7 +496,7 @@ fi
 if [[ $1 == "check" ]]; then
   activate-venv
   check-become-password
-  ansible-playbook local.yml --diff --check -vv
+  ansible-playbook local.yml --diff --check -vv --vault-password-file "$LOCAL_VAULT_PASS_FILE"
   exit 1
 fi
 
