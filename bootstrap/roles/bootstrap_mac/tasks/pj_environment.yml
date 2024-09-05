@@ -54,23 +54,9 @@
   include_tasks: powershell.yml
   when: node_type == "employee"
 
-- name: Create SSH Tunnel file
-  lineinfile:
-    line: "#!/bin/bash"
+- name: Add SSH Tunnel File
+  template:
+    src: tunnels.sh.j2
+    dest: "{{ ansible_user_dir }}/tunnels.sh"
     mode: '0740'
-    create: yes
-    path: "{{ ansible_user_dir }}/tunnels.sh"
-  when: (ssh_tunnels | length>0)
-
-- name: Add SSH Tunnels to Tunnels file
-  lineinfile:
-    line: "ssh -f -N -L {{ item.port }}:127.0.0.1:5900 {{ item.host }} &"
-    path: "{{ ansible_user_dir }}/tunnels.sh"
-  when: (ssh_tunnels | length>0)
-  loop: "{{ ssh_tunnels }}"
-
-- name: Add caffeinate to tunnels.shd
-  lineinfile:
-    line: "caffeinate -d"
-    path: "{{ ansible_user_dir }}/tunnels.sh"
   when: (ssh_tunnels | length>0)
