@@ -11,6 +11,12 @@
     state: present
   when: '"nats-io/nats-tools/nats" in brew_packages'
 
+- name: Tap peak/tap Homebrew repository
+  community.general.homebrew_tap:
+    name: peak/tap
+    state: present
+  when: '"s5cmd" in brew_packages'
+
 # Homebrew installer and dependencies
 - name: Install baseline homebrew packages
   homebrew:

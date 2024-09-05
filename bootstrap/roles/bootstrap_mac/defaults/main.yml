@@ -61,6 +61,7 @@ brew_packages:
   - kubectl
   - uv
   - nats-io/nats-tools/nats
+  - s5cmd
 brew_packages_removed: []
 brew_packages_user: []
 pip_packages: []
