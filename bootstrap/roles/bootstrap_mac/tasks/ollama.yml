@@ -10,21 +10,17 @@
   shell: open /Applications/Ollama.app
   when: ollama_installed.changed
 
-- name: Verify OLLAMA_HOST environment variable
-  shell: launchctl getenv OLLAMA_HOST
-  register: ollama_host_env
-  changed_when: no
-
-- name: Set OLLAMA_HOST environment variable
-  shell: launchctl setenv OLLAMA_HOST "0.0.0.0"
-  when: ollama_expose and ('0.0.0.0' not in ollama_host_env.stdout)
+- name: set ollama env vars
+  include_tasks: utilities/system_env.yml
+  when: ollama_expose
+  loop:
+    - { name: OLLAMA_HOST, value: '0.0.0.0' }
+    - { name: OLLAMA_KEEP_ALIVE, value: '24h' }
 
 - name: Ensure ollama is running the latest
   shell: |
     killall Ollama
     sleep 5
-    export OLLAMA_HOST='0.0.0.0'
-    export OLLAMA_KEEP_ALIVE='24h'
     open -a Ollama
   changed_when: no
 

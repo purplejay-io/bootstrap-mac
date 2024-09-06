@@ -1,0 +1,8 @@
+- name: Verify system environment variable
+  shell: launchctl getenv {{ item }}
+  register: system_env
+  changed_when: no
+
+- name: Set OLLAMA_HOST environment variable
+  shell: launchctl setenv {{ item.name }} "{{ item.value }}"
+  when: system_env.stdout != item.value
