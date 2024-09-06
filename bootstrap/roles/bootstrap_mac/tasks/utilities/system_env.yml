@@ -5,4 +5,4 @@
 
 - name: Set system environment variable
   shell: launchctl setenv {{ item.name }} "{{ item.value }}"
-  when: system_env.stdout != item.value
+  when:  item.value not in system_env.stdout
