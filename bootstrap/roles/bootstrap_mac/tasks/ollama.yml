@@ -21,6 +21,8 @@
   shell: |
     killall Ollama
     sleep 5
+    export OLLAMA_HOST='0.0.0.0'
+    export OLLAMA_KEEP_ALIVE='24h'
     open -a Ollama
   changed_when: no
 
