@@ -24,8 +24,7 @@ function pivssh-agent {
 }
 
 function pivssh-key {
-  ssh-add -D
-  ssh-add -s /usr/lib/ssh-keychain.dylib
+  ssh-keygen -D /usr/lib/ssh-keychain.dylib
 }
 
 function pj-update {
