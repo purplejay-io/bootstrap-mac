@@ -4,7 +4,7 @@ export PATH="$HOME/.jetbrains:$PATH"
 HOMEBREW_PATH="$(brew --prefix)"
 
 export PATH="$HOMEBREW_PATH/opt/node@18/bin:$PATH"
-alias python="python3"
+
 
 {% if gitlab_api_token != "please_update_user_yml" %}
 export UV_EXTRA_INDEX_URL = "https://__token__:{{ gitlab_api_token }}@gitlab.purplejay.net/api/v4/groups/205/-/packages/pypi/simple"
@@ -141,3 +141,4 @@ function ssh-tunnels {
 {{ lookup("template", "templates/yk_functions.zprofile") }}
 {{ lookup("template", "templates/python.zprofile") }}
 {{ lookup("template", "templates/git.zprofile") }}
+{{ lookup("template", "templates/common_zprofile_aliases") }}

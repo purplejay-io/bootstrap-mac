@@ -3,10 +3,7 @@ function power-save {
     sudo shutdown -s now
 }
 
-alias p="prlctl"
 alias typora="open -a typora"
-alias fde="sudo fdesetup authrestart"
-alias dns="sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder"
 
 function reboot-vms {
 vm_list=$(prlctl list -o name --no-header)

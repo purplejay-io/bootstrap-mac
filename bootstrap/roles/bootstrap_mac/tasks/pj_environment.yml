@@ -21,7 +21,7 @@
   vars:
     dest: "$HOME/.zprofile"
     template_marker: "PJ zprofile baseline"
-    template_file_path: "templates/{{ node_type }}.zprofile"
+    template_file_path: "templates/{{ node_type }}.zprofile.j2"
 
 - name: Configure git
   include_tasks: git_config.yml
