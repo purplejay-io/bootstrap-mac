@@ -3,6 +3,7 @@ function venv {
      rm -Rf .venv
   fi
   uv venv
+  pipc
   pip-install
   v
 }
