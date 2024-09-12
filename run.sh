@@ -488,7 +488,7 @@ if [[ $1 == "update" ]]; then
   brew update
   brew upgrade
   activate-venv
-  
+  check-become-password
   ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
   exit 1
 fi
