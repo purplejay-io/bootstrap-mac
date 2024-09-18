@@ -108,3 +108,4 @@
   become: yes
   register: os_update_status
   changed_when: 'os_update_status.stderr != "No updates are available."'
+  when: os_upgrade | bool
