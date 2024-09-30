@@ -1,5 +1,5 @@
 function gitd {
-  cd "$HOME/git/" || echo "No git directory"
+  cd "$GIT_HOME" || echo "No git directory"
 }
 
 function gitsub {

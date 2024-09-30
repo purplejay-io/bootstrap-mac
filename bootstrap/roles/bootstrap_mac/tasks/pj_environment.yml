@@ -23,6 +23,14 @@
     template_marker: "PJ zprofile baseline"
     template_file_path: "templates/{{ node_type }}.zprofile.j2"
 
+- name: set zshrc block from template
+  include_tasks: utilities/set_block_from_template.yml
+  vars:
+    dest: "$HOME/.zshrc"
+    template_marker: "PJ zshrc baseline"
+    template_file_path: "templates/{{ node_type }}.zshrc.j2"
+  when: node_type == "employee"
+
 - name: Configure git
   include_tasks: git_config.yml
 

@@ -1,5 +1,7 @@
 export PATH="$HOME/.LOCAL/bin:$PATH"
 export PATH="$HOME/.jetbrains:$PATH"
+export PJ_DIR="$HOME/.pj"
+export GIT_HOME="$HOME/git"
 
 HOMEBREW_PATH="$(brew --prefix)"
 
@@ -18,7 +20,7 @@ export UV_EXTRA_INDEX_URL = "https://__token__:{{ gitlab_api_token }}@gitlab.pur
 # alias sftp="sftp -S /usr/libexec/ssh-apple-pkcs11"
 # alias rsync="rsync -e /usr/libexec/ssh-apple-pkcs11"
 
-function pivssh-agent {
+function pivssh {
   ssh-add -D
   ssh-add -s /usr/lib/ssh-keychain.dylib
 }
@@ -71,7 +73,7 @@ function pj-create-backup {
 }
 
 function pj-user-vars {
-  file_path="$HOME/.pj/bootstrap-mac/vars/user.yml"
+  file_path="$PJ_DIR/bootstrap-mac/vars/user.yml"
   code "$file_path"
 }
 
