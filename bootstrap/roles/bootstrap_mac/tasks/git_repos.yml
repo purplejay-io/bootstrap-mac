@@ -9,5 +9,7 @@
   ansible.builtin.git:
     repo: '{{ item.url }}'
     dest: '{{ ansible_user_dir }}/git/{{ item.group }}/{{ item.name }}'
+    force: "{{ item.force if 'force' in item else false }}"
+    version: "{{ item.version if 'version' in item else 'HEAD' }}"
   ignore_errors: true
   loop: '{{ repos }}'
