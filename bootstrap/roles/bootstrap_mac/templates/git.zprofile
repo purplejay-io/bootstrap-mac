@@ -1,3 +1,5 @@
+export GIT_HOME="$HOME/git"
+
 function gitd {
   cd "$GIT_HOME" || echo "No git directory"
 }
