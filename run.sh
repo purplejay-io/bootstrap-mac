@@ -4,10 +4,6 @@
 #  Collect System Facts
 ########################################################################
 
-script_path=$(readlink -f "${BASH_SOURCE:-$0}")
-ROOT_DIR=$(dirname "$script_path")
-echo "$ROOT_DIR"
-
 # Is Homebrew installed correctly?
 if [[ $(uname -m) == 'arm64' ]]; then
   MAC_ARCHITECTURE="Apple"
@@ -64,7 +60,7 @@ function install-python {
   if [[ $HOMEBREW_INSTALLED == 0 && $PYTHON_INSTALLED == 1 ]]; then
     brew install python@3.12 uv
     $HOMEBREW_PATH/bin/python3.12 -m pip install pip --upgrade
-    PYTHON_INSTALLED=$(test -f $HOMEBREW_PATH/bin/python3;echo $?)
+    PYTHON_INSTALLED=$(test -f $HOMEBREW_PATH/bin/python3.12;echo $?)
   fi
   if [[ $PYTHON_INSTALLED != 0 ]]; then
     echo "function: install-python"
@@ -87,6 +83,7 @@ function install-yq {
 
 function setup-venv {
   cd "$BOOTSTRAP_MAC_PATH" || exit 1
+  rm -fr .venv
   uv venv
   . .venv/bin/activate
   check-venv
@@ -94,15 +91,13 @@ function setup-venv {
 }
 
 function reset-venv {
-  rm -Rf "$ROOT_DIR"/.venv
+  rm -Rf "$BOOTSTRAP_MAC_PATH/.venv"
   setup-venv
 }
 
 function activate-venv {
-  if [[ -d "$ROOT_DIR/.venv" ]]; then
-      setup-venv
-  fi
-  . "$ROOT_DIR"/.venv/bin/activate
+  setup-venv
+  . "$BOOTSTRAP_MAC_PATH/.venv/bin/activate"
   check-venv
 }
 
@@ -132,7 +127,7 @@ function install-bootstrapmac {
         # Pull latest bootstrap-mac version
         if [[ $(git rev-list HEAD...origin/main --count) != 0 ]]; then
           git pull
-          echo "The bootstrap-mac script has been updated. Re run the script now."
+          display-msg "The bootstrap-mac script has been updated. Re run the script now."
           exit 1
         fi
         # Escape the script if git pull didn't get the latest
@@ -151,6 +146,12 @@ function install-apps {
   install-homebrew
   install-python
   install-yq
+}
+
+function display-msg {
+  msg=$1
+
+  osascript -e "display dialog \"$msg\" with title \"Bootstrap Mac Alert\" buttons {\"OK\"} default button \"OK\""
 }
 
 function check-useryml {
