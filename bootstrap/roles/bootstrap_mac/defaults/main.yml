@@ -51,7 +51,7 @@ brew_cask_packages:
   - gitkraken
 brew_cask_packages_user: []
 brew_packages:
-  - python@3.12
+  - python3
   - node@18
   - nmap
   - tree
