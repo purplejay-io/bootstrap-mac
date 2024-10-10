@@ -51,7 +51,7 @@ function install-homebrew {
   fi
   if [[ $HOMEBREW_INSTALLED != 0 ]]; then
     echo "function: install-homebrew"
-    echo "Homebrew did not install successfully, try again."
+    display-msg "Homebrew did not install successfully, try again."
     exit 1
   fi
 }
@@ -64,7 +64,7 @@ function install-python {
   fi
   if [[ $PYTHON_INSTALLED != 0 ]]; then
     echo "function: install-python"
-    echo "Python 3.12 did not install successfully, try again."
+    display-msg "Python 3.12 did not install successfully, try again."
     exit 1
   fi
 }
@@ -76,7 +76,7 @@ function install-yq {
   fi
   if [[ $YQ_INSTALLED != 0 ]]; then
     echo "function: install-yq"
-    echo "yq did not install successfully, try again."
+    display-msg "yq did not install successfully, try again."
     exit 1
   fi
 }
@@ -103,7 +103,7 @@ function activate-venv {
 
 function check-venv {
   if [[ -z "$VIRTUAL_ENV" ]] && [[ "$VIRTUAL_ENV" == "" ]]; then
-    echo "Something failed in activating the venv, try again."
+    display-msg "Something failed in activating the venv, try again."
     exit 1
   fi
 }
@@ -111,7 +111,7 @@ function check-venv {
 function install-bootstrapmac {
     if [[ $HOMEBREW_INSTALLED == 1 ]]; then
       echo "function: install-bootstrapmac"
-      echo "Homebrew is not installed"
+      display-msg "Homebrew is not installed"
       exit 1
     fi
 
@@ -133,7 +133,7 @@ function install-bootstrapmac {
         # Escape the script if git pull didn't get the latest
         if [[ $(git rev-list HEAD...origin/main --count) != 0 ]]; then
           echo "function: install-bootstrapmac"
-          echo "An error occurred with pulling the version of bootstrap_man. Try again. "
+          display-msg "An error occurred with pulling the version of bootstrap_man. Try again. "
           exit 1
         fi
       else
@@ -172,7 +172,7 @@ function check-keychain-password {
   fi
   if [[ $ANSIBLE_KEYCHAIN_PASS_CHECK == "" ]]; then
     echo "function: check-keychain-password"
-    echo "The ephemeral password did not get created successfully in keychain, try again"
+    display-msg "The ephemeral password did not get created successfully in keychain, try again"
     exit 1
   fi
   ANSIBLE_KEYCHAIN_PASS=0
@@ -181,17 +181,17 @@ function check-keychain-password {
 function check-ansible-readiness {
   if [[ $HOMEBREW_INSTALLED == 1 ]]; then
     echo "function: check-ansible-readiness"
-    echo "Homebrew must be installed before you can run bootstrap-mac"
+    display-msg "Homebrew must be installed before you can run bootstrap-mac"
     exit 1
   fi
   if [[ $PYTHON_INSTALLED == 1 ]]; then
     echo "function: check-ansible-readiness"
-    echo "Python 3.12 must be installed before you can run bootstrap-mac"
+    display-msg "Python 3.12 must be installed before you can run bootstrap-mac"
     exit 1
   fi
   if [[ $BOOTSTRAP_MAC_REPO == 1 ]]; then
     echo "function: check-ansible-readiness"
-    echo "bootstrap-mac repo must be cloned locally before you can run bootstrap-mac"
+    display-msg "bootstrap-mac repo must be cloned locally before you can run bootstrap-mac"
     exit 1
   fi
 
@@ -201,7 +201,7 @@ function check-ansible-readiness {
   fi
 
   # Create empty secrets and user vars files if not found
-  cd "$BOOTSTRAP_MAC_PATH" || (echo "failed going to bootstrap mac path"; exit 1)
+  cd "$BOOTSTRAP_MAC_PATH" || (display-msg "failed going to bootstrap mac path"; exit 1)
   if [[ ! -f vars/user.yml ]]; then
     echo "---" > vars/user.yml
   fi
@@ -227,7 +227,7 @@ function check-become-password {
   fi
 
   # 3. Change Directory
-  cd "$BOOTSTRAP_MAC_PATH" || (echo "error going to bootstrap mac path"; exit 1;)
+  cd "$BOOTSTRAP_MAC_PATH" || (display-msg "error going to bootstrap mac path"; exit 1;)
 
   # 4. Create local ansible vault password file
   if [[ ! -f "$LOCAL_VAULT_PASS_FILE" ]]; then
@@ -254,7 +254,7 @@ function check-become-password {
   # 6. Check to make sure become password is encrypted
   if [[ $(ansible-vault view vars/pass.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" ) == "" ]]; then
     echo "function: check-become-password"
-    echo "Ansible-Vault wasn't able to encrypt your become password, try again."
+    display-msg "Ansible-Vault wasn't able to encrypt your become password, try again."
     exit 1
   fi
   BECOME_PASSWORD_CHECK=0
@@ -426,7 +426,7 @@ function reset-bootstrapmac {
 
 
 function display-help {
-  echo "Usage: ./run.sh [Option] [Path]
+  display-msg "Usage: ./run.sh [Option] [Path]
 
   Options:
   install           Install Apps and Clones bootstrap-mac
@@ -458,7 +458,7 @@ fi
 if [[ $1 == "install" ]]; then
   install-apps
   install-bootstrapmac
-  cd "$BOOTSTRAP_MAC_PATH" || (echo "error going to bootstrap mac path"; exit 1)
+  cd "$BOOTSTRAP_MAC_PATH" || (display-msg "error going to bootstrap mac path"; exit 1)
   reset-dock
 
   setup-venv

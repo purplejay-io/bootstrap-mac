@@ -28,19 +28,33 @@ function pivssh-key {
   ssh-keygen -D /usr/lib/ssh-keychain.dylib
 }
 
+function pj-help {
+  original_cwd=$(pwd)
+  trap 'cd "$original_cwd"' EXIT
+  cd ~/.pj/bootstrap-mac
+  ./run.sh
+}
 function pj-update {
+  original_cwd=$(pwd)
+  trap 'cd "$original_cwd"' EXIT
   cd ~/.pj/bootstrap-mac
   ./run.sh update
 }
 function pj-op {
+  original_cwd=$(pwd)
+  trap 'cd "$original_cwd"' EXIT
   cd ~/.pj/bootstrap-mac
   ./run.sh op
 }
 function pj-noupdate {
+  original_cwd=$(pwd)
+  trap 'cd "$original_cwd"' EXIT
   cd ~/.pj/bootstrap-mac
   ./run.sh noupdate
 }
 function pj-pass-reset {
+  original_cwd=$(pwd)
+  trap 'cd "$original_cwd"' EXIT
   cd ~/.pj/bootstrap-mac
   ./run.sh reset-password
 }
