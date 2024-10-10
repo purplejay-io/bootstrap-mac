@@ -20,7 +20,7 @@ HOMEBREW_INSTALLED=$(test -f $HOMEBREW_PATH/bin/brew;echo $?)
 export PATH="$HOMEBREW_PATH/bin:$HOME/.local/bin:$PATH"
 
 # Is Python3 Installed with
-PYTHON_INSTALLED=$(test -f $HOMEBREW_PATH/bin/python3;echo $?)
+PYTHON_INSTALLED=$(test -f $HOMEBREW_PATH/bin/python3.12;echo $?)
 
 # Is yq Installed
 YQ_INSTALLED=$(test -f $HOMEBREW_PATH/bin/yq;echo $?)
@@ -62,13 +62,13 @@ function install-homebrew {
 
 function install-python {
   if [[ $HOMEBREW_INSTALLED == 0 && $PYTHON_INSTALLED == 1 ]]; then
-    brew install python3 uv
-    $HOMEBREW_PATH/bin/python3 -m pip install pip --upgrade
+    brew install python@3.12 uv
+    $HOMEBREW_PATH/bin/python3.12 -m pip install pip --upgrade
     PYTHON_INSTALLED=$(test -f $HOMEBREW_PATH/bin/python3;echo $?)
   fi
   if [[ $PYTHON_INSTALLED != 0 ]]; then
     echo "function: install-python"
-    echo "Python 3 did not install successfully, try again."
+    echo "Python 3.12 did not install successfully, try again."
     exit 1
   fi
 }
@@ -185,7 +185,7 @@ function check-ansible-readiness {
   fi
   if [[ $PYTHON_INSTALLED == 1 ]]; then
     echo "function: check-ansible-readiness"
-    echo "Python 3 must be installed before you can run bootstrap-mac"
+    echo "Python 3.12 must be installed before you can run bootstrap-mac"
     exit 1
   fi
   if [[ $BOOTSTRAP_MAC_REPO == 1 ]]; then
