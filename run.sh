@@ -455,8 +455,6 @@ if [[ $# -gt 2 ]]; then
   display-help
 fi
 
-
-
 if [[ $1 == "install" ]]; then
   install-apps
   install-bootstrapmac
