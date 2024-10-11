@@ -1,4 +1,5 @@
-alias python="$HOMEBREW_PATH/bin/python3.12"
+alias python3="$HOMEBREW_PATH/bin/python3.12"
+alias python="python3"
 alias dns="sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder"
 alias fde="sudo fdesetup authrestart"
 alias p="prlctl"
