@@ -466,15 +466,13 @@ if [[ $1 == "install" ]]; then
 
   FILEVAULT_CHECK=$(ansible-vault view "$BOOTSTRAP_MAC_PATH"/vars/pass.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" | yq -r '.ansible_become_password' | sudo -S fdesetup isactive)
   if [[ $FILEVAULT_CHECK != "true" ]]; then
-    echo "Opening System Preferences, turn on Filevault before you proceed."
     open "x-apple.systempreferences:com.apple.preference.security?FileVault"
-    read -r -s -k '?Press any key to continue.'
+    display-msg "Opening System Preferences. Turn on Filevault before pressing OK."
     printf "\n"
   fi
 
-  echo "Opening Company Portal, ensure your device is compliant before continuing."
   open "/Applications/Company Portal.app"
-  read -r -s -k '?Press any key to continue.'
+  display-msg "Opening Company Portal. Ensure your device is compliant before pressing OK."
   printf "\n"
 
   ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
