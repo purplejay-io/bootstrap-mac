@@ -11,6 +11,7 @@ export PATH="$HOMEBREW_PATH/opt/node@18/bin:$PATH"
 export UV_EXTRA_INDEX_URL = "https://__token__:{{ gitlab_api_token }}@gitlab.purplejay.net/api/v4/groups/205/-/packages/pypi/simple"
 {% endif %}
 
+{{ lookup("template", "templates/common_zprofile_aliases") }}
 
 # Keep handy in case bug comes backup
 # https://www.nccs.nasa.gov/nccs-users/instructional/logging-in/connectivity-issues
@@ -33,6 +34,12 @@ function pj-help {
   trap 'cd "$original_cwd"' EXIT
   cd ~/.pj/bootstrap-mac
   ./run.sh
+}
+function pj-install {
+  original_cwd=$(pwd)
+  trap 'cd "$original_cwd"' EXIT
+  cd ~/.pj/bootstrap-mac
+  ./run.sh install
 }
 function pj-update {
   original_cwd=$(pwd)
@@ -141,7 +148,7 @@ function pj-infra-config-update {
   gitd
   cd infrastructure/pj-stack || exit
   venv
-  py main.py setup
+  python main.py setup
 }
 
 function ssh-kill {
@@ -155,4 +162,3 @@ function ssh-tunnels {
 {{ lookup("template", "templates/yk_functions.zprofile") }}
 {{ lookup("template", "templates/python.zprofile") }}
 {{ lookup("template", "templates/git.zprofile") }}
-{{ lookup("template", "templates/common_zprofile_aliases") }}
