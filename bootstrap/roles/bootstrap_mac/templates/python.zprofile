@@ -3,18 +3,19 @@ function venv {
      rm -Rf .venv
   fi
   uv venv
-  pipc
   pip-install
   v
 }
 
 function pip-install {
-  if [[ -f "requirements-dev.txt" ]]; then
-    uv pip install -r "requirements-dev.txt" -p ".venv"
+  if [[ -f "pyproject.toml" ]]; then
+    uv pip install -r "pyproject.toml" -p ".venv"
+  elif [[ -f "requirements.in" ]]; then
+    uv pip install -r "requirements.in" -p ".venv"
   elif [[ -f "requirements.txt" ]]; then
     uv pip install -r "requirements.txt" -p ".venv"
   else
-    pipc
+    echo "No pyproject or requirements file found"
   fi
 }
 
