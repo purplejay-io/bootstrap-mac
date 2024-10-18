@@ -20,12 +20,12 @@ function RefreshEnv
     }
 }
 
-function Venv
+function v
 {
     & "./.venv/bin/activate.ps1"
 }
 
-function CreatePipRequirements
+function pipc
 {
     $cwd = $( Get-Location )
     if (![System.IO.File]::Exists("$cwd/requirements.in") -and ![System.IO.File]::Exists("$cwd/pyproject.toml"))
@@ -46,61 +46,36 @@ function CreatePipRequirements
     }
 }
 
-function SetupVenv
+function venv
 {
-    CreatePipRequirements
     if (!([System.IO.Directory]::Exists(".venv")))
     {
         uv venv
     }
-    Venv
-    InstallRequirements
+    v
+    pip-install
 }
 
-function InstallRequirements
+function pip-install
 {
     $cwd = $( Get-Location )
-    if (![System.IO.File]::Exists("$cwd/requirements.txt") -or !([System.IO.Directory]::Exists("$cwd/.venv")))
+    if (![System.IO.File]::Exists("$cwd/pyproject.toml") -and ![System.IO.File]::Exists("$cwd/requirements.in"))
     {
-        SetupVenv
+        write-output "No requirements found"
     }
     else
     {
-        Venv
+        v
     }
 
-    if ( [System.IO.File]::Exists("$cwd/requirements-dev.txt"))
+    if ( [System.IO.File]::Exists("$cwd/pyproject.toml"))
     {
-        uv pip install -r "$cwd/requirements-dev.txt" -p "$cwd/.venv"
+        uv pip install -r "$cwd/pyproject.toml" -p "$cwd/.venv"
+        uv pip install -r "$cwd/pyproject.toml" -p "$cwd/.venv" --extra dev
     }
     else
     {
-        uv pip install -r "$cwd/requirements.txt" -p "$cwd/.venv"
+        uv pip install -r "$cwd/requirements.in" -p "$cwd/.venv"
     }
 
-}
-
-#TODO: look to deprecate k8s functions
-function CreateK8sDashboardToken
-{
-    $token = $( ssh pj-n1 -t "microk8s.kubectl create token default --duration 720h" )
-    op item edit --vault private "pj k8s cluster dashboard" "password=$token"
-    Set-Clipboard -Value "$token"
-}
-
-function CreateK8sDevDashboardToken
-{
-    $token = $( ssh dev-n1 -t "microk8s.kubectl create token default --duration 720h" )
-    op item edit --vault private "pj k8s cluster dashboard" "password=$token"
-    Set-Clipboard -Value "$token"
-}
-
-function K8sDashboardToken
-{
-    op read "op://private/pj k8s cluster dashboard/password" | Set-Clipboard
-}
-
-function K8sDevDashboardToken
-{
-    op read "op://private/pj k8s cluster dashboard/dev-token" | Set-Clipboard
 }

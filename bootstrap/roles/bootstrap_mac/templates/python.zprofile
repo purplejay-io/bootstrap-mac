@@ -10,6 +10,7 @@ function venv {
 function pip-install {
   if [[ -f "pyproject.toml" ]]; then
     uv pip install -r "pyproject.toml" -p ".venv"
+    uv pip install -r "pyproject.toml" -p ".venv" --extra dev
   elif [[ -f "requirements.in" ]]; then
     uv pip install -r "requirements.in" -p ".venv"
   elif [[ -f "requirements.txt" ]]; then
