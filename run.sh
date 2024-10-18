@@ -87,7 +87,7 @@ function setup-venv {
   uv venv
   . .venv/bin/activate
   check-venv
-  uv pip install -r requirements.txt
+  uv pip install -r requirements.in
 }
 
 function reset-venv {
