@@ -1,4 +1,8 @@
 ---
+- name: show node_type
+  debug:
+    msg: "Node Type: {{ node_type }}"
+
 # tasks file for bootstrap-mac
 - name: If this command hangs, your Become Password is incorrect
   shell: echo "If this command hangs, your Become Password is incorrect"
