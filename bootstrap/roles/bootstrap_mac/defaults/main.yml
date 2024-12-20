@@ -49,6 +49,7 @@ brew_cask_packages:
   - signal
   - visual-studio-code
   - gitkraken
+  - windows-app
 brew_cask_packages_user: []
 brew_packages:
   - python@3.12
