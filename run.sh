@@ -120,11 +120,11 @@ function check-become-password {
     echo "ansible_become_password: $password" >> "$BOOTSTRAP_MAC_PATH"/vars/pass.yml
     check-venv
 
-    echo `security find-generic-password -a pj-bootstrap-ansible -w` | ansible-vault encrypt --vault-password-file "$LOCAL_VAULT_PASS_FILE" vars/pass.yml
+    echo `security find-generic-password -a pj-bootstrap-ansible -w` | uv run ansible-vault encrypt --vault-password-file "$LOCAL_VAULT_PASS_FILE" vars/pass.yml
   fi
 
   # 6. Check to make sure become password is encrypted
-  if [[ $(ansible-vault view vars/pass.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" ) == "" ]]; then
+  if [[ $(uv run ansible-vault view vars/pass.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" ) == "" ]]; then
     echo "function: check-become-password"
     display-msg "Ansible-Vault wasn't able to encrypt your become password, try again."
     exit 1
@@ -179,7 +179,7 @@ if [[ $1 == "install" ]]; then
   cd "$BOOTSTRAP_MAC_PATH" || (display-msg "error going to bootstrap mac path"; exit 1)
   check-become-password
 
-  FILEVAULT_CHECK=$(ansible-vault view "$BOOTSTRAP_MAC_PATH"/vars/pass.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" | yq -r '.ansible_become_password' | sudo -S fdesetup isactive)
+  FILEVAULT_CHECK=$(uv run ansible-vault view "$BOOTSTRAP_MAC_PATH"/vars/pass.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" | yq -r '.ansible_become_password' | sudo -S fdesetup isactive)
   if [[ $FILEVAULT_CHECK != "true" ]]; then
     open "x-apple.systempreferences:com.apple.preference.security?FileVault"
     display-msg "Opening System Preferences. Turn on Filevault before pressing OK."
@@ -190,7 +190,7 @@ if [[ $1 == "install" ]]; then
   display-msg "Opening Company Portal. Ensure your device is compliant before pressing OK."
   printf "\n"
 
-  ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
+  uv run ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
 
   exit 1
 fi
