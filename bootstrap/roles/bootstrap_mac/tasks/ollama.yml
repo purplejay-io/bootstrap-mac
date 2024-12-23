@@ -15,14 +15,14 @@
   when: ollama_expose
   loop:
     - { name: OLLAMA_HOST, value: '0.0.0.0' }
-    - { name: OLLAMA_KEEP_ALIVE, value: '24h' }
+    - { name: OLLAMA_KEEP_ALIVE, value: '1h' }
 
 - name: Ensure ollama is running the latest
   shell: |
     killall Ollama
     sleep 5
     export OLLAMA_HOST='0.0.0.0'
-    export OLLAMA_KEEP_ALIVE='24h'
+    export OLLAMA_KEEP_ALIVE='1h'
     open -a Ollama
   changed_when: no
 
