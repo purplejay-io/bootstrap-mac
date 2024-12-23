@@ -47,12 +47,6 @@ function pj-update {
   cd ~/.pj/bootstrap-mac
   ./run.sh update
 }
-function pj-op {
-  original_cwd=$(pwd)
-  trap 'cd "$original_cwd"' EXIT
-  cd ~/.pj/bootstrap-mac
-  ./run.sh op
-}
 function pj-noupdate {
   original_cwd=$(pwd)
   trap 'cd "$original_cwd"' EXIT
@@ -64,32 +58,6 @@ function pj-pass-reset {
   trap 'cd "$original_cwd"' EXIT
   cd ~/.pj/bootstrap-mac
   ./run.sh reset-password
-}
-function pj-reset {
-  cd ~/.pj/bootstrap-mac
-  ./run.sh reset
-}
-function pj-reset-onedrive {
-  cd ~/.pj/bootstrap-mac
-  ./run.sh reset-onedrive
-}
-function pj-reset-edge {
-  cd ~/.pj/bootstrap-mac
-  ./run.sh reset-edge
-}
-function pj-reset-teams {
-  cd ~/.pj/bootstrap-mac
-  ./run.sh reset-teams
-}
-
-function pj-reset-nextcloud {
-  cd ~/.pj/bootstrap-mac
-  ./run.sh reset-nextcloud
-}
-
-function pj-create-backup {
-  cd ~/.pj/bootstrap-mac
-  ./run.sh create-backup
 }
 
 function pj-user-vars {

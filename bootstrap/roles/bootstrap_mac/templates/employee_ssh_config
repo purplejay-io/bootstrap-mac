@@ -1,14 +1,11 @@
 Host *
     PKCS11Provider /usr/lib/ssh-keychain.dylib
     AddKeysToAgent yes
-    UseKeychain yes
 
 Host gitlab.purplejay.net
     User git
     HostName 10.1.0.30
-    UseKeychain yes
 
 Host github.com
     User git
     HostName github.com
-    UseKeychain yes

@@ -3,11 +3,6 @@
 - name: Ensure common directories exist
   include_tasks: common_directories.yml
 
-- name: Remove old poetry preferences file
-  file:
-    path: "{{ ansible_user_dir }}/Library/Preferences/pypoetry"
-    state: absent
-
 - name: zprofile baseline for Apple Silicon
   lineinfile:
     line: eval "$(/opt/homebrew/bin/brew shellenv)"
