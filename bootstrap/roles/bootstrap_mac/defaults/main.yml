@@ -42,12 +42,10 @@ brew_cask_packages:
   - 1password
   - nextcloud
   - 1password-cli
-  - yubico-yubikey-manager
   - postman
   - signal
   - visual-studio-code
   - gitkraken
-  - windows-app
 brew_cask_packages_user: []
 brew_packages:
   - python@3.12
