@@ -37,14 +37,12 @@ repos: []
 brew_cask_packages_removed: []
 brew_cask_packages:
   - visual-studio-code
+  - 1password
+  - 1password-cli
   - docker
   - powershell
-  - 1password
-  - nextcloud
-  - 1password-cli
   - postman
   - signal
-  - visual-studio-code
   - gitkraken
 brew_cask_packages_user: []
 brew_packages:
@@ -56,7 +54,6 @@ brew_packages:
   - jq
   - mkcert
   - kubectl
-  - uv
   - nats-io/nats-tools/nats
   - s5cmd
 brew_packages_removed: []
