@@ -42,6 +42,8 @@ function install-bootstrapmac {
         echo "The variable does not contain .pj -- Not pulling latest from git repo"
       fi
     fi
+    
+    uv sync --all-extras
 }
 
 function display-msg {
