@@ -42,8 +42,6 @@ function install-bootstrapmac {
         echo "The variable does not contain .pj -- Not pulling latest from git repo"
       fi
     fi
-    
-    uv sync --all-extras
 }
 
 function display-msg {
@@ -178,6 +176,7 @@ fi
 if [[ $1 == "install" ]]; then
   install-bootstrapmac
   cd "$BOOTSTRAP_MAC_PATH" || (display-msg "error going to bootstrap mac path"; exit 1)
+  uv sync --all-extras
   check-become-password
 
   FILEVAULT_CHECK=$(uv run ansible-vault view "$BOOTSTRAP_MAC_PATH"/vars/pass.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" | yq -r '.ansible_become_password' | sudo -S fdesetup isactive)
