@@ -39,8 +39,6 @@ brew_cask_packages:
   - visual-studio-code
   - docker
   - powershell
-  - jetbrains-toolbox
-  - powershell
   - 1password
   - nextcloud
   - 1password-cli
