@@ -45,3 +45,19 @@
     type: string
     value: "{{ new_window_target }}"
     state: present
+
+- name: Default Keyboard Function Keys
+  community.general.osx_defaults:
+    domain: "Apple Global Domain"
+    key: com.apple.keyboard.fnState
+    type: bool
+    value: "{{ use_keyboard_fn_keys | bool }}"
+    state: present
+
+- name: Default Dock Autohide
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: autohide
+    type: bool
+    value: "{{ auto_hide_dock | bool }}"
+    state: present
