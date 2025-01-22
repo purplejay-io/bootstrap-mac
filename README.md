@@ -1,7 +1,7 @@
 # Purple Jay Bootstrap Mac README
 
 1. Install [Homebrew](https://brew.sh/)
-2. `brew install python@3.12 uv yq`
+2. `brew install python3 uv yq`
 
 3. Run the following
     ``` bash
