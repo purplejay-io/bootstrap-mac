@@ -36,8 +36,9 @@ repos: []
 # Packages
 brew_cask_packages_removed: []
 brew_cask_packages:
-  - visual-studio-code
+  - google-chrome
   - 1password
+  - visual-studio-code
   - 1password-cli
   - docker
   - powershell

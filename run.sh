@@ -186,10 +186,6 @@ if [[ $1 == "install" ]]; then
     printf "\n"
   fi
 
-  open "/Applications/Company Portal.app"
-  display-msg "Opening Company Portal. Ensure your device is compliant before pressing OK."
-  printf "\n"
-
   uv run ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
 
   exit 1
