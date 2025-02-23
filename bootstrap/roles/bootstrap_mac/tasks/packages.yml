@@ -7,7 +7,7 @@
 
 - name: Update Homebrew
   community.general.homebrew:
-    name: ""
+    name: "visual-studio-code"
     state: present
     update_homebrew: true       # Ensure Homebrew itself is updated
     upgrade_all: true          # Do not upgrade other installed packages
