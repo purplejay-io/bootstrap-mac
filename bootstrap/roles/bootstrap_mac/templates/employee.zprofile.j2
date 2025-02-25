@@ -4,7 +4,7 @@ export PJ_DIR="$HOME/.pj"
 
 HOMEBREW_PATH="$(brew --prefix)"
 
-export PATH="$HOMEBREW_PATH/opt/node@18/bin:$PATH"
+export PATH="$HOMEBREW_PATH/opt/node@22/bin:$PATH"
 
 
 {% if gitlab_api_token != "please_update_user_yml" %}
@@ -115,8 +115,8 @@ function pj-infra-config-update {
   trap cleanup EXIT
   gitd
   cd infrastructure/pj-stack || exit
-  venv
-  python main.py setup
+  uv run python main.py -t ssh-macs
+  uv run python main.py -g pj_prod_ubuntu -t ssh-vms
 }
 
 function ssh-kill {

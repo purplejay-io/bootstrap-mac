@@ -49,7 +49,7 @@ brew_cask_packages:
   - gitkraken
 brew_cask_packages_user: []
 brew_packages:
-  - node@18
+  - node@22
   - nmap
   - tree
   - wget

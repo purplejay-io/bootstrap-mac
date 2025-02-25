@@ -1,5 +1,7 @@
 export GIT_HOME="$HOME/git"
 
+export CDPATH="$GIT_HOME"
+
 function gitd {
   cd "$GIT_HOME" || echo "No git directory"
 }
