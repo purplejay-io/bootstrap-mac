@@ -22,6 +22,9 @@
 - name: Apply User Preferences
   import_tasks: pj_environment_user_preferences.yml
 
+- name: Add Lets Encrypt certs to keychain
+  import_tasks: add_certs_to_keychain.yml
+
 - name: Apply SSH Settings
   import_tasks: ssh.yml
   when: harden_ssh
