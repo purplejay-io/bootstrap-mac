@@ -1,0 +1,39 @@
+---
+- name: Define Let's Encrypt staging certs
+  set_fact:
+    certs:
+      - name: staging_pear
+        url: https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x1.pem
+        dest: /tmp/staging_pear.cer
+      - name: staging_broccoli
+        url: https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x2.pem
+        dest: /tmp/staging_broccoli.cer
+
+- name: Download staging certs
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.dest }}"
+    mode: '0644'
+  loop: "{{ certs }}"
+
+- name: Check if cert is in keychain
+  become: yes
+  shell: security find-certificate -c "{{ item.name }}" /Library/Keychains/System.keychain
+  register: cert_check
+  failed_when: no
+  changed_when: no
+  loop: "{{ certs }}"
+
+- name: Add certs to System keychain
+  become: yes
+  shell: security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain {{ item.dest }}
+  when: cert_check.results[idx].rc != 0
+  loop: "{{ certs }}"
+  loop_control:
+    index_var: idx
+
+- name: Remove downloaded certs
+  file:
+    path: "{{ item.dest }}"
+    state: absent
+  loop: "{{ certs }}"
