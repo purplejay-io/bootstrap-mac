@@ -29,6 +29,8 @@
   shell: security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain {{ item.dest }}
   when: cert_check.results[loop.index0].rc != 0
   loop: "{{ certs }}"
+  loop_control:
+    index_var: idx
 
 - name: Remove downloaded certs
   file:
