@@ -24,6 +24,7 @@
 
 - name: Add Lets Encrypt certs to keychain
   import_tasks: add_certs_to_keychain.yml
+  when: trust_letsencrypt_staging
 
 - name: Apply SSH Settings
   import_tasks: ssh.yml
