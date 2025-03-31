@@ -14,7 +14,6 @@
 
 - name: Package baselines
   import_tasks: packages.yml
-  tags: update
 
 - name: Apply PJ Environment settings
   import_tasks: pj_environment.yml

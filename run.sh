@@ -193,10 +193,8 @@ fi
 
 if [[ $1 == "update" ]]; then
   prune-logs
-  brew update
-  brew upgrade
   check-become-password
-  uv run ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
+  uv run ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" -e upgrade_packages=true
   exit 1
 fi
 
@@ -209,14 +207,14 @@ fi
 if [[ $1 == "noupdate" ]]; then
   prune-logs
   check-become-password
-  uv run ansible-playbook local.yml --skip-tags update --vault-password-file "$LOCAL_VAULT_PASS_FILE"
+  uv run ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
   exit 1
 fi
 
 if [[ $1 == "reset-password" ]]; then
   reset-become-password
   check-become-password
-  uv run ansible-playbook local.yml --skip-tags update --vault-password-file "$LOCAL_VAULT_PASS_FILE"
+  uv run ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
   exit 1
 fi
 

@@ -7,22 +7,18 @@
 
 - name: Update Homebrew
   community.general.homebrew:
-    name: "visual-studio-code"
-    state: present
-    update_homebrew: true       # Ensure Homebrew itself is updated
-    upgrade_all: true          # Do not upgrade other installed packages
+    update_homebrew: true
 
 - name: Install baseline homebrew cask packages
-  homebrew_cask:
+  community.general.homebrew_cask:
     name: "{{ item }}"
     state: present
-    greedy: yes
     sudo_password: "{{ ansible_become_password }}"
   loop: "{{ brew_cask_packages }}"
   ignore_errors: true
 
 - name: Remove homebrew cask packages
-  homebrew_cask:
+  community.general.homebrew_cask:
     name: "{{ item }}"
     state: absent
     install_options: force
@@ -46,7 +42,6 @@
   homebrew:
     name: "{{ item }}"
     update_homebrew: true
-    upgrade_all: false
   loop: "{{ brew_packages }}"
   ignore_errors: true
 
@@ -68,6 +63,12 @@
     state: present
     sudo_password: "{{ ansible_become_password }}"
   loop: "{{ brew_cask_packages_user }}"
+
+- name: Upgrade Homebrew
+  community.general.homebrew:
+    upgrade_all: true
+    sudo_password: "{{ ansible_become_password }}"
+  when: upgrade_packages is defined and upgrade_packages
 
 - name: Check if signed into Apple ID
   shell: defaults read MobileMeAccounts Accounts
