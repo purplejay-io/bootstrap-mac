@@ -12,7 +12,7 @@
 - name: Install baseline homebrew cask packages
   community.general.homebrew_cask:
     name: "{{ item }}"
-    state: present
+    state: "{{ 'present' if not upgrade_packages else 'upgraded' }}"
     sudo_password: "{{ ansible_become_password }}"
   loop: "{{ brew_cask_packages }}"
   ignore_errors: true
@@ -42,6 +42,7 @@
   homebrew:
     name: "{{ item }}"
     update_homebrew: true
+    state: "{{ 'present' if not upgrade_packages else 'upgraded' }}"
   loop: "{{ brew_packages }}"
   ignore_errors: true
 
@@ -54,21 +55,20 @@
 - name: Install user homebrew packages
   homebrew:
     name: "{{ item }}"
-    upgrade_all: false
+    state: "{{ 'present' if not upgrade_packages else 'upgraded' }}"
   loop: "{{ brew_packages_user }}"
 
 - name: Install user homebrew cask packages
-  homebrew_cask:
+  community.general.homebrew_cask:
     name: "{{ item }}"
-    state: present
+    state: "{{ 'present' if not upgrade_packages else 'upgraded' }}"
     sudo_password: "{{ ansible_become_password }}"
   loop: "{{ brew_cask_packages_user }}"
 
 - name: Upgrade Homebrew
   community.general.homebrew:
     upgrade_all: true
-    sudo_password: "{{ ansible_become_password }}"
-  when: upgrade_packages is defined and upgrade_packages
+  when: upgrade_packages
 
 - name: Check if signed into Apple ID
   shell: defaults read MobileMeAccounts Accounts
