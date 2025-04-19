@@ -58,6 +58,7 @@ brew_packages:
   - kubectl
   - nats-io/nats-tools/nats
   - s5cmd
+  - sshpass
 brew_packages_removed: []
 brew_packages_user: []
 pip_packages: []
