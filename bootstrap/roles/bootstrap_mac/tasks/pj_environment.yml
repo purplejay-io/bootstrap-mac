@@ -56,10 +56,3 @@
 - name: setup powershell
   include_tasks: powershell.yml
   when: node_type == "employee"
-
-- name: Add SSH Tunnel File
-  template:
-    src: tunnels.sh.j2
-    dest: "{{ ansible_user_dir }}/tunnels.sh"
-    mode: '0740'
-  when: (ssh_tunnels | length>0)

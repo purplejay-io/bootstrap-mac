@@ -1,6 +1,0 @@
-#!/bin/zsh
-
-{% for item in ssh_tunnels %}
-ssh -f -N -L {{ item.port }}:127.0.0.1:5900 {{ item.host }} &
-{% endfor %}
-caffeinate -d
