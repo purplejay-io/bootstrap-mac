@@ -10,19 +10,23 @@
   shell: open /Applications/Ollama.app
   when: ollama_installed.changed
 
+- set_fact:
+    ollama_host: '127.0.0.1'
+    ollama_keep_alive: '24h'
+
 - name: set ollama env vars
   include_tasks: utilities/system_env.yml
   when: ollama_expose
   loop:
-    - { name: OLLAMA_HOST, value: '0.0.0.0' }
-    - { name: OLLAMA_KEEP_ALIVE, value: '1h' }
+    - { name: OLLAMA_HOST, value: '{{ ollama_host }}' }
+    - { name: OLLAMA_KEEP_ALIVE, value: '{{ ollama_keep_alive }}' }
 
 - name: Ensure ollama is running the latest
   shell: |
     killall Ollama
     sleep 5
-    export OLLAMA_HOST='0.0.0.0'
-    export OLLAMA_KEEP_ALIVE='24h'
+    export OLLAMA_HOST='{{ ollama_host }}'
+    export OLLAMA_KEEP_ALIVE='{{ ollama_keep_alive }}'
     open -a Ollama
   changed_when: no
 
