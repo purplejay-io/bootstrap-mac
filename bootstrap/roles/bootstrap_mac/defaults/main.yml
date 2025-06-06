@@ -105,6 +105,8 @@ ssh_tunnels: []
 ollama_install: no
 ollama_expose: no
 ollama_models: []
+ollama_host: "0.0.0.0"
+ollama_keep_alive: "24h"
 
 # OS Update
 os_upgrade: false

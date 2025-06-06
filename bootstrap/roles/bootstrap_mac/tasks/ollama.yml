@@ -10,10 +10,6 @@
   shell: open /Applications/Ollama.app
   when: ollama_installed.changed
 
-- set_fact:
-    ollama_host: '127.0.0.1'
-    ollama_keep_alive: '24h'
-
 - name: set ollama env vars
   include_tasks: utilities/system_env.yml
   when: ollama_expose
