@@ -42,7 +42,6 @@ brew_cask_packages:
   - 1password
   - visual-studio-code
   - 1password-cli
-  - docker
   - powershell
   - postman
   - signal
@@ -50,9 +49,6 @@ brew_cask_packages:
 brew_cask_packages_user: []
 brew_packages:
   - node@22
-  - nmap
-  - tree
-  - wget
   - jq
   - mkcert
   - kubectl
