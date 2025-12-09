@@ -1,6 +1,7 @@
 ---
 
 - name: Additional user zprofile baseline
+  when: zprofile_user is defined and zprofile_user is not none
   blockinfile:
     block: "{{ zprofile_user }}"
     path: $HOME/.zprofile
