@@ -10,7 +10,8 @@ printf "Bootstrap Mac Path %s\n" "$BOOTSTRAP_MAC_PATH"
 
 BOOTSTRAP_MAC_REPO=$(test -d "$BOOTSTRAP_MAC_PATH"/.git/;echo $?)
 
-LOCAL_VAULT_PASS_FILE="$HOME/.pj-bootstrap-ansible.txt"
+LOCAL_VAULT_PASS_FILE="$BOOTSTRAP_MAC_PATH/.pj-bootstrap-ansible.txt"
+LOCAL_REQUIREMENTS_FILE="$BOOTSTRAP_MAC_PATH/requirements.yml"
 
 ########################################################################
 #  Define Functions
@@ -173,6 +174,13 @@ if [[ $# -gt 2 ]]; then
   display-help
 fi
 
+if [[ $1 == 'install' || $1 == 'update' || $1 == 'noupdate' || $1 == 'reset-password' || $1 == 'check' ]]; then
+    uv run ansible-galaxy install -r "$LOCAL_REQUIREMENTS_FILE"
+else
+    display-help
+fi
+
+
 if [[ $1 == "install" ]]; then
   install-bootstrapmac
   cd "$BOOTSTRAP_MAC_PATH" || (display-msg "error going to bootstrap mac path"; exit 1)
@@ -217,5 +225,3 @@ if [[ $1 == "reset-password" ]]; then
   uv run ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
   exit 1
 fi
-
-display-help

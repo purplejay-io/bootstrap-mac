@@ -51,3 +51,7 @@
 - name: Setup Ollama
   include_tasks: ollama.yml
   when: ollama_install and ansible_architecture == 'arm64'
+
+- name: prom metrics
+  when: prometheus_username is defined
+  include_tasks: prom_metrics.yml

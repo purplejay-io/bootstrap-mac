@@ -10,7 +10,6 @@
     create: yes
   when: ansible_architecture == 'arm64'
 
-
 - name: set zprofile block from template
   include_tasks: utilities/set_block_from_template.yml
   vars:
@@ -56,3 +55,10 @@
 - name: setup powershell
   include_tasks: powershell.yml
   when: node_type == "employee"
+
+- name: endpoint configuration
+  vars:
+    cmd: install
+  include_role:
+    name: pj.endpoint_configuration.install
+  when: prometheus_username is defined

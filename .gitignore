@@ -17,3 +17,4 @@ stderr.txt
 stdout.txt
 poetry.lock
 .vscode
+.pj-bootstrap-ansible.txt

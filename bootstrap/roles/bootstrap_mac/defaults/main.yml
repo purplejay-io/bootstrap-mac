@@ -18,9 +18,6 @@ auto_hide_dock: true
 
 # Local Development
 localhost_aliases:
-  - mongo1
-  - mongo2
-  - mongo3
   - nats.local
 
 # git

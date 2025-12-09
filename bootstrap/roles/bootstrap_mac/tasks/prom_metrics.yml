@@ -1,0 +1,36 @@
+- include_vars:
+    file: '{{ common_vars_dir }}/{{ item }}'
+  loop:
+    - authorized_keys.yml
+
+- name: include role
+  vars:
+    ssh_authorized_keys: "{{ mac_ssh_pubkeys | map(attribute='pub') }}"
+  include_role:
+    name: pj.bootstrap.bootstrap_mac
+
+- set_fact:
+    metric_name: bootstrap_mac_last_ran
+    metric_value: "{{ now(fmt='%s',utc=false) }}"
+
+- name: Get MacBook serial number
+  ansible.builtin.command: system_profiler SPHardwareDataType
+  register: hw_info
+  changed_when: false
+
+- name: Extract serial number from hardware info
+  ansible.builtin.set_fact:
+    mac_serial_number: "{{ hw_info.stdout | regex_search('Serial Number \\(system\\): (\\S+)', '\\1') | first }}"
+
+- name: Define metrics data
+  set_fact:
+    metrics_data: |
+      # TYPE {{ metric_name }} gauge
+      {{ metric_name }}{host_serial="{{ mac_serial_number }}",hostname="{{ ansible_hostname }}",stage="{{ stage }}"} {{ metric_value }}
+
+- name: create/update metrics file
+  vars:
+    content: "{{ metrics_data }}"
+  ansible.builtin.template:
+    src: prom_metrics.j2
+    dest: /opt/homebrew/etc/bootstrap_mac_metrics.prom
