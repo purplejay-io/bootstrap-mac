@@ -1,14 +1,3 @@
-- include_vars:
-    file: '{{ common_vars_dir }}/{{ item }}'
-  loop:
-    - authorized_keys.yml
-
-- name: include role
-  vars:
-    ssh_authorized_keys: "{{ mac_ssh_pubkeys | map(attribute='pub') }}"
-  include_role:
-    name: pj.bootstrap.bootstrap_mac
-
 - set_fact:
     metric_name: bootstrap_mac_last_ran
     metric_value: "{{ now(fmt='%s',utc=false) }}"
