@@ -174,7 +174,7 @@ if [[ $# -gt 2 ]]; then
   display-help
 fi
 
-if [[ $1 == 'install' || $1 == 'update' || $1 == 'noupdate' || $1 == 'reset-password' || $1 == 'check' ]]; then
+if [[ $1 == 'update' || $1 == 'noupdate' || $1 == 'reset-password' || $1 == 'check' ]]; then
     uv run ansible-galaxy install -r "$LOCAL_REQUIREMENTS_FILE"
 else
     display-help
