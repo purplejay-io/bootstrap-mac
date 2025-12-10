@@ -112,7 +112,7 @@ function check-become-password {
   # 6. Check to make sure become password is encrypted
   if [[ $(echo "$ANSIBLE_KEYCHAIN_PASS" | uv run ansible-vault view vars/pass.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" ) == "" ]]; then
     echo "function: check-become-password"
-    display-msg "Ansible-Vault wasn't able to encrypt your become password, try again."
+    display-msg "Ansible-Vault wasn't able to encrypt your become password. Reset password with (pj-pass-reset or ./run.sh reset-password)"
     exit 1
   fi
   BECOME_PASSWORD_CHECK=0
