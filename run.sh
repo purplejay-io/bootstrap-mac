@@ -118,7 +118,7 @@ function check-become-password {
     read -rs password
     printf "\n"
     echo "---" > "$BOOTSTRAP_MAC_PATH"/vars/pass.yml
-    echo "ansible_become_password: $password" >> "$BOOTSTRAP_MAC_PATH"/vars/pass.yml
+    echo "ansible_become_password: \"$password\"" >> "$BOOTSTRAP_MAC_PATH"/vars/pass.yml
 
     echo `security find-generic-password -a pj-bootstrap-ansible -w` | uv run ansible-vault encrypt --vault-password-file "$LOCAL_VAULT_PASS_FILE" vars/pass.yml
   fi
