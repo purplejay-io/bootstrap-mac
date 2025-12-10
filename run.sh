@@ -10,7 +10,8 @@ printf "Bootstrap Mac Path %s\n" "$BOOTSTRAP_MAC_PATH"
 
 BOOTSTRAP_MAC_REPO=$(test -d "$BOOTSTRAP_MAC_PATH"/.git/;echo $?)
 
-LOCAL_VAULT_PASS_FILE="$BOOTSTRAP_MAC_PATH/.pj-bootstrap-ansible.txt"
+LOCAL_VAULT_PASS_FILE="/bin/cat"
+ANSIBLE_KEYCHAIN_PASS=$(security find-generic-password -a pj-bootstrap-ansible -w)
 LOCAL_REQUIREMENTS_FILE="$BOOTSTRAP_MAC_PATH/requirements.yml"
 
 ########################################################################
@@ -52,18 +53,15 @@ function display-msg {
 }
 
 function check-keychain-password {
-  ANSIBLE_KEYCHAIN_PASS=1
-  ANSIBLE_KEYCHAIN_PASS_CHECK=$(security find-generic-password -a pj-bootstrap-ansible -w)
-  if [[ $ANSIBLE_KEYCHAIN_PASS_CHECK == "" ]]; then
+  if [[ $ANSIBLE_KEYCHAIN_PASS == "" ]]; then
     security add-generic-password -a pj-bootstrap-ansible -s ansible -w "$(openssl rand -base64 25)"
-    ANSIBLE_KEYCHAIN_PASS_CHECK=$(security find-generic-password -a pj-bootstrap-ansible -w)
+    ANSIBLE_KEYCHAIN_PASS=$(security find-generic-password -a pj-bootstrap-ansible -w)
   fi
-  if [[ $ANSIBLE_KEYCHAIN_PASS_CHECK == "" ]]; then
+  if [[ $ANSIBLE_KEYCHAIN_PASS == "" ]]; then
     echo "function: check-keychain-password"
     display-msg "The ephemeral password did not get created successfully in keychain, try again"
     exit 1
   fi
-  ANSIBLE_KEYCHAIN_PASS=0
 }
 
 function check-ansible-readiness {
@@ -87,9 +85,6 @@ function check-become-password {
   BECOME_PASSWORD_CHECK=1
   # 1. Check is the ephemeral password in keychain was successfully created.
    check-keychain-password
-  if [[ $ANSIBLE_KEYCHAIN_PASS == 1 ]]; then
-    exit 1
-  fi
 
   # 2. Ensure ansible-vault can be ran
   install-bootstrapmac
@@ -102,15 +97,6 @@ function check-become-password {
   # 3. Change Directory
   cd "$BOOTSTRAP_MAC_PATH" || (display-msg "error going to bootstrap mac path"; exit 1;)
 
-  # 4. Create local ansible vault password file
-  if [[ ! -f "$LOCAL_VAULT_PASS_FILE" ]]; then
-    echo -n
-    echo -n "Create a Vault Password:"
-    read -rs vault_password
-    printf "\n"
-    echo "$vault_password" > "$LOCAL_VAULT_PASS_FILE"
-  fi
-
   # 5. If pass.yml does not exist, then ask user for it
   if [[ ! -f "$BOOTSTRAP_MAC_PATH"/vars/pass.yml ]]; then
     echo -n
@@ -120,11 +106,11 @@ function check-become-password {
     echo "---" > "$BOOTSTRAP_MAC_PATH"/vars/pass.yml
     echo "ansible_become_password: \"$password\"" >> "$BOOTSTRAP_MAC_PATH"/vars/pass.yml
 
-    echo `security find-generic-password -a pj-bootstrap-ansible -w` | uv run ansible-vault encrypt --vault-password-file "$LOCAL_VAULT_PASS_FILE" vars/pass.yml
+    echo "$ANSIBLE_KEYCHAIN_PASS" | uv run ansible-vault encrypt --vault-password-file "$LOCAL_VAULT_PASS_FILE" vars/pass.yml
   fi
 
   # 6. Check to make sure become password is encrypted
-  if [[ $(uv run ansible-vault view vars/pass.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" ) == "" ]]; then
+  if [[ $(echo "$ANSIBLE_KEYCHAIN_PASS" | uv run ansible-vault view vars/pass.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" ) == "" ]]; then
     echo "function: check-become-password"
     display-msg "Ansible-Vault wasn't able to encrypt your become password, try again."
     exit 1
@@ -135,7 +121,7 @@ function check-become-password {
 function reset-become-password {
   security delete-generic-password -a pj-bootstrap-ansible
   rm -f "$BOOTSTRAP_MAC_PATH"/vars/pass.yml
-  rm -f "$LOCAL_VAULT_PASS_FILE"
+  ANSIBLE_KEYCHAIN_PASS=""
 }
 
 function prune-logs {
@@ -189,14 +175,14 @@ if [[ $1 == "install" ]]; then
   uv sync --all-extras
   check-become-password
 
-  FILEVAULT_CHECK=$(uv run ansible-vault view "$BOOTSTRAP_MAC_PATH"/vars/pass.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" | yq -r '.ansible_become_password' | sudo -S fdesetup isactive)
+  FILEVAULT_CHECK=$(echo "$ANSIBLE_KEYCHAIN_PASS" | uv run ansible-vault view "$BOOTSTRAP_MAC_PATH"/vars/pass.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" | yq -r '.ansible_become_password' | sudo -S fdesetup isactive)
   if [[ $FILEVAULT_CHECK != "true" ]]; then
     open "x-apple.systempreferences:com.apple.preference.security?FileVault"
     display-msg "Opening System Preferences. Turn on Filevault before pressing OK."
     printf "\n"
   fi
 
-  uv run ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
+  echo "$ANSIBLE_KEYCHAIN_PASS" | uv run ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
 
   exit 1
 fi
@@ -204,26 +190,26 @@ fi
 if [[ $1 == "update" ]]; then
   prune-logs
   check-become-password
-  uv run ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" -e upgrade_packages=true
+  echo "$ANSIBLE_KEYCHAIN_PASS" | uv run ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE" -e upgrade_packages=true
   exit 1
 fi
 
 if [[ $1 == "check" ]]; then
   check-become-password
-  uv run ansible-playbook local.yml --diff --check -vv --vault-password-file "$LOCAL_VAULT_PASS_FILE"
+  echo "$ANSIBLE_KEYCHAIN_PASS" | uv run ansible-playbook local.yml --diff --check -vv --vault-password-file "$LOCAL_VAULT_PASS_FILE"
   exit 1
 fi
 
 if [[ $1 == "noupdate" ]]; then
   prune-logs
   check-become-password
-  uv run ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
+  echo "$ANSIBLE_KEYCHAIN_PASS" | uv run ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
   exit 1
 fi
 
 if [[ $1 == "reset-password" ]]; then
   reset-become-password
   check-become-password
-  uv run ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
+  echo "$ANSIBLE_KEYCHAIN_PASS" | uv run ansible-playbook local.yml --vault-password-file "$LOCAL_VAULT_PASS_FILE"
   exit 1
 fi
