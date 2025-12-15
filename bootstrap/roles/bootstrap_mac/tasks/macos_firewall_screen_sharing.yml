@@ -10,8 +10,8 @@
           screen_sharing_ports = "{ 5900 3283 }"
           
           
-          {% if host_identifier is defined %}
-          table <pj_intranet> const {{ '{' }} {{ host_identifier }}.0/24 {{ '}' }}
+          {% if network_identifier is defined %}
+          table <pj_intranet> const {{ '{' }} {{ network_identifier }}.0/24 {{ '}' }}
           pass in quick proto tcp from <pj_intranet> to {{ ansible_default_ipv4.address }} port $screen_sharing_ports
           {% endif %}
 
