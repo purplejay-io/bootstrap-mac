@@ -8,7 +8,7 @@ export PATH="$HOMEBREW_PATH/opt/node@22/bin:$PATH"
 
 
 {% if gitlab_api_token != "please_update_user_yml" %}
-export UV_EXTRA_INDEX_URL = "https://__token__:{{ gitlab_api_token }}@gitlab.purplejay.net/api/v4/groups/205/-/packages/pypi/simple"
+export UV_EXTRA_INDEX_URL = "https://__token__:{{ gitlab_api_token }}@gitlab.purplejay.io/api/v4/groups/205/-/packages/pypi/simple"
 {% endif %}
 
 {{ lookup("template", "templates/common_zprofile_aliases") }}
@@ -93,7 +93,7 @@ function create-git-repo {
     # Try block equivalent in bash
     {
         git init --initial-branch=main
-        git remote add origin "git@gitlab.purplejay.net:$gitlabGroup/$repoName.git"
+        git remote add origin "git@gitlab.purplejay.io:$gitlabGroup/$repoName.git"
         git add .
         git commit -m "Initial commit"
         git push --set-upstream origin main

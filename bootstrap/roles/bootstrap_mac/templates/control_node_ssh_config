@@ -2,7 +2,7 @@ Host *
     AddKeysToAgent yes
     UseKeychain yes
 
-Host gitlab.purplejay.net
+Host gitlab.purplejay.io
     User git
     HostName 10.1.0.30
     UseKeychain yes

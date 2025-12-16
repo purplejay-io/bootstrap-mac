@@ -1,6 +1,6 @@
 Set-Alias -Name python -Value python3
 {% if gitlab_api_token != "please_update_user_yml" %}
-$env:UV_EXTRA_INDEX_URL = "https://__token__:{{ gitlab_api_token }}@gitlab.purplejay.net/api/v4/groups/205/-/packages/pypi/simple"
+$env:UV_EXTRA_INDEX_URL = "https://__token__:{{ gitlab_api_token }}@gitlab.purplejay.io/api/v4/groups/205/-/packages/pypi/simple"
 {% endif %}
 $env:UV_NATIVE_TLS = "true"
 

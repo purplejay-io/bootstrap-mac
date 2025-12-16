@@ -29,7 +29,7 @@ git_config: {}
 repos: []
 # Schema
 #  - name: 'ansible-collections'
-#    url: git@gitlab.purplejay.net:keystone/ansible-collections.git
+#    url: git@gitlab.purplejay.io:keystone/ansible-collections.git
 #    group: keystone
 
 # Packages
