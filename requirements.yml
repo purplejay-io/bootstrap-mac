@@ -6,7 +6,7 @@ collections:
 
   - name: git+https://git@gitlab.purplejay.io/onboarding/endpoint-configuration.git#/pj
     type: git
-    version: 0.0.3
+    version: 0.0.4
 
   - name: git+https://git@gitlab.purplejay.io/keystone/ansible-collections.git
     type: git
