@@ -54,6 +54,9 @@ brew_packages:
   - sshpass
 brew_packages_removed: []
 brew_packages_user: []
+brew_pinned_packages: []
+# - name: prometheus
+#   version: x.x.x
 pip_packages: []
 pip_packages_removed: []
 mas_apps: []
