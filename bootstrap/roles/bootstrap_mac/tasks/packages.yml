@@ -5,6 +5,23 @@
   changed_when: false
   become: true
 
+- name: Manage pinned homebrew packages
+  shell: |
+    CURRENT_VERSION=$(brew list --versions {{ item.name }} 2>/dev/null | awk '{print $2}')
+    if [ -n "$CURRENT_VERSION" ] && [ "$CURRENT_VERSION" != "{{ item.version }}" ]; then
+      brew unpin {{ item.name }} 2>/dev/null || true
+      brew install {{ item.name }}@{{ item.version }}
+      brew pin {{ item.name }}
+    elif [ -z "$CURRENT_VERSION" ]; then
+      brew install {{ item.name }}@{{ item.version }}
+      brew pin {{ item.name }}
+    elif [ "$CURRENT_VERSION" = "{{ item.version }}" ]; then
+      brew pin {{ item.name }} 2>/dev/null || true
+    fi
+  loop: "{{ brew_pinned_packages | default([]) }}"
+  register: pinned_package_result
+  changed_when: "'Unpinning' in pinned_package_result.stdout or 'Pinning' in pinned_package_result.stdout or 'Installing' in pinned_package_result.stdout"
+
 - name: Update Homebrew
   community.general.homebrew:
     update_homebrew: true
@@ -36,23 +53,6 @@
     name: peak/tap
     state: present
   when: '"s5cmd" in brew_packages'
-
-- name: Manage pinned homebrew packages
-  shell: |
-    CURRENT_VERSION=$(brew list --versions {{ item.name }} 2>/dev/null | awk '{print $2}')
-    if [ -n "$CURRENT_VERSION" ] && [ "$CURRENT_VERSION" != "{{ item.version }}" ]; then
-      brew unpin {{ item.name }} 2>/dev/null || true
-      brew install {{ item.name }}@{{ item.version }}
-      brew pin {{ item.name }}
-    elif [ -z "$CURRENT_VERSION" ]; then
-      brew install {{ item.name }}@{{ item.version }}
-      brew pin {{ item.name }}
-    elif [ "$CURRENT_VERSION" = "{{ item.version }}" ]; then
-      brew pin {{ item.name }} 2>/dev/null || true
-    fi
-  loop: "{{ brew_pinned_packages | default([]) }}"
-  register: pinned_package_result
-  changed_when: "'Unpinning' in pinned_package_result.stdout or 'Pinning' in pinned_package_result.stdout or 'Installing' in pinned_package_result.stdout"
 
 # Homebrew installer and dependencies
 - name: Install baseline homebrew packages
