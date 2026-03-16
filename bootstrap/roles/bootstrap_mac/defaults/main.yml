@@ -35,21 +35,15 @@ repos: []
 # Packages
 brew_cask_packages_removed: []
 brew_cask_packages:
-  - google-chrome
   - 1password
   - visual-studio-code
   - 1password-cli
-  - powershell
-  - postman
-  - signal
-  - gitkraken
 brew_cask_packages_user: []
 brew_packages:
   - node@22
   - jq
   - mkcert
   - kubectl
-  - nats-io/nats-tools/nats
   - s5cmd
   - sshpass
 brew_packages_removed: []
