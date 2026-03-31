@@ -17,7 +17,7 @@
     - name: Kill existing Ollama process (if running)
       ansible.builtin.command: killall Ollama
       register: kill_result
-      failed_when: kill_result.rc not in [0, 1]  # rc 1 = not running, that's fine
+      failed_when: kill_result.rc not in [0, 1]
       changed_when: kill_result.rc == 0
 
     - name: Pause to allow process to fully exit
@@ -32,7 +32,7 @@
 
     - name: Wait for Ollama REST API to become available
       ansible.builtin.uri:
-        url: "http://{{ ollama_host }}/api/version"
+        url: "{{ ollama_api_base }}/api/version"
         method: GET
         status_code: 200
       register: api_ready
@@ -40,7 +40,7 @@
       retries: 15
       delay: 3
 
-    - name: Assert expected Ollama version is running
+    - name: Assert Ollama API is responding
       ansible.builtin.assert:
         that:
           - api_ready.json.version is defined
@@ -51,7 +51,7 @@
 
 - name: Pull / update required models (foreground, streaming collapsed)
   ansible.builtin.uri:
-    url: "http://{{ ollama_host }}/api/pull"
+    url: "{{ ollama_api_base }}/api/pull"
     method: POST
     body_format: json
     body:
@@ -60,20 +60,19 @@
     timeout: 600
     status_code: 200
   loop: "{{ ollama_models }}"
-  register: pull_results
 
 - name: Remove absent models
   block:
     - name: Fetch installed model list
       ansible.builtin.uri:
-        url: "http://{{ ollama_host }}/api/tags"
+        url: "{{ ollama_api_base }}/api/tags"
         method: GET
         status_code: 200
       register: tags_response
 
     - name: Delete models that must not exist
       ansible.builtin.uri:
-        url: "http://{{ ollama_host }}/api/delete"
+        url: "{{ ollama_api_base }}/api/delete"
         method: DELETE
         body_format: json
         body:
