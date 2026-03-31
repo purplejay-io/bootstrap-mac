@@ -1,31 +1,84 @@
 ---
-- name: Install ollama cask
-  homebrew_cask:
-    name: "ollama"
-    state: present
-    greedy: yes
-  register: ollama_installed
+- name: Upgrade Ollama via Homebrew Cask
+  community.general.homebrew_cask:
+    name: ollama-app
+    state: upgraded
+  register: brew_upgrade
 
-- name: Open Ollama for the first time
-  shell: open /Applications/Ollama.app
-  when: ollama_installed.changed
-
-- name: set ollama env vars
+- name: Set Ollama environment variables (LaunchAgent plist)
   include_tasks: utilities/system_env.yml
   when: ollama_expose
   loop:
-    - { name: OLLAMA_HOST, value: '{{ ollama_host }}' }
-    - { name: OLLAMA_KEEP_ALIVE, value: '{{ ollama_keep_alive }}' }
+    - { name: OLLAMA_HOST, value: "{{ ollama_host }}" }
+    - { name: OLLAMA_KEEP_ALIVE, value: "{{ ollama_keep_alive }}" }
 
-- name: Ensure ollama is running the latest
-  shell: |
-    killall Ollama
-    sleep 5
-    export OLLAMA_HOST='{{ ollama_host }}'
-    export OLLAMA_KEEP_ALIVE='{{ ollama_keep_alive }}'
-    open -a Ollama
-  changed_when: no
+- name: Restart Ollama after upgrade or env change
+  block:
+    - name: Kill existing Ollama process (if running)
+      ansible.builtin.command: killall Ollama
+      register: kill_result
+      failed_when: kill_result.rc not in [0, 1]  # rc 1 = not running, that's fine
+      changed_when: kill_result.rc == 0
 
-- name: Pull the models
-  shell: ollama pull {{ item }} &
+    - name: Pause to allow process to fully exit
+      ansible.builtin.pause:
+        seconds: 3
+
+    - name: Launch Ollama app via launchctl (SSH-safe)
+      ansible.builtin.shell: |
+        launchctl asuser $(id -u {{ ansible_user }}) \
+          /usr/bin/open -a /Applications/Ollama.app
+      changed_when: true
+
+    - name: Wait for Ollama REST API to become available
+      ansible.builtin.uri:
+        url: "http://{{ ollama_host }}/api/version"
+        method: GET
+        status_code: 200
+      register: api_ready
+      until: api_ready.status == 200
+      retries: 15
+      delay: 3
+
+    - name: Assert expected Ollama version is running
+      ansible.builtin.assert:
+        that:
+          - api_ready.json.version is defined
+        success_msg: "Ollama API is up (version {{ api_ready.json.version }})"
+        fail_msg: "Ollama API did not return a version"
+
+  when: brew_upgrade.changed or ollama_expose
+
+- name: Pull / update required models (foreground, streaming collapsed)
+  ansible.builtin.uri:
+    url: "http://{{ ollama_host }}/api/pull"
+    method: POST
+    body_format: json
+    body:
+      model: "{{ item }}"
+      stream: false
+    timeout: 600
+    status_code: 200
   loop: "{{ ollama_models }}"
+  register: pull_results
+
+- name: Remove absent models
+  block:
+    - name: Fetch installed model list
+      ansible.builtin.uri:
+        url: "http://{{ ollama_host }}/api/tags"
+        method: GET
+        status_code: 200
+      register: tags_response
+
+    - name: Delete models that must not exist
+      ansible.builtin.uri:
+        url: "http://{{ ollama_host }}/api/delete"
+        method: DELETE
+        body_format: json
+        body:
+          model: "{{ item }}"
+        status_code: 200
+      loop: "{{ ollama_absent_models }}"
+      when: item in (tags_response.json.models | map(attribute='name') | list)
+  when: ollama_absent_models is defined and ollama_absent_models | length > 0
