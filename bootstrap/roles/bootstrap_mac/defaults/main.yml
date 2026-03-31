@@ -98,6 +98,7 @@ ollama_models: []
 ollama_absent_models: []
 ollama_host: "0.0.0.0"
 ollama_keep_alive: "24h"
+ollama_api_base: "http://127.0.0.1:11434"  # used for all API calls in the playbook
 
 # OS Update
 os_upgrade: false
