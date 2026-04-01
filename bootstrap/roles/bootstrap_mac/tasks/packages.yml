@@ -7,16 +7,16 @@
 
 - name: Manage pinned homebrew packages
   shell: |
-    CURRENT_VERSION=$(brew list --versions {{ item.name }} 2>/dev/null | awk '{print $2}')
+    CURRENT_VERSION=$({{ homebrew_path }}/bin/brew list --versions {{ item.name }} 2>/dev/null | awk '{print $2}')
     if [ -n "$CURRENT_VERSION" ] && [ "$CURRENT_VERSION" != "{{ item.version }}" ]; then
-      brew unpin {{ item.name }} 2>/dev/null || true
-      brew install {{ item.name }}@{{ item.version }}
-      brew pin {{ item.name }}
+      {{ homebrew_path }}/bin/brew unpin {{ item.name }} 2>/dev/null || true
+      {{ homebrew_path }}/bin/brew install {{ item.name }}@{{ item.version }}
+      {{ homebrew_path }}/bin/brew pin {{ item.name }}
     elif [ -z "$CURRENT_VERSION" ]; then
-      brew install {{ item.name }}@{{ item.version }}
-      brew pin {{ item.name }}
+      {{ homebrew_path }}/bin/brew install {{ item.name }}@{{ item.version }}
+      {{ homebrew_path }}/bin/brew pin {{ item.name }}
     elif [ "$CURRENT_VERSION" = "{{ item.version }}" ]; then
-      brew pin {{ item.name }} 2>/dev/null || true
+      {{ homebrew_path }}/bin/brew pin {{ item.name }} 2>/dev/null || true
     fi
   loop: "{{ brew_pinned_packages | default([]) }}"
   register: pinned_package_result
