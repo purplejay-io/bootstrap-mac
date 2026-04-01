@@ -2,11 +2,7 @@
 # Homebrew installer and dependencies
 - name: Homebrew path
   block:
-    - name: Where is homebrew installed?
-      shell: which brew | cut -d "/" -f 1-3
-      register: homebrew_check
-      changed_when: false
     - name: Set homebrew path
       set_fact:
-        homebrew_path: "{{ homebrew_check.stdout }}"
+        homebrew_path: "{{ '/opt/homebrew' if ansible_machine == 'arm64' else '/usr/local' }}"
 
