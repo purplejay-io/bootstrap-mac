@@ -1,9 +1,9 @@
 ---
 - name: Upgrade Ollama via Homebrew Cask
-  community.general.homebrew_cask:
-    name: ollama-app
-    state: upgraded
+  ansible.builtin.command: brew upgrade --cask ollama-app
   register: brew_upgrade
+  changed_when: "'Already up-to-date' not in brew_upgrade.stdout and 'Warning:' not in brew_upgrade.stderr"
+  failed_when: brew_upgrade.rc != 0 and 'already installed' not in brew_upgrade.stderr | lower
 
 - name: Set Ollama environment variables (LaunchAgent plist)
   include_tasks: utilities/system_env.yml
@@ -14,6 +14,7 @@
 
 - name: Restart Ollama after upgrade or env change
   block:
+
     - name: Kill existing Ollama process (if running)
       ansible.builtin.command: killall Ollama
       register: kill_result
@@ -24,10 +25,8 @@
       ansible.builtin.pause:
         seconds: 3
 
-    - name: Launch Ollama app via launchctl (SSH-safe)
-      ansible.builtin.shell: |
-        launchctl asuser $(id -u {{ ansible_user }}) \
-          /usr/bin/open -a /Applications/Ollama.app
+    - name: Launch Ollama app
+      ansible.builtin.command: /usr/bin/open -a /Applications/Ollama.app
       changed_when: true
 
     - name: Wait for Ollama REST API to become available
