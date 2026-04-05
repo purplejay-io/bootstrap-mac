@@ -25,6 +25,9 @@
       ansible.builtin.pause:
         seconds: 3
 
+    - name: Export Keep Alive env variable
+      ansible.builtin.command: launchctl setenv OLLAMA_KEEP_ALIVE "{{ ollama_keep_alive }}"
+
     - name: Launch Ollama app
       ansible.builtin.command: /usr/bin/open -a /Applications/Ollama.app
       changed_when: true
