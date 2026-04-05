@@ -25,9 +25,6 @@
       ansible.builtin.pause:
         seconds: 3
 
-    - name: Export Keep Alive env variable
-      ansible.builtin.command: launchctl setenv OLLAMA_KEEP_ALIVE "{{ ollama_keep_alive }}"
-
     - name: Launch Ollama app
       ansible.builtin.command: /usr/bin/open -a /Applications/Ollama.app
       changed_when: true
@@ -62,6 +59,20 @@
     timeout: 600
     status_code: 200
   loop: "{{ ollama_models }}"
+
+- name: Keep required models warm in memory via REST API
+  ansible.builtin.uri:
+    url: "{{ ollama_api_base }}/api/generate"
+    method: POST
+    body_format: json
+    body:
+      model: "{{ item }}"
+      prompt: ""
+      stream: false
+      keep_alive: "{{ ollama_keep_alive }}"
+    timeout: 600
+    status_code: 200
+  loop: "{{ ollama_keepalive_models }}"
 
 - name: Remove absent models
   block:
