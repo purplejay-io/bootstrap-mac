@@ -48,7 +48,7 @@
 
   when: brew_upgrade.changed or ollama_expose
 
-- name: Pull / update required models (foreground, streaming collapsed)
+- name: Pull / update required models in background
   ansible.builtin.uri:
     url: "{{ ollama_api_base }}/api/pull"
     method: POST
@@ -59,6 +59,27 @@
     timeout: 600
     status_code: 200
   loop: "{{ ollama_models }}"
+  async: 7200
+  poll: 0
+  register: ollama_pull_jobs
+
+- name: Show background pull job IDs
+  ansible.builtin.debug:
+    msg: "Started pull for {{ item.item }} as job {{ item.ansible_job_id }}"
+  loop: "{{ ollama_pull_jobs.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Wait for model pulls to finish
+  ansible.builtin.async_status:
+    jid: "{{ item.ansible_job_id }}"
+  register: ollama_pull_status
+  until: ollama_pull_status.finished
+  retries: 720
+  delay: 10
+  loop: "{{ ollama_pull_jobs.results }}"
+  loop_control:
+    label: "{{ item.item }}"
 
 - name: Keep required models warm in memory via REST API
   ansible.builtin.uri:
