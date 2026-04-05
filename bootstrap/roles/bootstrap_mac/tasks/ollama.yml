@@ -56,10 +56,10 @@
     body:
       model: "{{ item }}"
       stream: false
-    timeout: 600
+    timeout: 7200
     status_code: 200
   loop: "{{ ollama_models }}"
-  async: 7200
+  async: 10800
   poll: 0
   register: ollama_pull_jobs
 
