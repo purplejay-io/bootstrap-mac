@@ -76,7 +76,7 @@
   register: ollama_pull_status
   until: ollama_pull_status.finished
   retries: 720
-  delay: 10
+  delay: 60
   loop: "{{ ollama_pull_jobs.results }}"
   loop_control:
     label: "{{ item.item }}"
