@@ -1,6 +1,6 @@
 ---
 - name: Upgrade Ollama via Homebrew Cask
-  ansible.builtin.command: brew upgrade --cask ollama-app
+  ansible.builtin.command: "{{ homebrew_path }}/bin/brew upgrade --cask ollama-app"
   register: brew_upgrade
   changed_when: "'Already up-to-date' not in brew_upgrade.stdout and 'Warning:' not in brew_upgrade.stderr"
   failed_when: brew_upgrade.rc != 0 and 'already installed' not in brew_upgrade.stderr | lower
