@@ -5,8 +5,8 @@
   changed_when: "'Already up-to-date' not in brew_upgrade.stdout and 'Warning:' not in brew_upgrade.stderr"
   failed_when: brew_upgrade.rc != 0 and 'already installed' not in brew_upgrade.stderr | lower
 
-- name: Set Ollama environment variables (LaunchAgent plist)
-  include_tasks: utilities/system_env.yml
+- name: Set Ollama environment variables (user Aqua session)
+  include_tasks: utilities/user_aqua_env.yml
   when: ollama_expose
   loop:
     - { name: OLLAMA_HOST, value: "{{ ollama_host }}" }

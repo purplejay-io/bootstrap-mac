@@ -1,8 +1,0 @@
-- name: Verify system environment variable
-  shell: launchctl getenv {{ item.name }}
-  register: system_env
-  changed_when: no
-
-- name: Set system environment variable
-  shell: launchctl setenv {{ item.name }} "{{ item.value }}"
-  when:  item.value != system_env.stdout

@@ -1,0 +1,21 @@
+- name: Get console user UID
+  shell: stat -f%u /dev/console
+  register: console_uid
+  changed_when: no
+
+- name: Warn when no GUI user is logged in
+  ansible.builtin.debug:
+    msg: "WARNING: No console user logged in; skipping user-scope launchctl setenv for {{ item.name }}."
+  when: console_uid.stdout == "0"
+
+- name: Verify user-scope environment variable
+  shell: launchctl asuser {{ console_uid.stdout }} launchctl getenv {{ item.name }}
+  register: aqua_env
+  changed_when: no
+  when: console_uid.stdout != "0"
+
+- name: Set user-scope environment variable
+  shell: launchctl asuser {{ console_uid.stdout }} launchctl setenv {{ item.name }} "{{ item.value }}"
+  when:
+    - console_uid.stdout != "0"
+    - (item.value | string) != (aqua_env.stdout | default(''))
