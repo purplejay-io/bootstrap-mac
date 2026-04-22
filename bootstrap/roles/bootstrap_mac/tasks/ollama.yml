@@ -5,48 +5,57 @@
   changed_when: "'Already up-to-date' not in brew_upgrade.stdout and 'Warning:' not in brew_upgrade.stderr"
   failed_when: brew_upgrade.rc != 0 and 'already installed' not in brew_upgrade.stderr | lower
 
-- name: Set Ollama environment variables (user Aqua session)
-  include_tasks: utilities/user_aqua_env.yml
-  when: ollama_expose
-  loop:
-    - { name: OLLAMA_HOST, value: "{{ ollama_host }}" }
-    - { name: OLLAMA_KEEP_ALIVE, value: "{{ ollama_keep_alive }}" }
+- name: Remove Gatekeeper quarantine from Ollama.app so the LaunchDaemon can exec headlessly
+  ansible.builtin.command: /usr/bin/xattr -dr com.apple.quarantine /Applications/Ollama.app
+  changed_when: false
 
-- name: Restart Ollama after upgrade or env change
+- name: Install Ollama LaunchDaemon plist
+  ansible.builtin.template:
+    src: com.purplejay.ollama.plist.j2
+    dest: /Library/LaunchDaemons/com.purplejay.ollama.plist
+    owner: root
+    group: wheel
+    mode: '0644'
+  become: yes
+  register: ollama_plist
+
+- name: Reload Ollama LaunchDaemon
+  when: brew_upgrade.changed or ollama_plist.changed
+  become: yes
   block:
 
-    - name: Kill existing Ollama process (if running)
+    - name: Stop any GUI Ollama.app instance (may be holding :11434)
       ansible.builtin.command: killall Ollama
-      register: kill_result
-      failed_when: kill_result.rc not in [0, 1]
-      changed_when: kill_result.rc == 0
+      register: ollama_killall
+      failed_when: ollama_killall.rc not in [0, 1]
+      changed_when: ollama_killall.rc == 0
 
-    - name: Pause to allow process to fully exit
-      ansible.builtin.pause:
-        seconds: 3
+    - name: Bootout existing Ollama LaunchDaemon (ignore if not loaded)
+      ansible.builtin.command: launchctl bootout system/com.purplejay.ollama
+      register: ollama_bootout
+      failed_when: false
+      changed_when: ollama_bootout.rc == 0
 
-    - name: Launch Ollama app
-      ansible.builtin.command: /usr/bin/open -a /Applications/Ollama.app
+    - name: Bootstrap Ollama LaunchDaemon
+      ansible.builtin.command: launchctl bootstrap system /Library/LaunchDaemons/com.purplejay.ollama.plist
       changed_when: true
 
-    - name: Wait for Ollama REST API to become available
-      ansible.builtin.uri:
-        url: "{{ ollama_api_base }}/api/version"
-        method: GET
-        status_code: 200
-      register: api_ready
-      until: api_ready.status == 200
-      retries: 15
-      delay: 3
+- name: Wait for Ollama REST API to become available
+  ansible.builtin.uri:
+    url: "{{ ollama_api_base }}/api/version"
+    method: GET
+    status_code: 200
+  register: api_ready
+  until: api_ready.status == 200
+  retries: 15
+  delay: 3
 
-    - name: Assert Ollama API is responding
-      ansible.builtin.assert:
-        that:
-          - api_ready.json.version is defined
-        success_msg: "Ollama API is up (version {{ api_ready.json.version }})"
-        fail_msg: "Ollama API did not return a version"
-
-  when: brew_upgrade.changed or ollama_expose
+- name: Assert Ollama API is responding
+  ansible.builtin.assert:
+    that:
+      - api_ready.json.version is defined
+    success_msg: "Ollama API is up (version {{ api_ready.json.version }})"
+    fail_msg: "Ollama API did not return a version"
 
 - name: Pull / update required models in background
   ansible.builtin.uri:
