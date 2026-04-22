@@ -5,6 +5,10 @@
   changed_when: "'Already up-to-date' not in brew_upgrade.stdout and 'Warning:' not in brew_upgrade.stderr"
   failed_when: brew_upgrade.rc != 0 and 'already installed' not in brew_upgrade.stderr | lower
 
+- name: Remove Gatekeeper quarantine from Ollama.app so the LaunchDaemon can exec headlessly
+  ansible.builtin.command: /usr/bin/xattr -dr com.apple.quarantine /Applications/Ollama.app
+  changed_when: false
+
 - name: Install Ollama LaunchDaemon plist
   ansible.builtin.template:
     src: com.purplejay.ollama.plist.j2
