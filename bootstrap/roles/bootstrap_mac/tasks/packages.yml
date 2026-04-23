@@ -82,6 +82,16 @@
     sudo_password: "{{ ansible_become_password }}"
   loop: "{{ brew_cask_packages_user }}"
 
+# Overwrites any preexisting app at the cask's install path (e.g. a manually
+# installed /Applications/Foo.app) so brew can take over management.
+- name: Force install homebrew cask packages
+  community.general.homebrew_cask:
+    name: "{{ item }}"
+    state: "{{ 'present' if not upgrade_packages else 'upgraded' }}"
+    install_options: force
+    sudo_password: "{{ ansible_become_password }}"
+  loop: "{{ brew_cask_packages_force }}"
+
 - name: Upgrade Homebrew
   community.general.homebrew:
     upgrade_all: true

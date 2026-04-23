@@ -39,6 +39,7 @@ brew_cask_packages:
   - visual-studio-code
   - 1password-cli
 brew_cask_packages_user: []
+brew_cask_packages_force: []
 brew_packages:
   - node@22
   - jq
