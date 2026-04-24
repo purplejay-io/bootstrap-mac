@@ -100,6 +100,13 @@ ollama_absent_models: []
 ollama_host: "0.0.0.0"
 ollama_keep_alive: "24h"
 ollama_api_base: "http://127.0.0.1:11434"  # used for all API calls in the playbook
+# "latest" resolves to the newest GitHub release at run time. Override with a
+# specific version string (e.g. "0.21.2") to pin. When pinning, optionally set
+# ollama_darwin_tgz_sha256 to enforce byte-level reproducibility; codesign
+# --verify always runs regardless.
+ollama_version: "latest"
+ollama_darwin_tgz_sha256: ""
+ollama_install_dir: "/opt/purplejay/ollama"
 
 # OS Update
 os_upgrade: false
