@@ -5,9 +5,34 @@
   changed_when: "'Already up-to-date' not in brew_upgrade.stdout and 'Warning:' not in brew_upgrade.stderr"
   failed_when: brew_upgrade.rc != 0 and 'already installed' not in brew_upgrade.stderr | lower
 
-- name: Remove Gatekeeper quarantine from Ollama.app so the LaunchDaemon can exec headlessly
-  ansible.builtin.command: /usr/bin/xattr -dr com.apple.quarantine /Applications/Ollama.app
-  changed_when: false
+- name: Ensure parent directory for the headless Ollama bundle
+  ansible.builtin.file:
+    path: /opt/purplejay
+    state: directory
+    owner: root
+    group: wheel
+    mode: '0755'
+  become: yes
+
+# macOS App Management (Ventura+) blocks xattr modifications on anything under
+# /Applications/, even as root, so we cannot strip com.apple.quarantine there.
+# Mirror the bundle to /opt/purplejay/ (outside App Management's scope) and
+# exec from the copy. BSD rsync's -a does NOT include -X (xattrs), so the
+# quarantine attribute is dropped at copy time without a separate strip step.
+# Developer ID signature + notarization ticket live as regular files inside
+# the bundle and are preserved by the mirror.
+- name: Mirror Ollama.app out of /Applications to escape App Management
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/rsync
+      - -a
+      - --delete
+      - --itemize-changes
+      - /Applications/Ollama.app/
+      - /opt/purplejay/Ollama.app/
+  become: yes
+  register: ollama_mirror
+  changed_when: ollama_mirror.stdout | length > 0
 
 - name: Install Ollama LaunchDaemon plist
   ansible.builtin.template:
@@ -20,7 +45,7 @@
   register: ollama_plist
 
 - name: Reload Ollama LaunchDaemon
-  when: brew_upgrade.changed or ollama_plist.changed
+  when: brew_upgrade.changed or ollama_mirror.changed or ollama_plist.changed
   become: yes
   block:
 
