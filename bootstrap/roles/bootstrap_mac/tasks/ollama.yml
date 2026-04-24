@@ -1,12 +1,99 @@
 ---
-- name: Upgrade Ollama via Homebrew Cask
-  ansible.builtin.command: "{{ homebrew_path }}/bin/brew upgrade --cask ollama-app"
-  register: brew_upgrade
-  changed_when: "'Already up-to-date' not in brew_upgrade.stdout and 'Warning:' not in brew_upgrade.stderr"
-  failed_when: brew_upgrade.rc != 0 and 'already installed' not in brew_upgrade.stderr | lower
+# Install Ollama from Ollama Inc.'s standalone darwin release (not the .app
+# cask). The cask wraps the same binary in an Ollama.app bundle, which macOS
+# Ventura+ App Management binds to TCC via com.apple.macl — blocking xattr
+# and timestamp writes even as root, regardless of install path (moving the
+# bundle does not shed the macl tag). The standalone tarball ships the same
+# Developer ID-signed binary (Team 3MU9H2V9Y9, identifier ai.ollama.ollama)
+# without a bundle, so TCC App Management does not engage.
+- name: Remove legacy Ollama.app cask if present
+  ansible.builtin.command: "{{ homebrew_path }}/bin/brew uninstall --cask ollama-app"
+  register: brew_uninstall_cask
+  changed_when: brew_uninstall_cask.rc == 0
+  failed_when:
+    - brew_uninstall_cask.rc != 0
+    - "'No such keg' not in brew_uninstall_cask.stderr"
+    - "'not installed' not in brew_uninstall_cask.stderr | lower"
 
-- name: Remove Gatekeeper quarantine from Ollama.app so the LaunchDaemon can exec headlessly
-  ansible.builtin.command: /usr/bin/xattr -dr com.apple.quarantine /Applications/Ollama.app
+# Use github.com's /releases/latest redirect instead of api.github.com to
+# avoid the 60/hour unauthenticated rate limit, which four studios behind one
+# NAT can exhaust quickly. The 302 Location header carries the resolved tag,
+# e.g. https://github.com/ollama/ollama/releases/tag/v0.21.2
+- name: Resolve latest Ollama release tag
+  ansible.builtin.uri:
+    url: https://github.com/ollama/ollama/releases/latest
+    method: HEAD
+    follow_redirects: none
+    status_code: 302
+  register: ollama_latest
+  when: ollama_version == "latest"
+
+- name: Determine effective Ollama version
+  ansible.builtin.set_fact:
+    ollama_resolved_version: >-
+      {{ (ollama_latest.location | regex_replace('.*/tag/v?', ''))
+         if ollama_version == "latest" else ollama_version }}
+
+- name: Download Ollama standalone darwin release
+  ansible.builtin.get_url:
+    url: "https://github.com/ollama/ollama/releases/download/v{{ ollama_resolved_version }}/ollama-darwin.tgz"
+    dest: "/tmp/ollama-darwin-{{ ollama_resolved_version }}.tgz"
+    checksum: "{{ ('sha256:' + ollama_darwin_tgz_sha256) if ollama_darwin_tgz_sha256 else omit }}"
+    mode: '0644'
+  register: ollama_download
+
+- name: Check whether Ollama binary is already installed
+  ansible.builtin.stat:
+    path: "{{ ollama_install_dir }}/ollama"
+  register: ollama_binary
+
+# Wipe any prior install tree so stale siblings (e.g. dylibs dropped in a
+# future release) don't linger alongside the new binary. Only fires when we
+# are about to extract; codesign integrity is still enforced downstream.
+- name: Remove stale Ollama install tree before extract
+  ansible.builtin.file:
+    path: "{{ ollama_install_dir }}"
+    state: absent
+  become: yes
+  when: ollama_download.changed or not ollama_binary.stat.exists
+
+- name: Ensure Ollama install directory exists
+  ansible.builtin.file:
+    path: "{{ ollama_install_dir }}"
+    state: directory
+    owner: root
+    group: wheel
+    mode: '0755'
+  become: yes
+
+# ansible.builtin.unarchive requires GNU tar for .tgz; macOS ships BSD tar,
+# which handles gzip fine but the module refuses by name. Invoke tar directly.
+# --no-same-owner makes extracted files owned by the running user (root under
+# become), yielding root:wheel ownership without a follow-up chown. Re-extract
+# on a fresh download (version bump) or whenever the binary is missing (e.g. a
+# prior run failed between download and extract).
+- name: Extract Ollama release into install directory
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/tar
+      - --no-same-owner
+      - -xzf
+      - "/tmp/ollama-darwin-{{ ollama_resolved_version }}.tgz"
+      - -C
+      - "{{ ollama_install_dir }}"
+  become: yes
+  when: ollama_download.changed or not ollama_binary.stat.exists
+  register: ollama_extract
+  changed_when: ollama_download.changed or not ollama_binary.stat.exists
+
+- name: Verify Ollama binary Developer ID signature
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/codesign
+      - --verify
+      - --verbose=2
+      - "{{ ollama_install_dir }}/ollama"
+  register: ollama_codesign
   changed_when: false
 
 - name: Install Ollama LaunchDaemon plist
@@ -20,7 +107,7 @@
   register: ollama_plist
 
 - name: Reload Ollama LaunchDaemon
-  when: brew_upgrade.changed or ollama_plist.changed
+  when: ollama_extract.changed or ollama_plist.changed
   become: yes
   block:
 
